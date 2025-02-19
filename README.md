@@ -67,6 +67,7 @@ To set up the project locally, follow these steps:
 - **Roles and Abilities Screen**: Details the different roles in the game.
 - **Winning Strategies Screen**: Provides strategies for winning as different roles.
 - **Game Stats Screen**: Displays user statistics and performance.
+- **Game Join Screen**: Players can join a Game hosted by friends.
 
 ## Contributing
 Contributions are welcome! If you have suggestions for improvements or new features, please fork the repository and submit a pull request.

@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import { View, StyleSheet, Text, FlatList, ImageBackground, Modal, Button, TextInput } from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
+import { View, StyleSheet, Text, FlatList, Modal, Button, TextInput, StatusBar } from 'react-native';
 import theme from '../theme';
 import { gameService } from '../services/gameService';
 import { useAuth } from '../context/AuthContext';
 import BottomNavigation from '../components/BottomNavigation';
 import LoadingSpinner from '../components/LoadingSpinner';
+import ModernBackground from '../components/ModernBackground';
 
 const GameHistoryScreen = ({ navigation }) => {
   const [games, setGames] = useState([]);
@@ -17,6 +17,11 @@ const GameHistoryScreen = ({ navigation }) => {
   const [newStatus, setNewStatus] = useState('ended');
 
   const fetchGameHistory = async () => {
+    if (!user) {
+      setLoading(false);
+      return;
+    }
+
     try {
       setLoading(true);
       setError(null);
@@ -37,7 +42,7 @@ const GameHistoryScreen = ({ navigation }) => {
 
   useEffect(() => {
     fetchGameHistory();
-  }, []);
+  }, [user]);
 
   const handleUpdateStatus = async () => {
     if (selectedGame) {
@@ -118,8 +123,8 @@ const GameHistoryScreen = ({ navigation }) => {
               gameCode: item.gameCode,
               totalPlayers: item.totalPlayers,
               mafiaCount: item.mafiaCount,
-              hasDetective: item.hasDetective,
-              hasDoctor: item.hasDoctor,
+              detectiveCount: item.detectiveCount || 1,
+              doctorCount: item.doctorCount || 1,
               isHost: item.hostId === user.uid
             })}
             color={theme.colors.secondary}
@@ -131,35 +136,25 @@ const GameHistoryScreen = ({ navigation }) => {
 
   if (loading) {
     return (
-      <ImageBackground
-        source={require('../../assets/background.png')}
-        style={theme.commonStyles.content}
-        resizeMode="cover"
-      >
-        <LinearGradient
-          colors={theme.gradients.background}
-          style={theme.commonStyles.container}
-        >
+      <View style={theme.commonStyles.container}>
+        <StatusBar translucent backgroundColor="transparent" barStyle="light-content" />
+        <ModernBackground>
           <LoadingSpinner />
-        </LinearGradient>
-      </ImageBackground>
+        </ModernBackground>
+      </View>
     );
   }
 
   return (
-    <ImageBackground
-      source={require('../../assets/background.png')}
-      style={theme.commonStyles.content}
-      resizeMode="cover"
-    >
-      <LinearGradient
-        colors={theme.gradients.background}
-        style={theme.commonStyles.container}
-      >
+    <View style={theme.commonStyles.container}>
+      <StatusBar translucent backgroundColor="transparent" barStyle="light-content" />
+      <ModernBackground>
         <View style={theme.commonStyles.content}>
           <Text style={styles.title}>Game History</Text>
           {error ? (
             <Text style={styles.errorText}>{error}</Text>
+          ) : !user ? (
+            <Text style={styles.noGamesText}>Please log in to view your game history</Text>
           ) : games.length === 0 ? (
             <Text style={styles.noGamesText}>No games played yet</Text>
           ) : (
@@ -191,9 +186,9 @@ const GameHistoryScreen = ({ navigation }) => {
             <Button title="Cancel" onPress={() => setModalVisible(false)} />
           </View>
         </Modal>
-      </LinearGradient>
+      </ModernBackground>
       <BottomNavigation navigation={navigation} activeScreen="GameHistory" />
-    </ImageBackground>
+    </View>
   );
 };
 

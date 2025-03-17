@@ -1,29 +1,276 @@
-import React from 'react';
-import { View, Text, ImageBackground } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { 
+  View, 
+  Text, 
+  ImageBackground, 
+  StyleSheet, 
+  FlatList, 
+  TouchableOpacity,
+  StatusBar,
+  Alert
+} from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import theme from '../theme';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import Icon from 'react-native-vector-icons/MaterialIcons';
+import CustomButton from '../components/CustomButton';
+import { useAuth } from '../context/AuthContext';
+import { gameService } from '../services/gameService';
 
-const RoleAssignmentScreen = () => {
-  return (
-    <ImageBackground
-      source={require('../../assets/background.png')}
-      style={theme.commonStyles.content}
-      resizeMode="cover"
+const RoleCard = ({ role, name, description, icon }) => (
+  <View style={styles.roleCard}>
+    <LinearGradient
+      colors={theme.gradients.card}
+      style={styles.cardGradient}
     >
-      <LinearGradient
-        colors={theme.gradients.background}
-        style={theme.commonStyles.container}
+      <View style={styles.roleIconContainer}>
+        <Icon name={icon} size={28} color={theme.colors.primary} />
+      </View>
+      <View style={styles.roleContent}>
+        <Text style={styles.roleName}>{name}</Text>
+        <Text style={styles.roleDescription}>{description}</Text>
+      </View>
+    </LinearGradient>
+  </View>
+);
+
+const RoleAssignmentScreen = ({ route, navigation }) => {
+  const { gameCode, isHost } = route.params || {};
+  const [roles, setRoles] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const { user } = useAuth();
+  const insets = useSafeAreaInsets();
+
+  useEffect(() => {
+    const fetchRoles = async () => {
+      try {
+        if (!gameCode) {
+          setLoading(false);
+          return;
+        }
+        
+        // This would be replaced with actual API call to get roles
+        const gameRoles = await gameService.getGameRoles(gameCode);
+        setRoles(gameRoles);
+      } catch (error) {
+        console.error('Error fetching roles:', error);
+        Alert.alert('Error', 'Failed to fetch role assignments');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchRoles();
+  }, [gameCode]);
+
+  const getRoleIcon = (role) => {
+    switch (role.toLowerCase()) {
+      case 'mafia':
+        return 'person';
+      case 'detective':
+        return 'search';
+      case 'doctor':
+        return 'healing';
+      default:
+        return 'people';
+    }
+  };
+
+  const getRoleDescription = (role) => {
+    switch (role.toLowerCase()) {
+      case 'mafia':
+        return 'Eliminate civilians without being caught';
+      case 'detective':
+        return 'Investigate players to find the mafia';
+      case 'doctor':
+        return 'Save one player each night from elimination';
+      default:
+        return 'Vote to eliminate suspected mafia members';
+    }
+  };
+
+  const renderRoleItem = ({ item }) => (
+    <RoleCard
+      role={item.role}
+      name={item.playerName}
+      description={`Role: ${item.role} - ${getRoleDescription(item.role)}`}
+      icon={getRoleIcon(item.role)}
+    />
+  );
+
+  const handleContinue = () => {
+    navigation.navigate('GamePlay', { gameCode });
+  };
+
+  return (
+    <View style={styles.container}>
+      <StatusBar translucent backgroundColor="transparent" barStyle="light-content" />
+      <ImageBackground
+        source={require('../../assets/background.png')}
+        style={styles.backgroundImage}
+        resizeMode="cover"
       >
-        <View style={theme.commonStyles.content}>
-          <View style={theme.commonStyles.card}>
-            <Text style={theme.commonStyles.title}>Role Assignment</Text>
-            <Text style={theme.commonStyles.subtitle}>Assigned Roles:</Text>
-            {/* Display assigned roles here */}
+        <LinearGradient
+          colors={theme.gradients.background}
+          style={[
+            styles.gradientContainer,
+            { paddingTop: insets.top }
+          ]}
+        >
+          <View style={styles.content}>
+            <Text style={styles.title}>Role Assignment</Text>
+            <Text style={styles.subtitle}>
+              {isHost 
+                ? 'As the host, you can see all player roles' 
+                : 'Your role and abilities for this game'}
+            </Text>
+
+            <View style={styles.rolesContainer}>
+              {loading ? (
+                <Text style={styles.loadingText}>Loading roles...</Text>
+              ) : roles.length > 0 ? (
+                <FlatList
+                  data={roles}
+                  renderItem={renderRoleItem}
+                  keyExtractor={(item, index) => `role-${index}`}
+                  contentContainerStyle={styles.rolesList}
+                />
+              ) : (
+                <View style={styles.emptyContainer}>
+                  <Icon name="error-outline" size={48} color={theme.colors.text.secondary} />
+                  <Text style={styles.emptyText}>No role assignments found</Text>
+                </View>
+              )}
+            </View>
+
+            <View style={styles.buttonContainer}>
+              <CustomButton
+                title="CONTINUE TO GAME"
+                onPress={handleContinue}
+                disabled={loading || roles.length === 0}
+                leftIcon={<Icon name="play-arrow" size={20} color={theme.colors.text.primary} />}
+                fullWidth
+              />
+              
+              <CustomButton
+                title="BACK TO LOBBY"
+                onPress={() => navigation.goBack()}
+                variant="outline"
+                style={styles.backButton}
+                fullWidth
+              />
+            </View>
           </View>
-        </View>
-      </LinearGradient>
-    </ImageBackground>
+        </LinearGradient>
+      </ImageBackground>
+    </View>
   );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: theme.colors.background,
+  },
+  backgroundImage: {
+    flex: 1,
+    width: '100%',
+  },
+  gradientContainer: {
+    flex: 1,
+  },
+  content: {
+    flex: 1,
+    padding: theme.spacing.horizontalPadding,
+    paddingBottom: theme.spacing.safeBottom,
+  },
+  title: {
+    fontSize: theme.typography.sizes.xxl,
+    fontWeight: theme.typography.weights.bold,
+    color: theme.colors.text.accent,
+    textAlign: 'center',
+    marginVertical: theme.spacing.lg,
+    // Text shadow for better readability
+    textShadowColor: 'rgba(0, 0, 0, 0.75)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 4,
+  },
+  subtitle: {
+    fontSize: theme.typography.sizes.md,
+    color: theme.colors.text.secondary,
+    textAlign: 'center',
+    marginBottom: theme.spacing.xl,
+  },
+  rolesContainer: {
+    flex: 1,
+    backgroundColor: theme.colors.card.background,
+    borderRadius: theme.borderRadius.large,
+    padding: theme.spacing.lg,
+    marginBottom: theme.spacing.lg,
+    ...theme.shadows.medium,
+  },
+  rolesList: {
+    paddingBottom: theme.spacing.md,
+  },
+  roleCard: {
+    marginBottom: theme.spacing.md,
+    borderRadius: theme.borderRadius.large,
+    overflow: 'hidden',
+    ...theme.shadows.small,
+  },
+  cardGradient: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: theme.spacing.md,
+    borderRadius: theme.borderRadius.large,
+  },
+  roleIconContainer: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: 'rgba(108, 99, 255, 0.15)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: theme.spacing.md,
+  },
+  roleContent: {
+    flex: 1,
+  },
+  roleName: {
+    fontSize: theme.typography.sizes.lg,
+    fontWeight: theme.typography.weights.bold,
+    color: theme.colors.text.primary,
+    marginBottom: theme.spacing.xs,
+  },
+  roleDescription: {
+    fontSize: theme.typography.sizes.sm,
+    color: theme.colors.text.secondary,
+    lineHeight: theme.typography.lineHeights.relaxed,
+  },
+  loadingText: {
+    textAlign: 'center',
+    color: theme.colors.text.secondary,
+    fontSize: theme.typography.sizes.md,
+    padding: theme.spacing.xl,
+  },
+  emptyContainer: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: theme.spacing.xl,
+  },
+  emptyText: {
+    textAlign: 'center',
+    color: theme.colors.text.secondary,
+    fontSize: theme.typography.sizes.md,
+    marginTop: theme.spacing.md,
+  },
+  buttonContainer: {
+    marginTop: theme.spacing.lg,
+  },
+  backButton: {
+    marginTop: theme.spacing.md,
+  },
+});
 
 export default RoleAssignmentScreen; 

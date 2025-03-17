@@ -1,9 +1,12 @@
-import React, { useCallback, useState } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Modal, Alert } from 'react-native';
+import React, { useCallback, useState, useEffect } from 'react';
+import { View, Text, TouchableOpacity, StyleSheet, Modal, Alert, Dimensions, Platform } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import theme from '../theme';
 import { useAuth } from '../context/AuthContext';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+
+const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
 const BottomNavButton = React.memo(({ title, icon, onPress, disabled, isActive }) => (
   <TouchableOpacity 
@@ -12,11 +15,13 @@ const BottomNavButton = React.memo(({ title, icon, onPress, disabled, isActive }
     disabled={disabled}
     activeOpacity={0.7}
   >
-    <Icon 
-      name={icon} 
-      size={28} 
-      color={isActive ? theme.colors.primary : (disabled ? theme.colors.text.disabled : theme.colors.text.accent)} 
-    />
+    <View style={[styles.iconContainer, isActive && styles.activeIconContainer]}>
+      <Icon 
+        name={icon} 
+        size={24} 
+        color={isActive ? theme.colors.primary : (disabled ? theme.colors.text.disabled : theme.colors.text.secondary)} 
+      />
+    </View>
     <Text style={[
       styles.navButtonText,
       disabled && styles.navButtonTextDisabled,
@@ -27,8 +32,9 @@ const BottomNavButton = React.memo(({ title, icon, onPress, disabled, isActive }
   </TouchableOpacity>
 ));
 
-const MoreModal = ({ visible, onClose, navigation }) => {
+const MoreModal = ({ visible, onClose, navigation, isLoggedIn }) => {
   const { signOut } = useAuth();
+  const insets = useSafeAreaInsets();
 
   const handleSignOut = async () => {
     try {
@@ -36,7 +42,7 @@ const MoreModal = ({ visible, onClose, navigation }) => {
       await signOut();
       console.log("Sign out successful.");
       onClose();
-      navigation.navigate('Login');
+      navigation.navigate('Home');
     } catch (error) {
       console.error("Sign out error:", error);
       Alert.alert('Error', 'Failed to sign out. Please try again.');
@@ -55,7 +61,12 @@ const MoreModal = ({ visible, onClose, navigation }) => {
         activeOpacity={1} 
         onPress={onClose}
       >
-        <View style={styles.modalContent}>
+        <View style={[
+          styles.modalContent,
+          { paddingBottom: Math.max(insets.bottom, 16) }
+        ]}>
+          <View style={styles.modalHandle} />
+          
           <TouchableOpacity 
             style={styles.modalItem}
             onPress={() => {
@@ -66,23 +77,39 @@ const MoreModal = ({ visible, onClose, navigation }) => {
             <Icon name="help-outline" size={24} color={theme.colors.text.accent} />
             <Text style={styles.modalItemText}>Tutorial</Text>
           </TouchableOpacity>
-          <TouchableOpacity 
-            style={styles.modalItem}
-            onPress={() => {
-              onClose();
-              navigation.navigate('Settings');
-            }}
-          >
-            <Icon name="settings" size={24} color={theme.colors.text.accent} />
-            <Text style={styles.modalItemText}>Settings</Text>
-          </TouchableOpacity>
-          <TouchableOpacity 
-            style={styles.modalItem}
-            onPress={handleSignOut}
-          >
-            <Icon name="logout" size={24} color={theme.colors.text.accent} />
-            <Text style={styles.modalItemText}>Sign Out</Text>
-          </TouchableOpacity>
+          
+          {isLoggedIn ? (
+            <>
+              <TouchableOpacity 
+                style={styles.modalItem}
+                onPress={() => {
+                  onClose();
+                  navigation.navigate('Settings');
+                }}
+              >
+                <Icon name="settings" size={24} color={theme.colors.text.accent} />
+                <Text style={styles.modalItemText}>Settings</Text>
+              </TouchableOpacity>
+              <TouchableOpacity 
+                style={styles.modalItem}
+                onPress={handleSignOut}
+              >
+                <Icon name="logout" size={24} color={theme.colors.text.accent} />
+                <Text style={styles.modalItemText}>Sign Out</Text>
+              </TouchableOpacity>
+            </>
+          ) : (
+            <TouchableOpacity 
+              style={styles.modalItem}
+              onPress={() => {
+                onClose();
+                navigation.navigate('Login');
+              }}
+            >
+              <Icon name="login" size={24} color={theme.colors.text.accent} />
+              <Text style={styles.modalItemText}>Login / Register</Text>
+            </TouchableOpacity>
+          )}
         </View>
       </TouchableOpacity>
     </Modal>
@@ -91,17 +118,29 @@ const MoreModal = ({ visible, onClose, navigation }) => {
 
 const BottomNavigation = ({ navigation, activeScreen }) => {
   const [moreModalVisible, setMoreModalVisible] = useState(false);
+  const { user } = useAuth();
+  const isLoggedIn = !!user;
+  const insets = useSafeAreaInsets();
   
   const handleNavigation = useCallback((screen, params) => {
-    navigation.navigate(screen, params);
-  }, [navigation]);
+    if (screen === 'GameHistory' && !isLoggedIn) {
+      navigation.navigate(screen, params);
+    } else if ((screen === 'HostGame' || screen === 'JoinGame') && !isLoggedIn) {
+      navigation.navigate(screen, params);
+    } else {
+      navigation.navigate(screen, params);
+    }
+  }, [navigation, isLoggedIn]);
 
   return (
-    <View style={styles.bottomNav}>
+    <View style={[
+      styles.bottomNav,
+      { paddingBottom: Math.max(insets.bottom, 8) }
+    ]}>
       <LinearGradient
         colors={[
-          'rgba(42, 38, 87, 0.95)',
-          'rgba(30, 30, 30, 0.9)',
+          'rgba(25, 25, 35, 0.95)',
+          'rgba(18, 18, 30, 0.99)',
         ]}
         style={styles.bottomNavGradient}
       >
@@ -144,11 +183,12 @@ const BottomNavigation = ({ navigation, activeScreen }) => {
         </View>
       </LinearGradient>
 
-      <MoreModal 
+      <MoreModal
         visible={moreModalVisible}
         onClose={() => setMoreModalVisible(false)}
         navigation={navigation}
         activeScreen={activeScreen}
+        isLoggedIn={isLoggedIn}
       />
     </View>
   );
@@ -160,20 +200,14 @@ const styles = StyleSheet.create({
     bottom: 0,
     left: 0,
     right: 0,
-    elevation: 8, // Android shadow
-    shadowColor: '#000', // iOS shadow
-    shadowOffset: {
-      width: 0,
-      height: -2,
-    },
-    shadowOpacity: 0.9,
-    shadowRadius: 3,
+    zIndex: 1000,
+    elevation: 8,
+    ...theme.shadows.large,
   },
   bottomNavGradient: {
-    paddingTop: theme.spacing.lg,
-    paddingBottom: theme.spacing.lg,
-    //borderTopLeftRadius: 15,
-    //borderTopRightRadius: 15,
+    paddingTop: theme.spacing.md,
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
   },
   bottomNavContent: {
     flexDirection: 'row',
@@ -185,20 +219,33 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     padding: theme.spacing.xs,
-    minWidth: 65,
+    minWidth: SCREEN_WIDTH / 6,
+    maxWidth: SCREEN_WIDTH / 5,
   },
   activeButton: {
-    transform: [{ scale: 1.1 }],
+    transform: [{ translateY: -5 }],
+  },
+  iconContainer: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 2,
+  },
+  activeIconContainer: {
+    backgroundColor: 'rgba(108, 99, 255, 0.15)',
   },
   navButtonText: {
     color: theme.colors.text.secondary,
-    fontSize: theme.typography.sizes.sm,
-    marginTop: theme.spacing.xs,
+    fontSize: theme.typography.sizes.xs,
+    marginTop: 2,
     textAlign: 'center',
-    fontWeight: 'bold',
+    fontWeight: theme.typography.weights.medium,
   },
   activeButtonText: {
     color: theme.colors.primary,
+    fontWeight: theme.typography.weights.bold,
   },
   navButtonTextDisabled: {
     color: theme.colors.text.disabled,
@@ -209,21 +256,33 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-end',
   },
   modalContent: {
-    backgroundColor: 'rgba(30, 30, 30, 0.95)',
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
+    backgroundColor: 'rgba(30, 30, 40, 0.97)',
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
     padding: theme.spacing.lg,
+    paddingTop: theme.spacing.md,
+  },
+  modalHandle: {
+    width: 40,
+    height: 5,
+    borderRadius: 3,
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    alignSelf: 'center',
+    marginBottom: theme.spacing.lg,
   },
   modalItem: {
     flexDirection: 'row',
     alignItems: 'center',
     padding: theme.spacing.md,
-    borderRadius: 10,
+    borderRadius: 12,
+    marginBottom: theme.spacing.xs,
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
   },
   modalItemText: {
     color: theme.colors.text.primary,
     fontSize: theme.typography.sizes.md,
     marginLeft: theme.spacing.md,
+    fontWeight: theme.typography.weights.medium,
   },
 });
 

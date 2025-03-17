@@ -22,7 +22,7 @@ const getDbInstance = () => {
 
 export const gameService = {
   // Create a new game session
-  createGame: async ({ totalPlayers, mafiaCount, detectiveCount, hasDoctor }) => {
+  createGame: async ({ totalPlayers, mafiaCount, detectiveCount, doctorCount }) => {
     if (!auth.currentUser) {
       throw new Error('User must be authenticated to create a game');
     }
@@ -61,7 +61,7 @@ export const gameService = {
           totalPlayers,
           mafiaCount,
           detectiveCount,
-          hasDoctor,
+          doctorCount
         },
         players: {
           [auth.currentUser.uid]: {
@@ -422,12 +422,33 @@ export const gameService = {
     const gameRef = ref(database, `games/${gameCode}`);
     await update(gameRef, { status: newStatus });
   },
+  
+  // Method to get game roles for the RoleAssignmentScreen
+  getGameRoles: async (gameCode) => {
+    try {
+      const gameData = await gameService.getGameData(gameCode);
+      if (!gameData || !gameData.players) {
+        return [];
+      }
+      
+      return Object.values(gameData.players)
+        .filter(player => player.role) // Only include players with assigned roles
+        .map(player => ({
+          playerName: player.name,
+          role: player.role,
+          id: player.id
+        }));
+    } catch (error) {
+      console.error('Error fetching game roles:', error);
+      throw new Error('Failed to fetch role assignments');
+    }
+  },
 };
 
 // Helper function to assign roles
 function assignRoles(playerCount, settings) {
   const roles = [];
-  const { mafiaCount, detectiveCount, hasDoctor } = settings;
+  const { mafiaCount, detectiveCount, doctorCount } = settings;
 
   // Add mafia roles
   for (let i = 0; i < mafiaCount; i++) {
@@ -439,8 +460,8 @@ function assignRoles(playerCount, settings) {
     roles.push('Detective');
   }
 
-  // Add doctor role if applicable
-  if (hasDoctor) {
+  // Add doctor roles
+  for (let i = 0; i < doctorCount; i++) {
     roles.push('Doctor');
   }
 

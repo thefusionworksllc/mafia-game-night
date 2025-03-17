@@ -34,14 +34,14 @@ export default function App() {
       <NavigationContainer>
         <StatusBar style="auto" />
         <Stack.Navigator screenOptions={{ headerShown: false }}>
-          <Stack.Screen name="Login" component={LoginScreen} />
-          <Stack.Screen name="Register" component={RegisterScreen} />
-          <Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen} />
           <Stack.Screen name="Home" component={HomeScreen} />
           <Stack.Screen name="GameOverview" component={GameOverview} />
           <Stack.Screen name="RolesAndAbilities" component={RolesAndAbilities} />
           <Stack.Screen name="WinningStrategies" component={WinningStrategies} /> 
           <Stack.Screen name="GamePhases" component={GamePhases} />
+          <Stack.Screen name="Login" component={LoginScreen} />
+          <Stack.Screen name="Register" component={RegisterScreen} />
+          <Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen} />
           <Stack.Screen name="GameLobby" component={GameLobbyScreen} />
           <Stack.Screen name="RoleAssignment" component={RoleAssignmentScreen} />
           <Stack.Screen name="GameHistory" component={GameHistoryScreen} />

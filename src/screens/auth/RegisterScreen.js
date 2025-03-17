@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
-import { View, StyleSheet, Alert, Text as RNText, Image, ImageBackground, ScrollView } from 'react-native';
+import { View, StyleSheet, Alert, Text as RNText, Image, ScrollView, StatusBar } from 'react-native';
 import { Button, Input } from 'react-native-elements';
 import { LinearGradient } from 'expo-linear-gradient';
 import theme from '../../theme'; // Import the theme
 import { useAuth } from '../../context/AuthContext'; // Import useAuth hook
 import CustomButton from '../../components/CustomButton'; // Import CustomButton
+import ModernBackground from '../../components/ModernBackground';
 
 const RegisterScreen = ({ navigation }) => {
   const { signUp } = useAuth(); // Destructure signUp from useAuth
@@ -23,7 +24,7 @@ const RegisterScreen = ({ navigation }) => {
     try {
       await signUp(email, password, displayName); // Use signUp from AuthContext
       Alert.alert('Success', 'Account created successfully!');
-      navigation.navigate('Login'); // Navigate to Login after successful registration
+      navigation.navigate('Home'); // Navigate to Home after successful registration
     } catch (error) {
       Alert.alert('Error', error.message); // Show error message
     } finally {
@@ -32,17 +33,9 @@ const RegisterScreen = ({ navigation }) => {
   };
 
   return (
-    <ImageBackground
-      source={require('../../../assets/background.png')}
-      style={theme.commonStyles.content}
-      resizeMode="cover"
-    >
-      <LinearGradient
-        colors={theme.gradients.background}
-        style={theme.commonStyles.container}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 0, y: 1 }}
-      >
+    <View style={theme.commonStyles.container}>
+      <StatusBar translucent backgroundColor="transparent" barStyle="light-content" />
+      <ModernBackground>
         <ScrollView contentContainerStyle={theme.commonStyles.content}>
           <View style={theme.commonStyles.logoContainer}>
             <Image
@@ -110,8 +103,8 @@ const RegisterScreen = ({ navigation }) => {
             />
           </View>
         </ScrollView>
-      </LinearGradient>
-    </ImageBackground>
+      </ModernBackground>
+    </View>
   );
 };
 

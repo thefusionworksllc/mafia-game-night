@@ -1,98 +1,153 @@
 import React from 'react';
-import { View, Text, StyleSheet, ImageBackground } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, StatusBar } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import theme from '../theme';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import CustomButton from '../components/CustomButton';
 import BottomNavigation from '../components/BottomNavigation';
+import ModernBackground from '../components/ModernBackground';
 
 const GamePhasesScreen = ({ navigation }) => {
   return (
-    <ImageBackground
-      source={require('../../assets/background.png')}
-      style={theme.commonStyles.content}
-      resizeMode="cover"
-    >
-      <LinearGradient
-        colors={theme.gradients.background}
-        style={theme.commonStyles.container}
-      >
-        <View style={styles.container}>
-          <Text style={styles.title}>Game Phases</Text>
-          <Text style={styles.description}>
+    <View style={theme.commonStyles.container}>
+      <StatusBar translucent backgroundColor="transparent" barStyle="light-content" />
+      <ModernBackground>
+        <ScrollView 
+          style={theme.commonStyles.scrollContainer}
+          contentContainerStyle={theme.commonStyles.scrollContentContainer}
+          showsVerticalScrollIndicator={false}
+        >
+          <Text style={theme.commonStyles.title}>Game Phases</Text>
+          <Text style={theme.commonStyles.subtitle}>
             Understanding the day and night phases of the Mafia game.
           </Text>
 
           {/* Day Phase Section */}
-          <View style={styles.flowCard}>
-            <Text style={styles.flowTitle}>Day Phase:</Text>
-            <Text style={styles.flowText}>
-              • All players discuss and share information{'\n'}
-              • Players vote to eliminate a suspected Mafia member{'\n'}
-              • The player with the most votes is eliminated{'\n'}
-              • Their role is revealed after elimination
-            </Text>
+          <View style={styles.section}>
+            <View style={styles.sectionHeader}>
+              <Icon name="wb-sunny" size={24} color="#FFC107" />
+              <Text style={styles.sectionTitle}>Day Phase</Text>
+            </View>
+            <View style={styles.card}>
+              <LinearGradient
+                colors={theme.gradients.card}
+                style={styles.cardGradient}
+              >
+                <Text style={styles.cardText}>
+                  • All players discuss and share information{'\n\n'}
+                  • Players vote to eliminate a suspected Mafia member{'\n\n'}
+                  • The player with the most votes is eliminated{'\n\n'}
+                  • Their role is revealed after elimination
+                </Text>
+              </LinearGradient>
+            </View>
           </View>
 
           {/* Night Phase Section */}
-          <View style={styles.flowCard}>
-            <Text style={styles.flowTitle}>Night Phase:</Text>
-            <Text style={styles.flowText}>
-              • Mafia members secretly choose a player to eliminate{'\n'}
-              • Detective can investigate one player{'\n'}
-              • Doctor can protect one player{'\n'}
-              • Actions occur simultaneously
-            </Text>
+          <View style={styles.section}>
+            <View style={styles.sectionHeader}>
+              <Icon name="brightness-3" size={24} color="#5C6BC0" />
+              <Text style={styles.sectionTitle}>Night Phase</Text>
+            </View>
+            <View style={styles.card}>
+              <LinearGradient
+                colors={theme.gradients.card}
+                style={styles.cardGradient}
+              >
+                <Text style={styles.cardText}>
+                  • Mafia members secretly choose a player to eliminate{'\n\n'}
+                  • Detective can investigate one player{'\n\n'}
+                  • Doctor can protect one player{'\n\n'}
+                  • Actions occur simultaneously
+                </Text>
+              </LinearGradient>
+            </View>
           </View>
 
-          {/* Back to Home Button using CustomButton */}
-          <CustomButton
-            title="Back to Home"
-            onPress={() => navigation.navigate('Home')}
-            style={styles.backButton}
-          />
-        </View>
-      </LinearGradient>
-      <BottomNavigation navigation={navigation} activeScreen="Home" />
-    </ImageBackground>
+          {/* Game Flow Section */}
+          <View style={styles.section}>
+            <View style={styles.sectionHeader}>
+              <Icon name="loop" size={24} color={theme.colors.primary} />
+              <Text style={styles.sectionTitle}>Game Flow</Text>
+            </View>
+            <View style={styles.card}>
+              <LinearGradient
+                colors={theme.gradients.card}
+                style={styles.cardGradient}
+              >
+                <Text style={styles.cardText}>
+                  1. The game starts with the Night phase{'\n\n'}
+                  2. Alternate between Night and Day phases{'\n\n'}
+                  3. Each phase allows specific actions for different roles{'\n\n'}
+                  4. Continue until one team achieves their winning condition
+                </Text>
+              </LinearGradient>
+            </View>
+          </View>
+
+          {/* Navigation Buttons */}
+          <View style={styles.buttonContainer}>
+            <CustomButton
+              title="NEXT: WINNING STRATEGIES"
+              onPress={() => navigation.navigate('WinningStrategies')}
+              leftIcon={<Icon name="arrow-forward" size={20} color={theme.colors.text.primary} />}
+              fullWidth
+            />
+            
+            <CustomButton
+              title="BACK TO HOME"
+              onPress={() => navigation.navigate('Home')}
+              variant="outline"
+              style={styles.backButton}
+              leftIcon={<Icon name="home" size={20} color={theme.colors.text.accent} />}
+              fullWidth
+            />
+          </View>
+        </ScrollView>
+      </ModernBackground>
+      <BottomNavigation navigation={navigation} activeScreen="GamePhases" />
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: theme.spacing.lg,
+  section: {
+    marginBottom: theme.spacing.xl,
   },
-  title: {
-    fontSize: theme.typography.sizes.xxl,
-    fontWeight: theme.typography.weights.bold,
-    color: theme.colors.text.primary,
-  },
-  description: {
-    fontSize: theme.typography.sizes.md,
-    color: theme.colors.text.secondary,
-    textAlign: 'center',
-    marginTop: theme.spacing.md,
-  },
-  flowCard: {
-    backgroundColor: 'rgba(187, 134, 252, 0.1)',
-    borderRadius: 15,
-    padding: theme.spacing.lg,
+  sectionHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
     marginBottom: theme.spacing.md,
   },
-  flowTitle: {
+  sectionTitle: {
     fontSize: theme.typography.sizes.lg,
     fontWeight: theme.typography.weights.bold,
     color: theme.colors.text.accent,
-    marginBottom: theme.spacing.sm,
+    marginLeft: theme.spacing.sm,
   },
-  flowText: {
+  card: {
+    borderRadius: theme.borderRadius.large,
+    overflow: 'hidden',
+    ...theme.shadows.medium,
+  },
+  cardGradient: {
+    padding: theme.spacing.lg,
+    borderRadius: theme.borderRadius.large,
+  },
+  cardText: {
     fontSize: theme.typography.sizes.md,
-    color: theme.colors.text.secondary,
-    lineHeight: 24,
+    color: theme.colors.text.primary,
+    lineHeight: theme.typography.lineHeights.relaxed,
+    textShadowColor: 'rgba(0, 0, 0, 0.5)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 2,
+  },
+  buttonContainer: {
+    marginTop: theme.spacing.lg,
+    marginBottom: theme.spacing.xxl,
   },
   backButton: {
-    marginTop: theme.spacing.lg,
+    marginTop: theme.spacing.md,
   },
 });
 

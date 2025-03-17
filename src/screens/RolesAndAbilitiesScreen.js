@@ -1,60 +1,61 @@
 import React from 'react';
-import { View, Text, StyleSheet, ImageBackground, Image, ScrollView } from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
+import { View, Text, StyleSheet, Image, ScrollView } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import theme from '../theme';
 import CustomButton from '../components/CustomButton';
 import BottomNavigation from '../components/BottomNavigation';
+import { LinearGradient } from 'expo-linear-gradient';
+import ModernBackground from '../components/ModernBackground';
+import { StatusBar } from 'react-native';
 
 const RoleSection = ({ title, description, icon, image }) => (
   <View style={styles.roleCard}>
-    <View style={styles.roleHeader}>
-      <Icon name={icon} size={24} color={theme.colors.text.accent} />
-      <Text style={styles.roleTitle}>{title}</Text>
-    </View>
-    <Image source={image} style={styles.roleImage} />
-    <Text style={styles.roleDescription}>{description}</Text>
+    <LinearGradient
+      colors={theme.gradients.card}
+      style={styles.cardGradient}
+    >
+      <View style={styles.roleHeader}>
+        <Icon name={icon} size={24} color={theme.colors.text.accent} />
+        <Text style={styles.roleTitle}>{title}</Text>
+      </View>
+      <Image source={image} style={styles.roleImage} />
+      <Text style={styles.roleDescription}>{description}</Text>
+    </LinearGradient>
   </View>
 );
 
 const RolesAndAbilitiesScreen = ({ navigation }) => {
   const roles = [
     {
-      title: 'Civilian',
-      description: 'Regular townspeople who must work together to identify and eliminate the Mafia. They vote during the day phase to eliminate suspected Mafia members.',
-      icon: 'person',
-      image: require('../../assets/roles/civilian.png'),
-    },
-    {
       title: 'Mafia',
-      description: 'Secret killers who eliminate one player each night. They must blend in with civilians during the day while secretly eliminating them at night.',
-      icon: 'person-outline',
-      image: require('../../assets/roles/mafia.png'),
+      description: 'During the night phase, Mafia members secretly choose a civilian to eliminate. During the day phase, they must blend in and avoid suspicion.',
+      icon: 'security',
+      image: require('../../assets/mafia.png')
     },
     {
       title: 'Detective',
-      description: "Can investigate one player each night to determine if they are a member of the Mafia. This information is crucial for the town's strategy.",
+      description: 'During the night phase, the Detective can investigate one player to determine if they are a member of the Mafia or a Civilian.',
       icon: 'search',
-      image: require('../../assets/roles/detective.png'),
+      image: require('../../assets/detective.png')
     },
     {
       title: 'Doctor',
-      description: 'Can protect one player each night from being eliminated by the Mafia. Must choose wisely to save important town members.',
+      description: 'During the night phase, the Doctor can choose one player to protect from elimination. The Doctor can save themselves.',
       icon: 'healing',
-      image: require('../../assets/roles/doctor.png'),
+      image: require('../../assets/doctor.png')
     },
+    {
+      title: 'Civilian',
+      description: 'Civilians must work together during the day phase to identify and vote out Mafia members before they are outnumbered.',
+      icon: 'people',
+      image: require('../../assets/civilian.png')
+    }
   ];
 
   return (
-    <ImageBackground
-      source={require('../../assets/background.png')}
-      style={theme.commonStyles.content}
-      resizeMode="cover"
-    >
-      <LinearGradient
-        colors={theme.gradients.background}
-        style={theme.commonStyles.container}
-      >
+    <View style={theme.commonStyles.container}>
+      <StatusBar translucent backgroundColor="transparent" barStyle="light-content" />
+      <ModernBackground>
         <ScrollView contentContainerStyle={styles.scrollContainer}>
           <View style={styles.container}>
             <Text style={styles.title}>Roles & Abilities</Text>
@@ -64,7 +65,7 @@ const RolesAndAbilitiesScreen = ({ navigation }) => {
 
             {/* Roles Section */}
             <View style={styles.rolesSection}>
-              <Text style={styles.sectionTitle}>1. Game Roles</Text>
+              <Text style={styles.sectionTitle}>Game Roles</Text>
               {roles.map((role, index) => (
                 <RoleSection
                   key={index}
@@ -84,9 +85,9 @@ const RolesAndAbilitiesScreen = ({ navigation }) => {
             />
           </View>
         </ScrollView>
-      </LinearGradient>
+      </ModernBackground>
       <BottomNavigation navigation={navigation} activeScreen="Home" />
-    </ImageBackground>
+    </View>
   );
 };
 
@@ -149,6 +150,10 @@ const styles = StyleSheet.create({
   backButton: {
     marginTop: theme.spacing.lg,
     marginBottom: theme.spacing.xxxl,
+  },
+  cardGradient: {
+    borderRadius: 15,
+    padding: theme.spacing.lg,
   },
 });
 

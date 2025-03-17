@@ -1,18 +1,44 @@
 import React, { useState } from 'react';
-import { View, StyleSheet, Text, ImageBackground, Alert } from 'react-native';
-import { Input, Button } from 'react-native-elements';
-import { LinearGradient } from 'expo-linear-gradient';
+import { 
+  View, 
+  StyleSheet, 
+  Text, 
+  Alert, 
+  StatusBar,
+  KeyboardAvoidingView,
+  Platform,
+  TouchableWithoutFeedback,
+  Keyboard
+} from 'react-native';
+import { Input } from 'react-native-elements';
 import theme from '../theme';
 import { useAuth } from '../context/AuthContext';
 import { gameService } from '../services/gameService';
 import BottomNavigation from '../components/BottomNavigation';
+import CustomButton from '../components/CustomButton';
+import Icon from 'react-native-vector-icons/MaterialIcons';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import ModernBackground from '../components/ModernBackground';
 
 const JoinGameScreen = ({ navigation }) => {
   const [gameCode, setGameCode] = useState('');
   const [loading, setLoading] = useState(false);
   const { user } = useAuth();
+  const insets = useSafeAreaInsets();
 
   const handleJoinGame = async () => {
+    if (!user) {
+      Alert.alert(
+        'Login Required',
+        'You need to log in to join a game.',
+        [
+          { text: 'Cancel', style: 'cancel' },
+          { text: 'Login', onPress: () => navigation.navigate('Login') }
+        ]
+      );
+      return;
+    }
+
     if (gameCode.length !== 6) {
       Alert.alert('Error', 'Please enter a valid 6-digit game code');
       return;
@@ -32,93 +58,121 @@ const JoinGameScreen = ({ navigation }) => {
     }
   };
 
-  const CustomButton = ({ title, onPress, style }) => (
-    <LinearGradient
-      colors={theme.gradients.button}
-      style={[theme.commonStyles.buttonGradient, style]}
-      start={{ x: 0, y: 0 }}
-      end={{ x: 1, y: 0 }}
-    >
-      <Button
-        title={title}
-        onPress={onPress}
-        loading={loading}
-        buttonStyle={theme.commonStyles.buttonContent}
-        titleStyle={theme.commonStyles.buttonText}
-        containerStyle={theme.commonStyles.buttonContainer}
-      />
-    </LinearGradient>
-  );
-
   return (
-    <ImageBackground
-      source={require('../../assets/background.png')}
-      style={theme.commonStyles.content}
-      resizeMode="cover"
-    >
-      <LinearGradient
-        colors={theme.gradients.background}
-       style={theme.commonStyles.container}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 0, y: 1 }}
-      >
-        <View style={theme.commonStyles.content}>
-          <Text style={styles.title}>Join Game</Text>
-          <View style={theme.commonStyles.card}>
-            <Input
-              placeholder="Enter 6-digit Game Code"
-              value={gameCode}
-              onChangeText={(text) => setGameCode(text.toUpperCase())}
-              maxLength={6}
-              autoCapitalize="characters"
-              leftIcon={{ 
-                type: 'material',
-                name: 'input',
-                color: theme.colors.text.secondary
-              }}
-              inputStyle={[
-                theme.commonStyles.input,
-                styles.codeInput
-              ]}
-              placeholderTextColor={theme.colors.text.secondary}
-              containerStyle={theme.commonStyles.inputContainer}
-            />
-            <CustomButton
-              title="JOIN GAME"
-              onPress={handleJoinGame}
-            />
-             <CustomButton
-            title="BACK"
-            onPress={() => navigation.navigate('Home')}
-            style={{ marginTop: 20 }}
-          />
-          </View>
-         
-        </View>
-      </LinearGradient>
+    <View style={theme.commonStyles.container}>
+      <StatusBar translucent backgroundColor="transparent" barStyle="light-content" />
+      <ModernBackground>
+        <KeyboardAvoidingView
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          style={styles.keyboardAvoidingView}
+        >
+          <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+            <View style={styles.contentContainer}>
+              <View style={styles.welcomeSection}>
+                <Text style={styles.title}>Join Game</Text>
+                <Text style={styles.subtitle}>
+                  Enter a 6-digit game code to join an existing game
+                </Text>
+              </View>
 
+              <View style={styles.formContainer}>
+                <Input
+                  placeholder="Enter 6-digit Game Code"
+                  value={gameCode}
+                  onChangeText={setGameCode}
+                  keyboardType="number-pad"
+                  maxLength={6}
+                  inputStyle={styles.input}
+                  inputContainerStyle={styles.inputContainer}
+                  leftIcon={
+                    <Icon name="games" size={24} color={theme.colors.primary} />
+                  }
+                  autoCapitalize="none"
+                  returnKeyType="done"
+                  onSubmitEditing={handleJoinGame}
+                />
+
+                <View style={styles.buttonContainer}>
+                  <CustomButton
+                    title="Join Game"
+                    onPress={handleJoinGame}
+                    loading={loading}
+                    disabled={gameCode.length !== 6 || loading}
+                    style={styles.joinButton}
+                  />
+                  <CustomButton
+                    title="Back to Home"
+                    onPress={() => navigation.navigate('Home')}
+                    variant="outline"
+                    style={styles.backButton}
+                  />
+                </View>
+              </View>
+            </View>
+          </TouchableWithoutFeedback>
+        </KeyboardAvoidingView>
+      </ModernBackground>
       <BottomNavigation navigation={navigation} activeScreen="JoinGame" />
-    </ImageBackground>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
+  keyboardAvoidingView: {
+    flex: 1,
+  },
+  contentContainer: {
+    flex: 1,
+    padding: theme.spacing.horizontalPadding,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  welcomeSection: {
+    marginBottom: theme.spacing.xl,
+  },
   title: {
-    fontSize: theme.typography.sizes.xxxl,
+    fontSize: theme.typography.sizes.xxl,
     fontWeight: theme.typography.weights.bold,
-    color: theme.colors.text.accent,
+    color: theme.colors.text.primary,
+    textAlign: 'center',
+    marginBottom: theme.spacing.sm,
+    // Text shadow for better readability
+    textShadowColor: 'rgba(0, 0, 0, 0.75)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 4,
+  },
+  subtitle: {
+    fontSize: theme.typography.sizes.md,
+    color: theme.colors.text.secondary,
     textAlign: 'center',
     marginBottom: theme.spacing.xl,
   },
-  codeInput: {
-    fontSize: theme.typography.sizes.lg,
-    textAlign: 'center',
-    letterSpacing: 3,
-    fontWeight: theme.typography.weights.bold,
+  formContainer: {
+    width: '100%',
+    maxWidth: 400,
+    backgroundColor: theme.colors.card.background,
+    borderRadius: theme.borderRadius.large,
+    padding: theme.spacing.lg,
+    ...theme.shadows.medium,
   },
-  container: {
-    flex: 1,
-    paddingBottom: 80,
+  inputContainer: {
+    marginBottom: theme.spacing.lg,
+  },
+  input: {
+    color: theme.colors.text.primary,
+    fontSize: theme.typography.sizes.xl,
+    fontWeight: theme.typography.weights.bold,
+    textAlign: 'center',
+    letterSpacing: 8,
+  },
+  buttonContainer: {
+    width: '100%',
+  },
+  joinButton: {
+    marginTop: theme.spacing.md,
+  },
+  backButton: {
+    marginTop: theme.spacing.md,
   },
 });
 

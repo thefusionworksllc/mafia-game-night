@@ -1,142 +1,166 @@
 import React from 'react';
-import { View, Text, StyleSheet, ImageBackground, ScrollView } from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
+import { 
+  View, 
+  Text, 
+  StyleSheet, 
+  ScrollView,
+  StatusBar
+} from 'react-native';
 import theme from '../theme';
 import CustomButton from '../components/CustomButton';
 import BottomNavigation from '../components/BottomNavigation';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import Icon from 'react-native-vector-icons/MaterialIcons';
+import ModernBackground from '../components/ModernBackground';
+import { LinearGradient } from 'expo-linear-gradient';
 
 const GameOverviewScreen = ({ navigation }) => {
-  return (
-    <ImageBackground
-      source={require('../../assets/background.png')}
-      style={theme.commonStyles.content}
-      resizeMode="cover"
-    >
-      <LinearGradient
-        colors={theme.gradients.background}
-        style={theme.commonStyles.container}
-      >
-        <ScrollView contentContainerStyle={styles.scrollContainer}>
-          <View style={styles.container}>
-            <Text style={styles.title}>Game Overview</Text>
-            <Text style={styles.description}>
-              Learn the basics of the Mafia game and how to play.
-            </Text>
+  const insets = useSafeAreaInsets();
 
-            {/* Game Mechanics Section */}
-            <View style={styles.mechanicsSection}>
-              <Text style={styles.sectionTitle}>Game Mechanics:</Text>
-              <View style={styles.strategyCard}>
-                <Text style={styles.mechanicsText}>
-                  • The game is played with two teams: the Mafia and the Civilians.{'\n'}
-                  • Each player is assigned a role, either a member of the Mafia or a Civilian.{'\n'}
-                  • The game alternates between Day and Night phases.{'\n'}
-                  • During the Day phase, players discuss and vote to eliminate a suspected Mafia member.{'\n'}
+  return (
+    <View style={theme.commonStyles.container}>
+      <StatusBar translucent backgroundColor="transparent" barStyle="light-content" />
+      <ModernBackground>
+        <ScrollView
+          style={theme.commonStyles.scrollContainer}
+          contentContainerStyle={[
+            theme.commonStyles.scrollContentContainer,
+            { paddingTop: insets.top }
+          ]}
+          showsVerticalScrollIndicator={false}
+        >
+          <Text style={theme.commonStyles.title}>Game Overview</Text>
+          <Text style={theme.commonStyles.subtitle}>
+            Learn the basics of the Mafia game and how to play.
+          </Text>
+
+          {/* Game Mechanics Section */}
+          <View style={styles.section}>
+            <View style={styles.sectionHeader}>
+              <Icon name="settings" size={24} color={theme.colors.text.accent} />
+              <Text style={styles.sectionTitle}>Game Mechanics</Text>
+            </View>
+            <View style={styles.card}>
+              <LinearGradient
+                colors={theme.gradients.card}
+                style={styles.cardGradient}
+              >
+                <Text style={styles.cardText}>
+                  • The game is played with two teams: the Mafia and the Civilians.{'\n\n'}
+                  • Each player is assigned a role, either a member of the Mafia or a Civilian.{'\n\n'}
+                  • The game alternates between Day and Night phases.{'\n\n'}
+                  • During the Day phase, players discuss and vote to eliminate a suspected Mafia member.{'\n\n'}
                   • During the Night phase, the Mafia secretly chooses a player to eliminate.
                 </Text>
-              </View>
+              </LinearGradient>
             </View>
+          </View>
 
-            {/* Objectives Section */}
-            <View style={styles.objectivesSection}>
-              <Text style={styles.sectionTitle}>Objectives:</Text>
-              <View style={styles.strategyCard}>
-                <Text style={styles.objectivesText}>
-                  • Civilians aim to identify and eliminate all Mafia members.{'\n'}
-                  • Mafia members aim to eliminate enough Civilians to outnumber them.{'\n'}
+          {/* Objectives Section */}
+          <View style={styles.section}>
+            <View style={styles.sectionHeader}>
+              <Icon name="emoji-events" size={24} color={theme.colors.text.accent} />
+              <Text style={styles.sectionTitle}>Objectives</Text>
+            </View>
+            <View style={styles.card}>
+              <LinearGradient
+                colors={theme.gradients.card}
+                style={styles.cardGradient}
+              >
+                <Text style={styles.cardText}>
+                  • Civilians aim to identify and eliminate all Mafia members.{'\n\n'}
+                  • Mafia members aim to eliminate enough Civilians to outnumber them.{'\n\n'}
                   • Players must use strategy, deception, and teamwork to achieve their goals.
                 </Text>
-              </View>
+              </LinearGradient>
             </View>
+          </View>
 
-            {/* How to Play Section */}
-            <View style={styles.howToPlaySection}>
-              <Text style={styles.sectionTitle}>How to Play:</Text>
-              <View style={styles.strategyCard}>
-                <Text style={styles.howToPlayText}>
-                  1. Gather a group of players (ideally 6-12).{'\n'}
-                  2. Assign roles randomly to each player.{'\n'}
-                  3. Start the game with the Night phase, where the Mafia chooses a target.{'\n'}
-                  4. Transition to the Day phase, where players discuss and vote.{'\n'}
+          {/* How to Play Section */}
+          <View style={styles.section}>
+            <View style={styles.sectionHeader}>
+              <Icon name="play-circle-filled" size={24} color={theme.colors.text.accent} />
+              <Text style={styles.sectionTitle}>How to Play</Text>
+            </View>
+            <View style={styles.card}>
+              <LinearGradient
+                colors={theme.gradients.card}
+                style={styles.cardGradient}
+              >
+                <Text style={styles.cardText}>
+                  1. Gather a group of players (ideally 6-12).{'\n\n'}
+                  2. Assign roles randomly to each player.{'\n\n'}
+                  3. Start the game with the Night phase, where the Mafia chooses a target.{'\n\n'}
+                  4. Transition to the Day phase, where players discuss and vote.{'\n\n'}
                   5. Repeat the phases until one team wins.
                 </Text>
-              </View>
+              </LinearGradient>
             </View>
+          </View>
 
-            {/* Back to Home Button */}
+          {/* Navigation Buttons */}
+          <View style={styles.buttonContainer}>
             <CustomButton
-              title="Back to Home"
+              title="NEXT: ROLES & ABILITIES"
+              onPress={() => navigation.navigate('RolesAndAbilities')}
+              leftIcon={<Icon name="arrow-forward" size={20} color={theme.colors.text.primary} />}
+              fullWidth
+            />
+            
+            <CustomButton
+              title="BACK TO HOME"
               onPress={() => navigation.navigate('Home')}
+              variant="outline"
               style={styles.backButton}
+              leftIcon={<Icon name="home" size={20} color={theme.colors.text.accent} />}
+              fullWidth
             />
           </View>
         </ScrollView>
-      </LinearGradient>
-      <BottomNavigation navigation={navigation} activeScreen="Home" />
-    </ImageBackground>
+      </ModernBackground>
+      <BottomNavigation navigation={navigation} activeScreen="GameOverview" />
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
-  scrollContainer: {
-    flexGrow: 1,
-  },
-  container: {
-    flex: 1,
-    padding: theme.spacing.lg,
-  },
-  title: {
-    fontSize: theme.typography.sizes.xxl,
-    fontWeight: theme.typography.weights.bold,
-    color: theme.colors.text.primary,
-    textAlign: 'center',
-    marginBottom: theme.spacing.md,
-  },
-  description: {
-    fontSize: theme.typography.sizes.md,
-    color: theme.colors.text.secondary,
-    textAlign: 'center',
+  section: {
     marginBottom: theme.spacing.xl,
+  },
+  sectionHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: theme.spacing.md,
   },
   sectionTitle: {
     fontSize: theme.typography.sizes.lg,
     fontWeight: theme.typography.weights.bold,
     color: theme.colors.text.accent,
-    marginBottom: theme.spacing.sm,
+    marginLeft: theme.spacing.sm,
   },
-  mechanicsSection: {
-    marginBottom: theme.spacing.xl,
+  card: {
+    borderRadius: theme.borderRadius.large,
+    overflow: 'hidden',
+    ...theme.shadows.medium,
   },
-  mechanicsText: {
-    fontSize: theme.typography.sizes.md,
-    color: theme.colors.text.secondary,
-    lineHeight: 22,
-  },
-  objectivesSection: {
-    marginBottom: theme.spacing.xl,
-  },
-  objectivesText: {
-    fontSize: theme.typography.sizes.md,
-    color: theme.colors.text.secondary,
-    lineHeight: 22,
-  },
-  howToPlaySection: {
-    marginBottom: theme.spacing.xl,
-  },
-  howToPlayText: {
-    fontSize: theme.typography.sizes.md,
-    color: theme.colors.text.secondary,
-    lineHeight: 22,
-  },
-  strategyCard: {
-    backgroundColor: 'rgba(187, 134, 252, 0.1)',
-    borderRadius: 15,
+  cardGradient: {
     padding: theme.spacing.lg,
-    marginBottom: theme.spacing.md,
+    borderRadius: theme.borderRadius.large,
+  },
+  cardText: {
+    fontSize: theme.typography.sizes.md,
+    color: theme.colors.text.primary,
+    lineHeight: theme.typography.lineHeights.relaxed,
+    textShadowColor: 'rgba(0, 0, 0, 0.5)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 2,
+  },
+  buttonContainer: {
+    marginTop: theme.spacing.lg,
+    marginBottom: theme.spacing.xxl,
   },
   backButton: {
-    marginTop: theme.spacing.lg,
-    marginBottom: theme.spacing.xxxl,
+    marginTop: theme.spacing.md,
   },
 });
 

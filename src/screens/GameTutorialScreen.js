@@ -1,60 +1,60 @@
 import React from 'react';
-import { View, Text, ScrollView, StyleSheet, ImageBackground, Image } from 'react-native';
+import { View, Text, StyleSheet, Image, ScrollView, StatusBar } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import theme from '../theme';
-import BottomNavigation from '../components/BottomNavigation';
 import CustomButton from '../components/CustomButton';
+import BottomNavigation from '../components/BottomNavigation';
+import ModernBackground from '../components/ModernBackground';
 
 const RoleSection = ({ title, description, icon, image }) => (
   <View style={styles.roleCard}>
-    <View style={styles.roleHeader}>
-      <Icon name={icon} size={24} color={theme.colors.text.accent} />
-      <Text style={styles.roleTitle}>{title}</Text>
-    </View>
-    <Image source={image} style={styles.roleImage} />
-    <Text style={styles.roleDescription}>{description}</Text>
+    <LinearGradient
+      colors={theme.gradients.card}
+      style={styles.cardGradient}
+    >
+      <View style={styles.roleHeader}>
+        <Icon name={icon} size={24} color={theme.colors.text.accent} />
+        <Text style={styles.roleTitle}>{title}</Text>
+      </View>
+      <Image source={image} style={styles.roleImage} />
+      <Text style={styles.roleDescription}>{description}</Text>
+    </LinearGradient>
   </View>
 );
 
 const GameTutorialScreen = ({ navigation }) => {
   const roles = [
     {
-      title: 'Civilian',
-      description: 'Regular townspeople who must work together to identify and eliminate the Mafia. They vote during the day phase to eliminate suspected Mafia members.',
-      icon: 'person',
-      image: require('../../assets/civilian.png'),
-    },
-    {
       title: 'Mafia',
-      description: 'Secret killers who eliminate one player each night. They must blend in with civilians during the day while secretly eliminating them at night.',
-      icon: 'person-outline',
-      image: require('../../assets/mafia.png'),
+      description: 'During the night phase, Mafia members secretly choose a civilian to eliminate. During the day phase, they must blend in and avoid suspicion.',
+      icon: 'security',
+      image: require('../../assets/mafia.png')
     },
     {
       title: 'Detective',
-      description: "Can investigate one player each night to determine if they are a member of the Mafia. This information is crucial for the town's strategy.",
+      description: 'During the night phase, the Detective can investigate one player to determine if they are a member of the Mafia or a Civilian.',
       icon: 'search',
-      image: require('../../assets/detective.png'),
+      image: require('../../assets/detective.png')
     },
     {
       title: 'Doctor',
-      description: 'Can protect one player each night from being eliminated by the Mafia. Must choose wisely to save important town members.',
+      description: 'During the night phase, the Doctor can choose one player to protect from elimination. The Doctor can save themselves.',
       icon: 'healing',
-      image: require('../../assets/doctor.png'),
+      image: require('../../assets/doctor.png')
     },
+    {
+      title: 'Civilian',
+      description: 'Civilians must work together during the day phase to identify and vote out Mafia members before they are outnumbered.',
+      icon: 'people',
+      image: require('../../assets/civilian.png')
+    }
   ];
 
   return (
-    <ImageBackground
-      source={require('../../assets/background.png')}
-      style={theme.commonStyles.content}
-      resizeMode="cover"
-    >
-      <LinearGradient
-        colors={theme.gradients.background}
-        style={theme.commonStyles.container}
-      >
+    <View style={theme.commonStyles.container}>
+      <StatusBar translucent backgroundColor="transparent" barStyle="light-content" />
+      <ModernBackground>
         <ScrollView style={styles.container}>
           <Text style={styles.title}>Game Tutorial</Text>
 
@@ -75,32 +75,68 @@ const GameTutorialScreen = ({ navigation }) => {
           {/* Game Flow Section */}
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>2. Game Flow</Text>
-            <View style={styles.flowCard}>
-              <Text style={styles.flowTitle}>Day Phase:</Text>
-              <Text style={styles.flowText}>
-                • All players discuss and share information{'\n'}
-                • Players vote to eliminate a suspected Mafia member{'\n'}
-                • The player with the most votes is eliminated{'\n'}
-                • Their role is revealed after elimination
-              </Text>
+            <View style={styles.phaseCard}>
+              <LinearGradient
+                colors={theme.gradients.card}
+                style={styles.cardGradient}
+              >
+                <View style={styles.phaseHeader}>
+                  <Icon name="wb-sunny" size={24} color="#FFC107" />
+                  <Text style={styles.phaseTitle}>Day Phase</Text>
+                </View>
+                <Text style={styles.phaseDescription}>
+                  During the day, all players discuss who they suspect might be Mafia. At the end of the discussion, everyone votes on who to eliminate. The player with the most votes is eliminated from the game.
+                </Text>
+              </LinearGradient>
             </View>
-
-            <View style={styles.flowCard}>
-              <Text style={styles.flowTitle}>Night Phase:</Text>
-              <Text style={styles.flowText}>
-                • Mafia members secretly choose a player to eliminate{'\n'}
-                • Detective can investigate one player{'\n'}
-                • Doctor can protect one player{'\n'}
-                • Actions occur simultaneously
-              </Text>
+            
+            <View style={styles.phaseCard}>
+              <LinearGradient
+                colors={theme.gradients.card}
+                style={styles.cardGradient}
+              >
+                <View style={styles.phaseHeader}>
+                  <Icon name="brightness-3" size={24} color="#5C6BC0" />
+                  <Text style={styles.phaseTitle}>Night Phase</Text>
+                </View>
+                <Text style={styles.phaseDescription}>
+                  During the night, the Mafia secretly chooses a player to eliminate. The Detective can investigate one player, and the Doctor can protect one player from elimination.
+                </Text>
+              </LinearGradient>
             </View>
+          </View>
 
-            <View style={styles.flowCard}>
-              <Text style={styles.flowTitle}>Win Conditions:</Text>
-              <Text style={styles.flowText}>
-                • Town wins when all Mafia members are eliminated{'\n'}
-                • Mafia wins when they equal or outnumber the town
-              </Text>
+          {/* Winning Conditions Section */}
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>3. Winning Conditions</Text>
+            <View style={styles.winCard}>
+              <LinearGradient
+                colors={theme.gradients.card}
+                style={styles.cardGradient}
+              >
+                <View style={styles.winHeader}>
+                  <Icon name="people" size={24} color={theme.colors.primary} />
+                  <Text style={styles.winTitle}>Civilians Win</Text>
+                </View>
+                <Text style={styles.winDescription}>
+                  If all Mafia members are eliminated, the Civilians win the game.
+                </Text>
+              </LinearGradient>
+            </View>
+            
+            <View style={styles.winCard}>
+              <LinearGradient
+                colors={theme.gradients.card}
+                style={styles.cardGradient}
+              >
+                <View style={styles.winHeader}>
+                  <Icon name="security" size={24} color={theme.colors.tertiary} />
+                  <Text style={styles.winTitle}>Mafia Wins</Text>
+                </View>
+                <Text style={styles.winDescription}>
+                  If the number of Mafia equals or exceeds the number of Civilians, the Mafia wins the game.
+                </Text>
+              </LinearGradient>
             </View>
           </View>
 
@@ -111,9 +147,9 @@ const GameTutorialScreen = ({ navigation }) => {
             style={styles.backButton}
           />
         </ScrollView>
-      </LinearGradient>
-      <BottomNavigation navigation={navigation} activeScreen="Tutorial" />
-    </ImageBackground>
+      </ModernBackground>
+      <BottomNavigation navigation={navigation} activeScreen="Home" />
+    </View>
   );
 };
 
@@ -167,19 +203,44 @@ const styles = StyleSheet.create({
     color: theme.colors.text.secondary,
     lineHeight: 22,
   },
-  flowCard: {
-    backgroundColor: 'rgba(187, 134, 252, 0.1)',
-    borderRadius: 15,
-    padding: theme.spacing.lg,
+  phaseCard: {
     marginBottom: theme.spacing.md,
   },
-  flowTitle: {
+  cardGradient: {
+    borderRadius: 15,
+    padding: theme.spacing.lg,
+  },
+  phaseHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: theme.spacing.sm,
+  },
+  phaseTitle: {
     fontSize: theme.typography.sizes.lg,
     fontWeight: theme.typography.weights.bold,
     color: theme.colors.text.accent,
+    marginLeft: theme.spacing.sm,
+  },
+  phaseDescription: {
+    fontSize: theme.typography.sizes.md,
+    color: theme.colors.text.secondary,
+    lineHeight: 24,
+  },
+  winCard: {
+    marginBottom: theme.spacing.md,
+  },
+  winHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
     marginBottom: theme.spacing.sm,
   },
-  flowText: {
+  winTitle: {
+    fontSize: theme.typography.sizes.lg,
+    fontWeight: theme.typography.weights.bold,
+    color: theme.colors.text.accent,
+    marginLeft: theme.spacing.sm,
+  },
+  winDescription: {
     fontSize: theme.typography.sizes.md,
     color: theme.colors.text.secondary,
     lineHeight: 24,

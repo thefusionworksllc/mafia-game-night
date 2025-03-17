@@ -1,24 +1,35 @@
 import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, Text, ImageBackground, Alert, FlatList } from 'react-native';
-import { Button } from 'react-native-elements';
+import { 
+  View, 
+  StyleSheet, 
+  Text, 
+  Alert, 
+  FlatList,
+  StatusBar,
+  TouchableOpacity
+} from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import theme from '../theme'; 
 import { useAuth } from '../context/AuthContext';
 import { gameService } from '../services/gameService';
 import BottomNavigation from '../components/BottomNavigation';
 import CustomButton from '../components/CustomButton';
+import Icon from 'react-native-vector-icons/MaterialIcons';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import ModernBackground from '../components/ModernBackground';
 
 const GameLobbyScreen = ({ route, navigation }) => {
-  const { gameCode, totalPlayers, mafiaCount, hasDetective, hasDoctor, isHost } = route.params;
+  const { gameCode, totalPlayers, mafiaCount, detectiveCount, doctorCount, isHost } = route.params;
   const [players, setPlayers] = useState([]);
   const [gameData, setGameData] = useState(null);
   const [loading, setLoading] = useState(false);
   const { user } = useAuth();
+  const insets = useSafeAreaInsets();
 
   // Check if user is null and handle accordingly
   if (!user) {
-    Alert.alert('Error', 'User not authenticated. Please log in.');
-    navigation.navigate('Login'); // Redirect to LoginScreen
+    Alert.alert('Login Required', 'You need to log in to access the game lobby.');
+    navigation.replace('Login'); // Redirect to LoginScreen
     return null; // Prevent rendering the rest of the component
   }
 
@@ -111,93 +122,135 @@ const GameLobbyScreen = ({ route, navigation }) => {
   );
 
   return (
-    <ImageBackground
-      source={require('../../assets/background.png')} 
-      style={theme.commonStyles.content}
-      resizeMode="cover"
-    >
-      <LinearGradient
-        colors={theme.gradients.background}
-        style={theme.commonStyles.container}
-      >
-        <View style={theme.commonStyles.content}>
-          <Text style={styles.title}>Game Lobby</Text>
-          <Text style={styles.gameCodeText}>Game Code: {gameCode}</Text>
-                    
-          {gameData?.hostName && (
-            <Text style={styles.hostText}>
-              {gameData.hostName} <Text style={styles.hostLabel}>(Host)</Text>
-            </Text>
-          )}
-
-          <View style={styles.cardContainer}>
-            <Text style={styles.subTitle}>Players List : {players.filter(player => !player.isHost).length}/{gameData?.settings?.totalPlayers || totalPlayers}</Text>
-            <View style={styles.playersList}>
-              <FlatList
-                data={players.filter(player => !player.isHost)}
-                renderItem={renderPlayer}
-                keyExtractor={item => item.id}
-                ListEmptyComponent={
-                  <Text style={styles.emptyText}>Waiting for players to join...</Text>
-                }
-              />
+    <View style={theme.commonStyles.container}>
+      <StatusBar translucent backgroundColor="transparent" barStyle="light-content" />
+      <ModernBackground>
+        <View style={styles.content}>
+          <View style={styles.header}>
+            <Text style={styles.title}>Game Lobby</Text>
+            <View style={styles.gameCodeContainer}>
+              <Text style={styles.gameCodeLabel}>Game Code:</Text>
+              <Text style={styles.gameCode}>{gameCode}</Text>
             </View>
           </View>
 
-          {isHost ? (
-            <View style={styles.buttonContainer}>
-              <CustomButton
-                title="START GAME"
-                onPress={handleStartGame}
-                style={styles.button}
-                loading={loading}
-              />
-              <CustomButton
-                title="LEAVE GAME"
-                onPress={() => {
-                  Alert.alert(
-                    'Leave Game',
-                    'Are you sure you want to Leave this game?',
-                    [
-                      { text: 'Cancel', style: 'cancel' },
-                      { 
-                        text: 'Leave Game', 
-                        onPress: handleEndGame,
-                        style: 'destructive'
-                      },
-                    ]
-                  );
-                }}
-                style={[styles.button, styles.endGameButton]}
-                type="clear"
-                titleStyle={styles.leaveGameText}
-              />
+          <View style={styles.infoContainer}>
+            <View style={styles.infoItem}>
+              <Icon name="people" size={24} color={theme.colors.primary} />
+              <Text style={styles.infoText}>
+                Players: {players.length}/{totalPlayers}
+              </Text>
             </View>
-          ) : (
-            <Text style={styles.waitingText}>Waiting for host to start the game...</Text>
-          )}
-          
+            <View style={styles.infoItem}>
+              <Icon name="security" size={24} color={theme.colors.tertiary} />
+              <Text style={styles.infoText}>
+                Mafia: {mafiaCount}
+              </Text>
             </View>
-        
-        
-      </LinearGradient>
-      <BottomNavigation navigation={navigation} activeScreen="GameLobby" />
-    </ImageBackground>
+            <View style={styles.infoItem}>
+              <Icon name="search" size={24} color={theme.colors.info} />
+              <Text style={styles.infoText}>
+                Detective: {detectiveCount}
+              </Text>
+            </View>
+            <View style={styles.infoItem}>
+              <Icon name="healing" size={24} color={theme.colors.success} />
+              <Text style={styles.infoText}>
+                Doctor: {doctorCount}
+              </Text>
+            </View>
+          </View>
+
+          <View style={styles.playersSection}>
+            <Text style={styles.sectionTitle}>Players</Text>
+            <FlatList
+              data={players}
+              keyExtractor={(item) => item.id}
+              renderItem={renderPlayer}
+              contentContainerStyle={styles.playersList}
+            />
+          </View>
+
+          <View style={styles.buttonContainer}>
+            {isHost ? (
+              <>
+                <CustomButton
+                  title="START GAME"
+                  onPress={handleStartGame}
+                  loading={loading}
+                  disabled={players.length < totalPlayers || loading}
+                  leftIcon={<Icon name="play-arrow" size={20} color={theme.colors.text.primary} />}
+                  fullWidth
+                />
+                <Text style={styles.waitingText}>
+                  {players.length < totalPlayers 
+                    ? `Waiting for ${totalPlayers - players.length} more player(s)...` 
+                    : 'All players have joined! You can start the game.'}
+                </Text>
+                <CustomButton
+                  title="END GAME"
+                  onPress={handleEndGame}
+                  variant="outline"
+                  style={styles.endGameButton}
+                  leftIcon={<Icon name="cancel" size={20} color={theme.colors.error} />}
+                  fullWidth
+                />
+              </>
+            ) : (
+              <>
+                <Text style={styles.waitingText}>
+                  {players.length < totalPlayers 
+                    ? `Waiting for ${totalPlayers - players.length} more player(s)...` 
+                    : 'All players have joined! Waiting for host to start the game.'}
+                </Text>
+                <CustomButton
+                  title="LEAVE GAME"
+                  onPress={handleLeaveLobby}
+                  variant="outline"
+                  style={styles.leaveButton}
+                  leftIcon={<Icon name="exit-to-app" size={20} color={theme.colors.error} />}
+                  fullWidth
+                />
+              </>
+            )}
+          </View>
+        </View>
+      </ModernBackground>
+      <BottomNavigation navigation={navigation} activeScreen="Home" />
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: theme.colors.background,
+  },
+  backgroundImage: {
+    flex: 1,
+    width: '100%',
+  },
+  gradientContainer: {
+    flex: 1,
+  },
+  content: {
+    flex: 1,
+    padding: theme.spacing.horizontalPadding,
+    paddingBottom: theme.spacing.bottomNavHeight + theme.spacing.safeBottom,
+  },
   title: {
-    fontSize: theme.typography.sizes.xxxl,
+    fontSize: theme.typography.sizes.xxl,
     fontWeight: theme.typography.weights.bold,
     color: theme.colors.text.accent,
     textAlign: 'center',
-    marginBottom: theme.spacing.lg,
+    marginVertical: theme.spacing.lg,
+    // Text shadow for better readability
+    textShadowColor: 'rgba(0, 0, 0, 0.75)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 4,
   },
-  subTitle: {
-    fontSize: theme.typography.sizes.lg,
-    fontWeight: theme.typography.weights.bold,
-    color: theme.colors.text.accent,
+  gameCodeContainer: {
+    alignItems: 'center',
     marginBottom: theme.spacing.md,
   },
   gameCodeText: {
@@ -205,10 +258,17 @@ const styles = StyleSheet.create({
     fontWeight: theme.typography.weights.bold,
     color: theme.colors.primary,
     textAlign: 'center',
-    marginBottom: theme.spacing.md,
     backgroundColor: 'rgba(187, 134, 252, 0.2)',
-    padding: theme.spacing.sm,
-    borderRadius: 10,
+    paddingVertical: theme.spacing.sm,
+    paddingHorizontal: theme.spacing.lg,
+    borderRadius: theme.borderRadius.medium,
+    overflow: 'hidden',
+  },
+  subTitle: {
+    fontSize: theme.typography.sizes.lg,
+    fontWeight: theme.typography.weights.bold,
+    color: theme.colors.text.accent,
+    marginBottom: theme.spacing.md,
   },
   hostText: {
     fontSize: theme.typography.sizes.lg,
@@ -223,9 +283,10 @@ const styles = StyleSheet.create({
   },
   cardContainer: {
     backgroundColor: theme.colors.card.background,
-    borderRadius: 15,
-    padding: theme.spacing.md,
-    marginVertical: theme.spacing.sm,
+    borderRadius: theme.borderRadius.large,
+    padding: theme.spacing.lg,
+    marginVertical: theme.spacing.md,
+    ...theme.shadows.medium,
   },
   playersList: {
     maxHeight: 200,
@@ -233,7 +294,7 @@ const styles = StyleSheet.create({
   playerItem: {
     padding: theme.spacing.md,
     backgroundColor: 'rgba(255, 255, 255, 0.1)',
-    borderRadius: 10,
+    borderRadius: theme.borderRadius.medium,
     marginBottom: theme.spacing.sm,
     borderWidth: 1,
     borderColor: theme.colors.text.secondary + '40',
@@ -242,20 +303,26 @@ const styles = StyleSheet.create({
     fontSize: theme.typography.sizes.md,
     color: theme.colors.text.primary,
   },
+  hostName: {
+    color: theme.colors.primary,
+    fontWeight: theme.typography.weights.bold,
+  },
   buttonContainer: {
     marginTop: theme.spacing.lg,
   },
-  button: {
-    marginVertical: theme.spacing.sm,
-  },
-  endGameButton: {
+  leaveButton: {
+    marginTop: theme.spacing.md,
     borderColor: theme.colors.error,
+  },
+  waitingContainer: {
+    alignItems: 'center',
+    marginTop: theme.spacing.xl,
   },
   waitingText: {
     textAlign: 'center',
     color: theme.colors.text.accent,
     fontSize: theme.typography.sizes.md,
-    marginVertical: theme.spacing.lg,
+    marginBottom: theme.spacing.lg,
   },
   emptyText: {
     textAlign: 'center',
@@ -263,16 +330,59 @@ const styles = StyleSheet.create({
     fontSize: theme.typography.sizes.md,
     padding: theme.spacing.md,
   },
-  playersText: {
-    fontSize: theme.typography.sizes.md,
-    color: theme.colors.text.secondary,
-    textAlign: 'center',
+  leaveGameText: {
+    color: theme.colors.error,
+  },
+  header: {
+    alignItems: 'center',
     marginBottom: theme.spacing.md,
   },
-  leaveGameText: {
-    color: theme.colors.text.accent,
+  gameCodeContainer: {
+    alignItems: 'center',
+    marginBottom: theme.spacing.md,
+  },
+  gameCodeLabel: {
+    fontSize: theme.typography.sizes.lg,
+    fontWeight: theme.typography.weights.bold,
+    color: theme.colors.text.secondary,
+    marginRight: theme.spacing.sm,
+  },
+  gameCode: {
+    fontSize: theme.typography.sizes.xl,
+    fontWeight: theme.typography.weights.bold,
+    color: theme.colors.primary,
+    backgroundColor: 'rgba(187, 134, 252, 0.2)',
+    paddingVertical: theme.spacing.sm,
+    paddingHorizontal: theme.spacing.lg,
+    borderRadius: theme.borderRadius.medium,
+    overflow: 'hidden',
+  },
+  infoContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: theme.spacing.md,
+  },
+  infoItem: {
+    alignItems: 'center',
+  },
+  infoText: {
     fontSize: theme.typography.sizes.md,
-  }
+    color: theme.colors.text.secondary,
+    marginLeft: theme.spacing.sm,
+  },
+  playersSection: {
+    marginBottom: theme.spacing.md,
+  },
+  sectionTitle: {
+    fontSize: theme.typography.sizes.lg,
+    fontWeight: theme.typography.weights.bold,
+    color: theme.colors.text.accent,
+    marginBottom: theme.spacing.sm,
+  },
+  endGameButton: {
+    marginTop: theme.spacing.md,
+    borderColor: theme.colors.error,
+  },
 });
 
 export default GameLobbyScreen;

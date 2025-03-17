@@ -1,90 +1,143 @@
 import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, Text, ImageBackground, Alert, TouchableOpacity } from 'react-native';
-import { Input, Button } from 'react-native-elements';
-import Slider from '@react-native-community/slider';
+import { 
+  View, 
+  StyleSheet, 
+  Text, 
+  Alert, 
+  TouchableOpacity,
+  StatusBar,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  Animated
+} from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import theme from '../theme';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { gameService } from '../services/gameService';
 import BottomNavigation from '../components/BottomNavigation';
+import { useAuth } from '../context/AuthContext';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import CustomButton from '../components/CustomButton';
+import ModernBackground from '../components/ModernBackground';
 
-const CustomCheckbox = ({ title, checked, onPress }) => (
-  <TouchableOpacity 
-    style={styles.checkboxContainer} 
-    onPress={onPress}
-  >
-    <View style={[
-      styles.checkbox,
-      checked && styles.checkboxChecked
-    ]}>
-      {checked && (
-        <Icon 
-          name="check" 
-          size={16} 
-          color={theme.colors.text.accent} 
-        />
-      )}
-    </View>
-    <Text style={styles.checkboxText}>{title}</Text>
-  </TouchableOpacity>
-);
+// Animated control component for all numeric inputs
+const AnimatedControl = ({ 
+  value, 
+  label, 
+  maxValue, 
+  minValue = 1,
+  onIncrement, 
+  onDecrement,
+  icon,
+  description
+}) => {
+  const animatedValue = useState(new Animated.Value(1))[0];
+  
+  const animatePress = () => {
+    Animated.sequence([
+      Animated.timing(animatedValue, {
+        toValue: 0.95,
+        duration: 100,
+        useNativeDriver: true,
+      }),
+      Animated.timing(animatedValue, {
+        toValue: 1,
+        duration: 100,
+        useNativeDriver: true,
+      }),
+    ]).start();
+  };
 
-const SliderControl = ({ 
-  value = 0,
-  onValueChange = () => {},
-  minimumValue = 0,
-  maximumValue = 100,
-  label = '',
-  onDecrement = () => {},
-  onIncrement = () => {},
-  disabled = false 
-}) => (
-  <View style={styles.sliderContainer}>
-    <Text style={styles.sliderLabel}>{label}</Text>
-    <View style={styles.mafiaControls}>
-      <TouchableOpacity 
-        style={[styles.controlButton, disabled && styles.controlButtonDisabled]} 
-        onPress={onDecrement}
-        disabled={disabled}
-      >
-        <Icon 
-          name="remove" 
-          size={24} 
-          color={theme.colors.text.secondary} 
-        />
-      </TouchableOpacity>
+  return (
+    <View style={styles.controlContainer}>
+      <View style={styles.controlHeader}>
+        <View style={styles.controlIconContainer}>
+          <Icon name={icon} size={24} color={theme.colors.primary} />
+        </View>
+        <View style={styles.controlLabelContainer}>
+          <Text style={styles.controlLabel}>{label}</Text>
+          <Text style={styles.controlDescription}>{description}</Text>
+        </View>
+      </View>
       
-      <Slider
-        value={value}
-        onValueChange={onValueChange}
-        minimumValue={minimumValue}
-        maximumValue={maximumValue}
-        step={1}
-        style={styles.slider}
-        thumbStyle={styles.sliderThumb}
-        trackStyle={styles.sliderTrack}
-        minimumTrackTintColor={theme.colors.text.accent}
-        maximumTrackTintColor={theme.colors.text.secondary}
-        allowTouchTrack={true}
-        thumbProps={{
-          children: (
-            <View style={styles.sliderThumb} />
-          ),
-        }}
-      />
+      <View style={styles.controlActions}>
+        <TouchableOpacity 
+          style={[
+            styles.controlButton,
+            value <= minValue && styles.controlButtonDisabled
+          ]} 
+          onPress={() => {
+            if (value > minValue) {
+              animatePress();
+              onDecrement();
+            }
+          }}
+          disabled={value <= minValue}
+          activeOpacity={0.7}
+        >
+          <Icon 
+            name="remove" 
+            size={24} 
+            color={value <= minValue ? theme.colors.text.disabled : theme.colors.text.secondary} 
+          />
+        </TouchableOpacity>
+        
+        <Animated.View 
+          style={[
+            styles.controlValueContainer,
+            { transform: [{ scale: animatedValue }] }
+          ]}
+        >
+          <Text style={styles.controlValue}>{value}</Text>
+          {maxValue && (
+            <Text style={styles.controlMaxValue}>Max: {maxValue}</Text>
+          )}
+        </Animated.View>
 
-      <TouchableOpacity 
-        style={[styles.controlButton, disabled && styles.controlButtonDisabled]} 
-        onPress={onIncrement}
-        disabled={disabled}
-      >
-        <Icon 
-          name="add" 
-          size={24} 
-          color={theme.colors.text.secondary} 
-        />
-      </TouchableOpacity>
+        <TouchableOpacity 
+          style={[
+            styles.controlButton,
+            value >= maxValue && styles.controlButtonDisabled
+          ]} 
+          onPress={() => {
+            if (value < maxValue) {
+              animatePress();
+              onIncrement();
+            }
+          }}
+          disabled={value >= maxValue}
+          activeOpacity={0.7}
+        >
+          <Icon 
+            name="add" 
+            size={24} 
+            color={value >= maxValue ? theme.colors.text.disabled : theme.colors.text.secondary} 
+          />
+        </TouchableOpacity>
+      </View>
     </View>
+  );
+};
+
+// Role card component to display role information
+const RoleCard = ({ role, count, icon, color, description }) => (
+  <View style={styles.roleCard}>
+    <LinearGradient
+      colors={[`${color}20`, `${color}10`]}
+      style={styles.roleCardGradient}
+    >
+      <View style={[styles.roleIconContainer, { backgroundColor: `${color}30` }]}>
+        <Icon name={icon} size={24} color={color} />
+      </View>
+      <View style={styles.roleInfoContainer}>
+        <Text style={styles.roleName}>{role}</Text>
+        <Text style={styles.roleDescription}>{description}</Text>
+      </View>
+      <View style={styles.roleCountContainer}>
+        <Text style={[styles.roleCount, { color }]}>{count}</Text>
+      </View>
+    </LinearGradient>
   </View>
 );
 
@@ -93,15 +146,11 @@ const HostGameScreen = ({ navigation }) => {
   const [mafiaCount, setMafiaCount] = useState(2);
   const [maxMafia, setMaxMafia] = useState(Math.floor(6 / 3));
   const [detectiveCount, setDetectiveCount] = useState(1);
-  const [hasDoctor, setHasDoctor] = useState(true);
+  const [doctorCount, setDoctorCount] = useState(1);
   const [loading, setLoading] = useState(false);
   const [gameCode, setGameCode] = useState(null);
-  const [players, setPlayers] = useState([{ id: 'host', name: 'Host Player', isHost: true }]);
-
-  // Handle mafia count changes
-  const handleMafiaCountChange = (value) => {
-    setMafiaCount(Math.min(value, maxMafia));
-  };
+  const { user } = useAuth();
+  const insets = useSafeAreaInsets();
 
   // Handle total players changes
   const handleTotalPlayersChange = (value) => {
@@ -111,18 +160,6 @@ const HostGameScreen = ({ navigation }) => {
     // Adjust mafia count if it exceeds new maximum
     if (mafiaCount > newMaxMafia) {
       setMafiaCount(newMaxMafia);
-    }
-  };
-
-  const incrementMafia = () => {
-    if (mafiaCount < maxMafia) {
-      setMafiaCount(mafiaCount + 1);
-    }
-  };
-
-  const decrementMafia = () => {
-    if (mafiaCount > 1) {
-      setMafiaCount(mafiaCount - 1);
     }
   };
 
@@ -138,6 +175,18 @@ const HostGameScreen = ({ navigation }) => {
     }
   };
 
+  const incrementMafia = () => {
+    if (mafiaCount < maxMafia) {
+      setMafiaCount(mafiaCount + 1);
+    }
+  };
+
+  const decrementMafia = () => {
+    if (mafiaCount > 1) {
+      setMafiaCount(mafiaCount - 1);
+    }
+  };
+
   // Detective count handlers
   const incrementDetective = () => {
     if (detectiveCount < 2) {
@@ -146,17 +195,42 @@ const HostGameScreen = ({ navigation }) => {
   };
 
   const decrementDetective = () => {
-    if (detectiveCount > 1) {
+    if (detectiveCount > 0) {
       setDetectiveCount(detectiveCount - 1);
     }
   };
 
-  // Calculate remaining civilians (updated)
-  const remainingCivilians = totalPlayers - mafiaCount - detectiveCount - (hasDoctor ? 1 : 0);
+  // Doctor count handlers
+  const incrementDoctor = () => {
+    if (doctorCount < 2) {
+      setDoctorCount(doctorCount + 1);
+    }
+  };
+
+  const decrementDoctor = () => {
+    if (doctorCount > 0) {
+      setDoctorCount(doctorCount - 1);
+    }
+  };
+
+  // Calculate remaining civilians
+  const remainingCivilians = totalPlayers - mafiaCount - detectiveCount - doctorCount;
 
   const handleHostGame = async () => {
+    if (!user) {
+      Alert.alert(
+        'Login Required',
+        'You need to log in to host a game.',
+        [
+          { text: 'Cancel', style: 'cancel' },
+          { text: 'Login', onPress: () => navigation.navigate('Login') }
+        ]
+      );
+      return;
+    }
+
     console.log('Host Game button clicked');
-    const specialRolesCount = detectiveCount + (hasDoctor ? 1 : 0);
+    const specialRolesCount = detectiveCount + doctorCount;
     const civilians = totalPlayers - mafiaCount - specialRolesCount;
 
     if (civilians < 1) {
@@ -170,12 +244,19 @@ const HostGameScreen = ({ navigation }) => {
         totalPlayers,
         mafiaCount,
         detectiveCount,
-        hasDoctor
+        doctorCount
       });
 
       setGameCode(createdGameCode);
       console.log('Game created with code:', createdGameCode);
-      navigation.navigate('GameLobby', { gameCode: createdGameCode, isHost: true });
+      navigation.navigate('GameLobby', { 
+        gameCode: createdGameCode, 
+        isHost: true,
+        totalPlayers,
+        mafiaCount,
+        detectiveCount,
+        doctorCount
+      });
     } catch (error) {
       console.error('Error creating game:', error);
       Alert.alert('Error', error.message || 'Failed to create game');
@@ -184,245 +265,354 @@ const HostGameScreen = ({ navigation }) => {
     }
   };
 
-  const CustomButton = ({ title, onPress, style, loading }) => (
-    <LinearGradient
-      colors={theme.gradients.button}
-      style={[theme.commonStyles.buttonGradient, style]}
-      start={{ x: 0, y: 0 }}
-      end={{ x: 1, y: 0 }}
-    >
-      <Button
-        title={title}
-        onPress={onPress}
-        buttonStyle={theme.commonStyles.buttonContent}
-        titleStyle={theme.commonStyles.buttonText}
-        containerStyle={theme.commonStyles.buttonContainer}
-        loading={loading}
-      />
-    </LinearGradient>
-  );
-
   return (
-    <ImageBackground
-      source={require('../../assets/background.png')}
-      style={theme.commonStyles.content}
-      resizeMode="cover"
-    >
-      <LinearGradient
-        colors={theme.gradients.background}
-        style={theme.commonStyles.container}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 0, y: 1 }}
-      >
-        <View style={theme.commonStyles.content}>
-          <Text style={styles.title}>Host Game</Text>
-          <View style={theme.commonStyles.card}>
-            {/* Total Players Slider */}
-            <SliderControl
-              value={totalPlayers}
-              onValueChange={handleTotalPlayersChange}
-              minimumValue={4}
-              maximumValue={12}
-              label={`Total Players: ${totalPlayers}`}
-              onDecrement={decrementTotalPlayers}
-              onIncrement={incrementTotalPlayers}
-            />
-
-            {/* Mafia Players Slider */}
-            <SliderControl
-              value={mafiaCount}
-              onValueChange={handleMafiaCountChange}
-              minimumValue={1}
-              maximumValue={maxMafia}
-              label={`Mafia Players: ${mafiaCount} (Max: ${maxMafia})`}
-              onDecrement={decrementMafia}
-              onIncrement={incrementMafia}
-            />
-
-            {/* Detective Count */}
-            <View style={styles.sliderContainer}>
-              <Text style={styles.sliderLabel}>
-                Detective Count: <Text style={styles.numberText}>{detectiveCount}</Text> (Max: 2)
-              </Text>
-              <View style={styles.mafiaControls}>
-                <TouchableOpacity 
-                  style={[
-                    styles.controlButton,
-                    detectiveCount <= 1 && styles.controlButtonDisabled
-                  ]} 
-                  onPress={decrementDetective}
-                  disabled={detectiveCount <= 1}
-                >
-                  <Icon 
-                    name="remove" 
-                    size={24} 
-                    color={theme.colors.text.secondary} 
+    <View style={theme.commonStyles.container}>
+      <StatusBar translucent backgroundColor="transparent" barStyle="light-content" />
+      <ModernBackground>
+        <KeyboardAvoidingView
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          style={styles.keyboardAvoidingView}
+        >
+          <ScrollView 
+            style={theme.commonStyles.scrollContainer}
+            contentContainerStyle={theme.commonStyles.scrollContentContainer}
+            showsVerticalScrollIndicator={false}
+          >
+            <Text style={theme.commonStyles.title}>Host Game</Text>
+            
+            {/* Game Settings Section */}
+            <View style={styles.section}>
+              <Text style={styles.sectionTitle}>Game Settings</Text>
+              
+              {/* Total Players Control */}
+              <AnimatedControl
+                label="Total Players"
+                value={totalPlayers}
+                minValue={4}
+                maxValue={12}
+                onIncrement={incrementTotalPlayers}
+                onDecrement={decrementTotalPlayers}
+                icon="group"
+                description="Number of players in the game (4-12)"
+              />
+              
+              {/* Role Distribution */}
+              <Text style={styles.roleDistributionTitle}>Role Distribution</Text>
+              
+              <View style={styles.rolesContainer}>
+                <View style={styles.roleControls}>
+                  <AnimatedControl
+                    label="Mafia Count"
+                    value={mafiaCount}
+                    minValue={1}
+                    maxValue={Math.max(1, Math.floor(totalPlayers / 3))}
+                    onIncrement={incrementMafia}
+                    onDecrement={decrementMafia}
+                    icon="security"
+                    description={`Mafia players (1-${Math.max(1, Math.floor(totalPlayers / 3))})`}
                   />
-                </TouchableOpacity>
-                
-                <View style={styles.detectiveCountDisplay}>
-                  <Text style={styles.numberText}>{detectiveCount}</Text>
+                  
+                  <AnimatedControl
+                    label="Detective Count"
+                    value={detectiveCount}
+                    minValue={0}
+                    maxValue={2}
+                    onIncrement={incrementDetective}
+                    onDecrement={decrementDetective}
+                    icon="search"
+                    description="Detectives can investigate players (0-2)"
+                  />
+                  
+                  <AnimatedControl
+                    label="Doctor Count"
+                    value={doctorCount}
+                    minValue={0}
+                    maxValue={2}
+                    onIncrement={incrementDoctor}
+                    onDecrement={decrementDoctor}
+                    icon="healing"
+                    description="Doctors can save players (0-2)"
+                  />
                 </View>
-
-                <TouchableOpacity 
-                  style={[
-                    styles.controlButton,
-                    detectiveCount >= 2 && styles.controlButtonDisabled
-                  ]} 
-                  onPress={incrementDetective}
-                  disabled={detectiveCount >= 2}
-                >
-                  <Icon 
-                    name="add" 
-                    size={24} 
-                    color={theme.colors.text.secondary} 
-                  />
-                </TouchableOpacity>
+              </View>
+              
+              {/* Role Summary */}
+              <View style={styles.roleSummary}>
+                <Text style={styles.roleSummaryTitle}>Role Summary</Text>
+                <View style={styles.roleSummaryCards}>
+                  <View style={styles.roleCard}>
+                    <LinearGradient
+                      colors={[`${theme.colors.tertiary}20`, `${theme.colors.tertiary}10`]}
+                      style={styles.roleCardGradient}
+                    >
+                      <View style={[styles.roleIconContainer, { backgroundColor: `${theme.colors.tertiary}30` }]}>
+                        <Icon name="security" size={24} color={theme.colors.tertiary} />
+                      </View>
+                      <Text style={styles.roleName}>Mafia</Text>
+                      <View style={styles.roleCountContainer}>
+                        <Text style={[styles.roleCount, { color: theme.colors.tertiary }]}>{mafiaCount}</Text>
+                      </View>
+                    </LinearGradient>
+                  </View>
+                  
+                  <View style={styles.roleCard}>
+                    <LinearGradient
+                      colors={[`${theme.colors.info}20`, `${theme.colors.info}10`]}
+                      style={styles.roleCardGradient}
+                    >
+                      <View style={[styles.roleIconContainer, { backgroundColor: `${theme.colors.info}30` }]}>
+                        <Icon name="search" size={24} color={theme.colors.info} />
+                      </View>
+                      <Text style={styles.roleName}>Detective</Text>
+                      <View style={styles.roleCountContainer}>
+                        <Text style={[styles.roleCount, { color: theme.colors.info }]}>{detectiveCount}</Text>
+                        {detectiveCount === 2 && (
+                          <Text style={styles.maxLabel}>MAX</Text>
+                        )}
+                      </View>
+                    </LinearGradient>
+                  </View>
+                  
+                  <View style={styles.roleCard}>
+                    <LinearGradient
+                      colors={[`${theme.colors.success}20`, `${theme.colors.success}10`]}
+                      style={styles.roleCardGradient}
+                    >
+                      <View style={[styles.roleIconContainer, { backgroundColor: `${theme.colors.success}30` }]}>
+                        <Icon name="healing" size={24} color={theme.colors.success} />
+                      </View>
+                      <Text style={styles.roleName}>Doctor</Text>
+                      <View style={styles.roleCountContainer}>
+                        <Text style={[styles.roleCount, { color: theme.colors.success }]}>{doctorCount}</Text>
+                        {doctorCount === 2 && (
+                          <Text style={styles.maxLabel}>MAX</Text>
+                        )}
+                      </View>
+                    </LinearGradient>
+                  </View>
+                  
+                  <View style={styles.roleCard}>
+                    <LinearGradient
+                      colors={[`${theme.colors.primary}20`, `${theme.colors.primary}10`]}
+                      style={styles.roleCardGradient}
+                    >
+                      <View style={[styles.roleIconContainer, { backgroundColor: `${theme.colors.primary}30` }]}>
+                        <Icon name="people" size={24} color={theme.colors.primary} />
+                      </View>
+                      <Text style={styles.roleName}>Civilian</Text>
+                      <View style={styles.roleCountContainer}>
+                        <Text style={[styles.roleCount, { color: theme.colors.primary }]}>{totalPlayers - mafiaCount - detectiveCount - doctorCount}</Text>
+                      </View>
+                    </LinearGradient>
+                  </View>
+                </View>
+                
+                {remainingCivilians < 1 && (
+                  <Text style={styles.errorText}>
+                    Not enough players for selected roles
+                  </Text>
+                )}
               </View>
             </View>
-
-            {/* Doctor Checkbox */}
-            <View style={styles.rolesContainer}>
-              <CustomCheckbox
-                title="Doctor"
-                checked={hasDoctor}
-                onPress={() => setHasDoctor(!hasDoctor)}
+            
+            {/* Host Game Button */}
+            <View style={styles.buttonContainer}>
+              <CustomButton
+                title="HOST GAME"
+                onPress={handleHostGame}
+                loading={loading}
+                disabled={loading || remainingCivilians < 1}
+                leftIcon={<Icon name="play-arrow" size={20} color={theme.colors.text.primary} />}
+                fullWidth
+              />
+              
+              <CustomButton
+                title="BACK TO HOME"
+                onPress={() => navigation.navigate('Home')}
+                variant="outline"
+                style={styles.backButton}
+                leftIcon={<Icon name="arrow-back" size={20} color={theme.colors.text.accent} />}
+                fullWidth
               />
             </View>
-
-            {/* Summary and Host Game Button */}
-            <View style={styles.summary}>
-              <Text style={[
-                styles.summaryText,
-                remainingCivilians < 1 && styles.errorText
-              ]}>
-                Civilians: <Text style={styles.numberText}>{remainingCivilians}</Text>
-              </Text>
-              {remainingCivilians < 1 && (
-                <Text style={styles.errorText}>
-                  Not enough players for selected roles
-                </Text>
-              )}
-            </View>
-
-            <CustomButton
-              title="HOST GAME"
-              onPress={handleHostGame}
-              loading={loading}
-            />
-          </View>
-        </View>
-      </LinearGradient>
+          </ScrollView>
+        </KeyboardAvoidingView>
+      </ModernBackground>
       <BottomNavigation navigation={navigation} activeScreen="HostGame" />
-    </ImageBackground>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
-  title: {
-    fontSize: theme.typography.sizes.xxxl,
-    fontWeight: theme.typography.weights.bold,
-    color: theme.colors.text.accent,
-    textAlign: 'center',
-    marginBottom: theme.spacing.xl,
+  keyboardAvoidingView: {
+    flex: 1,
   },
-  sliderContainer: {
+  section: {
     marginBottom: theme.spacing.lg,
   },
-  sliderLabel: {
-    fontSize: theme.typography.sizes.lg,
-    color: theme.colors.text.secondary,
-    marginBottom: theme.spacing.sm,
-    fontWeight: theme.typography.weights.medium,
-  },
-  numberText: {
+  sectionTitle: {
     fontSize: theme.typography.sizes.xl,
-    color: theme.colors.text.accent,
     fontWeight: theme.typography.weights.bold,
+    color: theme.colors.text.accent,
+    marginBottom: theme.spacing.xs,
   },
-  sliderThumb: {
-    width: 20,
-    height: 20,
-    borderRadius: 10,
-    backgroundColor: theme.colors.text.accent,
-  },
-  sliderTrack: {
-    height: 5,
-    borderRadius: 3,
+  roleDistributionTitle: {
+    fontSize: theme.typography.sizes.xl,
+    fontWeight: theme.typography.weights.bold,
+    color: theme.colors.text.accent,
+    marginBottom: theme.spacing.md,
   },
   rolesContainer: {
     marginBottom: theme.spacing.lg,
   },
-  checkboxContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginVertical: theme.spacing.xs,
+  roleControls: {
+    flexDirection: 'column',
+    width: '100%',
   },
-  checkbox: {
-    width: 24,
-    height: 24,
-    borderRadius: 4,
-    borderWidth: 2,
-    borderColor: theme.colors.text.secondary,
-    marginRight: theme.spacing.sm,
+  roleSummary: {
+    marginBottom: theme.spacing.lg,
+  },
+  roleSummaryTitle: {
+    fontSize: theme.typography.sizes.xl,
+    fontWeight: theme.typography.weights.bold,
+    color: theme.colors.text.accent,
+    marginBottom: theme.spacing.md,
+  },
+  roleSummaryCards: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+    marginBottom: theme.spacing.md,
+  },
+  roleCard: {
+    width: '48%',
+    marginBottom: theme.spacing.md,
+    borderRadius: theme.borderRadius.medium,
+    overflow: 'hidden',
+    ...theme.shadows.small,
+  },
+  roleCardGradient: {
+    padding: theme.spacing.md,
+    borderRadius: theme.borderRadius.medium,
     alignItems: 'center',
     justifyContent: 'center',
+    height: 100,
   },
-  checkboxChecked: {
-    backgroundColor: 'rgba(187, 134, 252, 0.1)',
-    borderColor: theme.colors.text.accent,
+  roleIconContainer: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: theme.spacing.xs,
   },
-  checkboxText: {
-    color: theme.colors.text.secondary,
-    fontSize: theme.typography.sizes.lg,
-    fontWeight: theme.typography.weights.medium,
+  roleName: {
+    fontSize: theme.typography.sizes.md,
+    fontWeight: theme.typography.weights.bold,
+    color: theme.colors.text.primary,
+    marginBottom: theme.spacing.xs,
   },
-  summary: {
-    marginBottom: theme.spacing.lg,
+  roleCountContainer: {
     alignItems: 'center',
   },
-  summaryText: {
-    fontSize: theme.typography.sizes.lg,
-    color: theme.colors.text.secondary,
-    fontWeight: theme.typography.weights.medium,
+  roleCount: {
+    fontSize: theme.typography.sizes.xl,
+    fontWeight: theme.typography.weights.bold,
+  },
+  maxLabel: {
+    fontSize: theme.typography.sizes.xs,
+    color: theme.colors.warning,
+    fontWeight: theme.typography.weights.bold,
+    marginTop: 2,
   },
   errorText: {
     color: theme.colors.error,
-    fontSize: theme.typography.sizes.sm,
-    marginTop: theme.spacing.xs,
+    fontSize: theme.typography.sizes.md,
+    marginTop: theme.spacing.sm,
   },
-  mafiaControls: {
+  buttonContainer: {
+    marginBottom: theme.spacing.xxl,
+  },
+  backButton: {
+    marginBottom: theme.spacing.md,
+  },
+  controlContainer: {
+    marginBottom: theme.spacing.lg,
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    borderRadius: theme.borderRadius.medium,
+    padding: theme.spacing.md,
+    ...theme.shadows.small,
+  },
+  controlHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: theme.spacing.md,
+  },
+  controlIconContainer: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: 'rgba(108, 99, 255, 0.15)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: theme.spacing.md,
+  },
+  controlLabelContainer: {
+    flex: 1,
+  },
+  controlLabel: {
+    fontSize: theme.typography.sizes.lg,
+    fontWeight: theme.typography.weights.bold,
+    color: theme.colors.text.primary,
+    marginBottom: theme.spacing.xs,
+  },
+  controlDescription: {
+    fontSize: theme.typography.sizes.sm,
+    color: theme.colors.text.secondary,
+  },
+  controlActions: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: theme.spacing.sm,
   },
   controlButton: {
-    padding: theme.spacing.sm,
+    width: 48,
+    height: 48,
+    borderRadius: 24,
     backgroundColor: 'rgba(0, 0, 0, 0.2)',
-    borderRadius: 20,
-    width: 40,
-    height: 40,
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  slider: {
-    flex: 1,
-    marginHorizontal: theme.spacing.md,
-    height: 40,
+    ...theme.shadows.small,
   },
   controlButtonDisabled: {
     opacity: 0.5,
     backgroundColor: 'rgba(0, 0, 0, 0.1)',
   },
-  detectiveCountDisplay: {
+  controlValueContainer: {
+    flex: 1,
     backgroundColor: 'rgba(0, 0, 0, 0.2)',
-    borderRadius: 12,
-    paddingHorizontal: theme.spacing.md,
+    borderRadius: theme.borderRadius.medium,
     paddingVertical: theme.spacing.sm,
     marginHorizontal: theme.spacing.md,
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  controlValue: {
+    fontSize: theme.typography.sizes.xl,
+    fontWeight: theme.typography.weights.bold,
+    color: theme.colors.text.accent,
+  },
+  controlMaxValue: {
+    fontSize: theme.typography.sizes.xs,
+    color: theme.colors.text.secondary,
+    marginTop: theme.spacing.xs,
+  },
+  roleInfoContainer: {
+    flex: 1,
+  },
+  roleDescription: {
+    fontSize: theme.typography.sizes.sm,
+    color: theme.colors.text.secondary,
   },
 });
 

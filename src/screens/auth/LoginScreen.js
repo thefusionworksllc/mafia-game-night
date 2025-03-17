@@ -1,17 +1,34 @@
 import React, { useState } from 'react';
-import { View, Text as RNText, Alert, ImageBackground, Image, StyleSheet, ScrollView } from 'react-native';
-import { Input, Button } from 'react-native-elements';
+import { 
+  View, 
+  Text, 
+  Alert, 
+  ImageBackground, 
+  Image, 
+  StyleSheet, 
+  ScrollView,
+  StatusBar,
+  KeyboardAvoidingView,
+  Platform,
+  TouchableWithoutFeedback,
+  Keyboard
+} from 'react-native';
+import { Input } from 'react-native-elements';
 import { LinearGradient } from 'expo-linear-gradient';
 import theme from '../../theme'; // Import the theme
 import { useAuth } from '../../context/AuthContext'; // Import useAuth hook
 import CustomButton from '../../components/CustomButton'; // Import CustomButton
 import LoadingSpinner from '../../components/LoadingSpinner'; // Import LoadingSpinner
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import Icon from 'react-native-vector-icons/MaterialIcons';
+import ModernBackground from '../../components/ModernBackground';
 
 const LoginScreen = ({ navigation }) => {
   const { signIn } = useAuth(); // Destructure signIn from useAuth
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const insets = useSafeAreaInsets();
 
   const handleLogin = async () => {
     if (!email || !password) {
@@ -23,7 +40,7 @@ const LoginScreen = ({ navigation }) => {
     console.log("Logging in with email:", email); // Debug message
     try {
       await signIn(email, password); // Use signIn from AuthContext
-     // Alert.alert('Success', 'Logged in successfully!');
+      // Alert.alert('Success', 'Logged in successfully!');
       navigation.navigate('Home'); // Navigate to Home after successful login
     } catch (error) {
       console.error("Login error:", error); // Debug message
@@ -34,107 +51,216 @@ const LoginScreen = ({ navigation }) => {
   };
 
   return (
-    <ImageBackground
-      source={require('../../../assets/background.png')}
-      style={theme.commonStyles.content}
-      resizeMode="cover"
-    >
-      <LinearGradient
-        colors={theme.gradients.background}
-        style={theme.commonStyles.container}
-      >
-        <ScrollView contentContainerStyle={theme.commonStyles.content}>
-          <View style={theme.commonStyles.logoContainer}>
-            <Image
-              source={require('../../../assets/icon.png')}
-              style={[theme.commonStyles.logo, { width: 200, height: 200 }]}
-            />
-            <RNText style={styles.welcomeText}>Let the Game Begin!</RNText>
-          </View>
+    <View style={theme.commonStyles.container}>
+      <StatusBar translucent backgroundColor="transparent" barStyle="light-content" />
+      <ModernBackground>
+        <KeyboardAvoidingView
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          style={styles.keyboardAvoidingView}
+        >
+          <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+            <ScrollView 
+              style={theme.commonStyles.scrollContainer}
+              contentContainerStyle={styles.scrollContentContainer}
+              showsVerticalScrollIndicator={false}
+            >
+              <View style={styles.logoContainer}>
+                <Image
+                  source={require('../../../assets/icon.png')}
+                  style={styles.logo}
+                />
+                <Text style={styles.welcomeText}>Let the Game Begin!</Text>
+              </View>
 
-          <View style={theme.commonStyles.card}>
-            <Input
-              placeholder="Email"
-              value={email}
-              onChangeText={setEmail}
-              autoCapitalize="none"
-              keyboardType="email-address"
-              leftIcon={{ 
-                type: 'material',
-                name: 'email',
-                color: theme.colors.text.secondary
-              }}
-              inputStyle={theme.commonStyles.input}
-              placeholderTextColor={theme.colors.text.secondary}
-              containerStyle={theme.commonStyles.inputContainer}
-            />
-            <Input
-              placeholder="Password"
-              value={password}
-              onChangeText={setPassword}
-              secureTextEntry
-              leftIcon={{ 
-                type: 'material',
-                name: 'lock',
-                color: theme.colors.text.secondary
-              }}
-              inputStyle={theme.commonStyles.input}
-              placeholderTextColor={theme.colors.text.secondary}
-              containerStyle={theme.commonStyles.inputContainer}
-            />
+              <View style={styles.card}>
+                <Text style={styles.title}>Login</Text>
+                <Text style={styles.subtitle}>Sign in to your account</Text>
+                
+                <View style={styles.inputContainer}>
+                  <Text style={styles.inputLabel}>Email</Text>
+                  <View style={styles.inputWrapper}>
+                    <Icon 
+                      name="email" 
+                      size={20} 
+                      color={theme.colors.text.secondary}
+                      style={styles.inputIcon}
+                    />
+                    <Input
+                      placeholder="Enter your email"
+                      value={email}
+                      onChangeText={setEmail}
+                      autoCapitalize="none"
+                      keyboardType="email-address"
+                      inputStyle={styles.input}
+                      placeholderTextColor={theme.colors.text.secondary}
+                      containerStyle={styles.inputContainerStyle}
+                      inputContainerStyle={{ borderBottomWidth: 0 }}
+                    />
+                  </View>
+                </View>
+                
+                <View style={styles.inputContainer}>
+                  <Text style={styles.inputLabel}>Password</Text>
+                  <View style={styles.inputWrapper}>
+                    <Icon 
+                      name="lock" 
+                      size={20} 
+                      color={theme.colors.text.secondary}
+                      style={styles.inputIcon}
+                    />
+                    <Input
+                      placeholder="Enter your password"
+                      value={password}
+                      onChangeText={setPassword}
+                      secureTextEntry
+                      inputStyle={styles.input}
+                      placeholderTextColor={theme.colors.text.secondary}
+                      containerStyle={styles.inputContainerStyle}
+                      inputContainerStyle={{ borderBottomWidth: 0 }}
+                    />
+                  </View>
+                </View>
 
-            <CustomButton
-              title="LOGIN"
-              onPress={handleLogin}
-              loading={loading}
-            />
-            <CustomButton
-              title="REGISTER"
-              onPress={() => navigation.navigate('Register')}
-              style={styles.registerButton}
-            />
-            <Button
-              title="Forgot Password?"
-              onPress={() => navigation.navigate('ForgotPassword')}
-              type="clear"
-              titleStyle={styles.forgotPasswordText}
-              containerStyle={styles.forgotPasswordContainer}
-            />
-          </View>
-          {loading && <LoadingSpinner />} 
-        </ScrollView>
-      </LinearGradient>
-      </ImageBackground>
+                <CustomButton
+                  title="LOGIN"
+                  onPress={handleLogin}
+                  loading={loading}
+                  leftIcon={<Icon name="login" size={20} color={theme.colors.text.primary} />}
+                  fullWidth
+                />
+                
+                <TouchableWithoutFeedback onPress={() => navigation.navigate('ForgotPassword')}>
+                  <View style={styles.forgotPasswordContainer}>
+                    <Text style={styles.forgotPasswordText}>Forgot Password?</Text>
+                  </View>
+                </TouchableWithoutFeedback>
+                
+                <View style={styles.divider}>
+                  <View style={styles.dividerLine} />
+                  <Text style={styles.dividerText}>OR</Text>
+                  <View style={styles.dividerLine} />
+                </View>
+                
+                <CustomButton
+                  title="CREATE ACCOUNT"
+                  onPress={() => navigation.navigate('Register')}
+                  variant="outline"
+                  style={styles.registerButton}
+                  leftIcon={<Icon name="person-add" size={20} color={theme.colors.text.accent} />}
+                  fullWidth
+                />
+              </View>
+              {loading && <LoadingSpinner />} 
+            </ScrollView>
+          </TouchableWithoutFeedback>
+        </KeyboardAvoidingView>
+      </ModernBackground>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
+  keyboardAvoidingView: {
+    flex: 1,
+  },
+  scrollContentContainer: {
+    flexGrow: 1,
+    padding: theme.spacing.horizontalPadding,
+    paddingBottom: theme.spacing.safeBottom + theme.spacing.lg,
+  },
+  logoContainer: {
+    alignItems: 'center',
+    marginTop: theme.spacing.xl,
+    marginBottom: theme.spacing.xl,
+  },
+  logo: {
+    width: 120,
+    height: 120,
+    borderRadius: 60,
+    marginBottom: theme.spacing.md,
+  },
   welcomeText: {
     fontSize: theme.typography.sizes.xl,
-    color: theme.colors.text.secondary,
-    marginBottom: theme.spacing.sm,
-  },
-  title: {
-    fontSize: theme.typography.sizes.xxxl,
     fontWeight: theme.typography.weights.bold,
     color: theme.colors.text.accent,
-    marginBottom: theme.spacing.sm,
+    // Text shadow for better readability
+    textShadowColor: 'rgba(0, 0, 0, 0.75)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 4,
+  },
+  card: {
+    backgroundColor: theme.colors.card.background,
+    borderRadius: theme.borderRadius.large,
+    padding: theme.spacing.lg,
+    ...theme.shadows.medium,
+  },
+  title: {
+    fontSize: theme.typography.sizes.xxl,
+    fontWeight: theme.typography.weights.bold,
+    color: theme.colors.text.accent,
+    marginBottom: theme.spacing.xs,
     textAlign: 'center',
   },
   subtitle: {
-    fontSize: theme.typography.sizes.lg,
+    fontSize: theme.typography.sizes.md,
     color: theme.colors.text.secondary,
     textAlign: 'center',
     marginBottom: theme.spacing.lg,
   },
-  registerButton: {
+  inputContainer: {
+    marginBottom: theme.spacing.md,
+  },
+  inputLabel: {
+    fontSize: theme.typography.sizes.sm,
+    color: theme.colors.text.secondary,
+    marginBottom: theme.spacing.xs,
+    fontWeight: theme.typography.weights.medium,
+  },
+  inputWrapper: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    borderRadius: theme.borderRadius.medium,
+    overflow: 'hidden',
+  },
+  inputIcon: {
+    paddingLeft: theme.spacing.md,
+  },
+  input: {
+    color: theme.colors.text.primary,
+    fontSize: theme.typography.sizes.md,
+    paddingLeft: 0,
+  },
+  inputContainerStyle: {
+    paddingHorizontal: 0,
+    marginHorizontal: 0,
+    width: '90%',
+  },
+  forgotPasswordContainer: {
+    alignItems: 'center',
     marginTop: theme.spacing.sm,
+    marginBottom: theme.spacing.md,
   },
   forgotPasswordText: {
     color: theme.colors.text.accent,
     fontSize: theme.typography.sizes.md,
   },
-  forgotPasswordContainer: {
+  divider: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginVertical: theme.spacing.md,
+  },
+  dividerLine: {
+    flex: 1,
+    height: 1,
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+  },
+  dividerText: {
+    color: theme.colors.text.secondary,
+    paddingHorizontal: theme.spacing.md,
+    fontSize: theme.typography.sizes.sm,
+  },
+  registerButton: {
     marginTop: theme.spacing.sm,
   },
 });

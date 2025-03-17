@@ -1,11 +1,25 @@
 import React, { useState } from 'react';
-import { View, StyleSheet, Text, ImageBackground, Modal, FlatList, Alert, Image } from 'react-native';
+import { 
+  View, 
+  StyleSheet, 
+  Text, 
+  Modal, 
+  FlatList, 
+  Alert, 
+  Image, 
+  StatusBar,
+  TouchableOpacity,
+  ScrollView
+} from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { Button } from 'react-native-elements';
 import theme from '../theme';
 import { useAuth } from '../context/AuthContext';
 import { gameService } from '../services/gameService';
 import BottomNavigation from '../components/BottomNavigation';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import Icon from 'react-native-vector-icons/MaterialIcons';
+import CustomButton from '../components/CustomButton';
+import ModernBackground from '../components/ModernBackground';
 
 const roleImages = {
   civilian: require('../../assets/civilian.png'),
@@ -14,11 +28,19 @@ const roleImages = {
   doctor: require('../../assets/doctor.png'),
 };
 
+const roleIcons = {
+  civilian: 'people',
+  mafia: 'person',
+  detective: 'search',
+  doctor: 'healing',
+};
+
 const PlayerRoleScreen = ({ route, navigation }) => {
   const { role, isHost, gameCode } = route.params;
   const { user } = useAuth();
   const [modalVisible, setModalVisible] = useState(false);
   const [groupedPlayers, setGroupedPlayers] = useState({});
+  const insets = useSafeAreaInsets();
 
   // Convert role to lowercase for matching
   const normalizedRole = role ? role.toLowerCase() : '';
@@ -59,187 +81,263 @@ const PlayerRoleScreen = ({ route, navigation }) => {
   const renderRoleSection = ({ item }) => {
     const roleName = item.key;
     const players = item.data;
+    const normalizedRoleName = roleName.toLowerCase();
     
     return (
       <View style={styles.roleSection}>
-        <View style={styles.roleTitleContainer}>
-          <Text style={styles.roleTitle}>{roleName}</Text>
-          <Text style={styles.roleCount}>{players.length} {players.length === 1 ? 'Player' : 'Players'}</Text>
-        </View>
-        {players.map((player) => (
-          <View key={player.id} style={styles.playerItem}>
-            <Text style={styles.playerName}>{player.name}</Text>
+        <LinearGradient
+          colors={theme.gradients.card}
+          style={styles.roleSectionGradient}
+        >
+          <View style={styles.roleTitleContainer}>
+            <View style={styles.roleIconContainer}>
+              <Icon 
+                name={roleIcons[normalizedRoleName] || 'person'} 
+                size={24} 
+                color={theme.colors.primary} 
+              />
+            </View>
+            <View style={styles.roleTitleContent}>
+              <Text style={styles.roleTitle}>{roleName}</Text>
+              <Text style={styles.roleCount}>{players.length} {players.length === 1 ? 'Player' : 'Players'}</Text>
+            </View>
           </View>
-        ))}
+          
+          {players.map((player) => (
+            <View key={player.id} style={styles.playerItem}>
+              <Text style={styles.playerName}>{player.name}</Text>
+            </View>
+          ))}
+        </LinearGradient>
       </View>
     );
   };
 
   return (
-    <ImageBackground
-      source={require('../../assets/background.png')}
-      style={theme.commonStyles.content}
-      resizeMode="cover"
-    >
-      <LinearGradient
-        colors={theme.gradients.background}
-        style={theme.commonStyles.container}
-      >
-        <View style={theme.commonStyles.content}>
-          <Text style={styles.title}>
+    <View style={theme.commonStyles.container}>
+      <StatusBar translucent backgroundColor="transparent" barStyle="light-content" />
+      <ModernBackground>
+        <ScrollView
+          style={theme.commonStyles.scrollContainer}
+          contentContainerStyle={theme.commonStyles.scrollContentContainer}
+          showsVerticalScrollIndicator={false}
+        >
+          <Text style={theme.commonStyles.title}>
             {isHost ? 'Game Started' : 'Your Role'}
           </Text>
-          <View style={styles.roleContainer}>
-            <Text style={styles.playerName}>
-              {user.displayName}
-            </Text>
-            {isHost ? (
-              <>
-                <Text style={styles.hostText}>
-                  You are the Game Host
-                </Text>
-                <Button
-                  title="View All Roles"
-                  onPress={handleViewAllRoles}
-                  buttonStyle={styles.viewRolesButton}
-                  titleStyle={styles.viewRolesButtonText}
-                />
-                <Button
-                  title="End Game"
-                  onPress={() => {
-                    Alert.alert(
-                      'End Game',
-                      'Are you sure you want to end this game?',
-                      [
-                        { text: 'Cancel', style: 'cancel' },
-                        { 
-                          text: 'End Game', 
-                          onPress: handleEndGame,
-                          style: 'destructive'
-                        },
-                      ]
-                    );
-                  }}
-                  buttonStyle={styles.endGameButton}
-                  titleStyle={styles.endGameButtonText}
-                />
-              </>
-            ) : (
-              <View style={styles.roleDisplay}>
-                <Image 
-                  source={roleImages[normalizedRole]} 
-                  style={styles.roleImage}
-                />
-                <Text style={styles.roleText}>
-                  You are a {role}
+          
+          {isHost ? (
+            <View style={styles.hostContainer}>
+              <Text style={styles.hostText}>
+                You are the Game Host
+              </Text>
+              <Text style={styles.hostDescription}>
+                As the host, you can see all player roles and monitor the game progress.
+              </Text>
+              
+              <View style={styles.roleDistributionCard}>
+                <Text style={styles.sectionTitle}>Role Distribution</Text>
+                <View style={styles.rolesList}>
+                  {Object.entries(groupedPlayers).map(([role, players]) => (
+                    <View key={role} style={styles.roleGroup}>
+                      <View style={styles.roleHeader}>
+                        <Icon 
+                          name={roleIcons[role.toLowerCase()] || 'person'} 
+                          size={24} 
+                          color={getRoleColor(role)}
+                        />
+                        <Text style={styles.roleName}>{role} ({players.length})</Text>
+                      </View>
+                      {players.map(player => (
+                        <Text key={player.id} style={styles.playerName}>
+                          {player.name}
+                        </Text>
+                      ))}
+                    </View>
+                  ))}
+                </View>
+              </View>
+              
+              <CustomButton
+                title="VIEW PLAYER ACTIONS"
+                onPress={() => setModalVisible(true)}
+                style={styles.actionButton}
+                leftIcon={<Icon name="visibility" size={20} color={theme.colors.text.primary} />}
+              />
+            </View>
+          ) : (
+            <View style={styles.playerContainer}>
+              <View style={styles.roleCard}>
+                <LinearGradient
+                  colors={theme.gradients.card}
+                  style={styles.roleCardGradient}
+                >
+                  <View style={styles.roleImageContainer}>
+                    <Image 
+                      source={roleImages[normalizedRole] || roleImages.civilian}
+                      style={styles.roleImage}
+                      resizeMode="contain"
+                    />
+                  </View>
+                  
+                  <Text style={styles.roleName}>
+                    {role || 'Civilian'}
+                  </Text>
+                  
+                  <Text style={styles.roleDescription}>
+                    {getRoleDescription(normalizedRole)}
+                  </Text>
+                </LinearGradient>
+              </View>
+              
+              <View style={styles.instructionsCard}>
+                <Text style={styles.sectionTitle}>Your Objective</Text>
+                <Text style={styles.instructionsText}>
+                  {getRoleObjective(normalizedRole)}
                 </Text>
               </View>
-            )}
-          </View>
-
-          {/* Modal for displaying all roles */}
-          <Modal
-            animationType="slide"
-            transparent={true}
-            visible={modalVisible}
-            onRequestClose={() => setModalVisible(false)}
-          >
-            <View style={styles.modalContainer}>
-              <View style={styles.modalContent}>
-                <Text style={styles.modalTitle}>All Player Roles</Text>
-                <FlatList
-                  data={Object.entries(groupedPlayers).map(([key, data]) => ({ key, data }))}
-                  renderItem={renderRoleSection}
-                  keyExtractor={item => item.key}
-                  style={styles.rolesList}
-                  contentContainerStyle={styles.rolesListContent}
-                />
-                <Button
-                  title="Close"
-                  onPress={() => setModalVisible(false)}
-                  buttonStyle={styles.closeButton}
-                  titleStyle={styles.closeButtonText}
-                />
+              
+              <View style={styles.instructionsCard}>
+                <Text style={styles.sectionTitle}>Game Instructions</Text>
+                <Text style={styles.instructionsText}>
+                  {getGameInstructions(normalizedRole)}
+                </Text>
               </View>
             </View>
-          </Modal>
-        </View>
-
-        {/* Add Bottom Navigation */}
-        <BottomNavigation navigation={navigation} activeScreen="PlayerRole" />
-      </LinearGradient>
-    </ImageBackground>
+          )}
+          
+          <View style={styles.buttonContainer}>
+            <CustomButton
+              title="CONTINUE TO GAME"
+              onPress={() => navigation.navigate('GamePlay', { 
+                gameCode, 
+                role: normalizedRole,
+                isHost 
+              })}
+              style={styles.continueButton}
+              leftIcon={<Icon name="play-arrow" size={20} color={theme.colors.text.primary} />}
+            />
+          </View>
+        </ScrollView>
+        
+        {/* Modal for host to view player actions */}
+        <Modal
+          animationType="slide"
+          transparent={true}
+          visible={modalVisible}
+          onRequestClose={() => setModalVisible(false)}
+        >
+          <View style={styles.modalContainer}>
+            <View style={styles.modalContent}>
+              <Text style={styles.modalTitle}>Player Actions</Text>
+              
+              {/* Modal content here */}
+              
+              <CustomButton
+                title="CLOSE"
+                onPress={() => setModalVisible(false)}
+                variant="outline"
+                style={styles.closeButton}
+              />
+            </View>
+          </View>
+        </Modal>
+      </ModernBackground>
+      <BottomNavigation navigation={navigation} activeScreen="Home" />
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
-  title: {
-    fontSize: theme.typography.sizes.xxxl,
-    fontWeight: theme.typography.weights.bold,
-    color: theme.colors.text.accent,
-    textAlign: 'center',
-    marginBottom: theme.spacing.xl,
-  },
   roleContainer: {
     padding: theme.spacing.lg,
     backgroundColor: theme.colors.card.background,
-    borderRadius: 15,
+    borderRadius: theme.borderRadius.large,
     alignItems: 'center',
+    ...theme.shadows.medium,
   },
-  playerName: {
+  playerNameText: {
     fontSize: theme.typography.sizes.xl,
     color: theme.colors.text.primary,
     marginBottom: theme.spacing.md,
+    fontWeight: theme.typography.weights.bold,
   },
   roleDisplay: {
     alignItems: 'center',
     marginTop: theme.spacing.md,
+    width: '100%',
+  },
+  roleImageContainer: {
+    padding: theme.spacing.sm,
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    borderRadius: theme.borderRadius.large,
+    marginBottom: theme.spacing.md,
+    ...theme.shadows.small,
   },
   roleImage: {
     width: 150,
     height: 150,
-    borderRadius: 10,
-    marginBottom: theme.spacing.sm,
+    borderRadius: theme.borderRadius.medium,
   },
   roleText: {
     fontSize: theme.typography.sizes.lg,
+    color: theme.colors.text.secondary,
+    marginBottom: theme.spacing.md,
+  },
+  roleName: {
     color: theme.colors.text.accent,
     fontWeight: theme.typography.weights.bold,
   },
-  hostText: {
+  roleDescriptionContainer: {
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    borderRadius: theme.borderRadius.medium,
+    padding: theme.spacing.md,
+    width: '100%',
+    marginTop: theme.spacing.sm,
+  },
+  roleDescription: {
     fontSize: theme.typography.sizes.md,
     color: theme.colors.text.secondary,
-    fontStyle: 'italic',
+    textAlign: 'center',
+    lineHeight: theme.typography.lineHeights.relaxed,
   },
-  viewRolesButton: {
-    backgroundColor: theme.colors.primary,
-    borderRadius: 25,
-    paddingHorizontal: 20,
-    marginTop: theme.spacing.lg,
+  hostText: {
+    fontSize: theme.typography.sizes.lg,
+    color: theme.colors.text.secondary,
+    marginBottom: theme.spacing.lg,
   },
-  viewRolesButtonText: {
-    color: theme.colors.text.primary,
-    fontSize: theme.typography.sizes.md,
+  buttonContainer: {
+    width: '100%',
+    marginTop: theme.spacing.md,
+  },
+  endGameButton: {
+    marginTop: theme.spacing.md,
+    borderColor: theme.colors.error,
+  },
+  endGameButtonText: {
+    color: theme.colors.error,
   },
   modalContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: 'rgba(0, 0, 0, 0.8)',
+    paddingHorizontal: theme.spacing.md,
   },
   modalContent: {
     backgroundColor: theme.colors.card.background,
-    borderRadius: 15,
+    borderRadius: theme.borderRadius.large,
     padding: theme.spacing.lg,
-    width: '90%',
+    width: '100%',
     maxHeight: '80%',
+    ...theme.shadows.large,
   },
   modalTitle: {
     fontSize: theme.typography.sizes.xl,
     fontWeight: theme.typography.weights.bold,
     color: theme.colors.text.accent,
     textAlign: 'center',
-    marginBottom: theme.spacing.xl,
+    marginBottom: theme.spacing.lg,
   },
   rolesList: {
     marginBottom: theme.spacing.lg,
@@ -248,59 +346,126 @@ const styles = StyleSheet.create({
     paddingBottom: theme.spacing.md,
   },
   roleSection: {
-    marginBottom: theme.spacing.lg,
-    backgroundColor: 'rgba(187, 134, 252, 0.1)', // theme.colors.primary with opacity
-    borderRadius: 10,
+    marginBottom: theme.spacing.md,
+    borderRadius: theme.borderRadius.large,
+    overflow: 'hidden',
+    ...theme.shadows.small,
+  },
+  roleSectionGradient: {
     padding: theme.spacing.md,
+    borderRadius: theme.borderRadius.large,
   },
   roleTitleContainer: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: theme.spacing.md,
     paddingBottom: theme.spacing.sm,
     borderBottomWidth: 1,
-    borderBottomColor: theme.colors.primary + '40',
+    borderBottomColor: 'rgba(255, 255, 255, 0.1)',
+  },
+  roleIconContainer: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: 'rgba(108, 99, 255, 0.15)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: theme.spacing.sm,
+  },
+  roleTitleContent: {
+    flex: 1,
   },
   roleTitle: {
     fontSize: theme.typography.sizes.lg,
     fontWeight: theme.typography.weights.bold,
-    color: theme.colors.primary,
+    color: theme.colors.text.primary,
   },
   roleCount: {
     fontSize: theme.typography.sizes.sm,
     color: theme.colors.text.secondary,
   },
   playerItem: {
-    paddingVertical: theme.spacing.sm,
-    paddingHorizontal: theme.spacing.md,
-    marginVertical: theme.spacing.xs,
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
-    borderRadius: 8,
+    padding: theme.spacing.sm,
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    borderRadius: theme.borderRadius.medium,
+    marginBottom: theme.spacing.xs,
   },
-  closeButton: {
-    backgroundColor: theme.colors.error,
-    borderRadius: 25,
-    marginTop: theme.spacing.sm,
-  },
-  closeButtonText: {
-    color: theme.colors.text.primary,
+  playerName: {
     fontSize: theme.typography.sizes.md,
-    fontWeight: theme.typography.weights.medium,
+    color: theme.colors.text.primary,
   },
-  container: {
-    flex: 1,
-    paddingBottom: 80,
+  hostContainer: {
+    padding: theme.spacing.lg,
+    backgroundColor: theme.colors.card.background,
+    borderRadius: theme.borderRadius.large,
+    alignItems: 'center',
+    ...theme.shadows.medium,
   },
-  endGameButton: {
-    backgroundColor: theme.colors.error,
-    borderRadius: 25,
-    paddingHorizontal: 20,
+  hostDescription: {
+    fontSize: theme.typography.sizes.lg,
+    color: theme.colors.text.secondary,
+    marginBottom: theme.spacing.lg,
+  },
+  roleDistributionCard: {
+    padding: theme.spacing.lg,
+    backgroundColor: theme.colors.card.background,
+    borderRadius: theme.borderRadius.large,
+    marginBottom: theme.spacing.lg,
+    ...theme.shadows.medium,
+  },
+  sectionTitle: {
+    fontSize: theme.typography.sizes.xl,
+    fontWeight: theme.typography.weights.bold,
+    color: theme.colors.text.accent,
+    marginBottom: theme.spacing.md,
+  },
+  roleGroup: {
+    marginBottom: theme.spacing.md,
+  },
+  roleHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: theme.spacing.sm,
+  },
+  actionButton: {
     marginTop: theme.spacing.md,
   },
-  endGameButtonText: {
-    color: theme.colors.text.primary,
+  playerContainer: {
+    padding: theme.spacing.lg,
+    backgroundColor: theme.colors.card.background,
+    borderRadius: theme.borderRadius.large,
+    alignItems: 'center',
+    ...theme.shadows.medium,
+  },
+  roleCard: {
+    padding: theme.spacing.lg,
+    backgroundColor: theme.colors.card.background,
+    borderRadius: theme.borderRadius.large,
+    marginBottom: theme.spacing.lg,
+    ...theme.shadows.medium,
+  },
+  roleCardGradient: {
+    padding: theme.spacing.md,
+    borderRadius: theme.borderRadius.large,
+  },
+  instructionsCard: {
+    padding: theme.spacing.lg,
+    backgroundColor: theme.colors.card.background,
+    borderRadius: theme.borderRadius.large,
+    marginBottom: theme.spacing.lg,
+    ...theme.shadows.medium,
+  },
+  instructionsText: {
     fontSize: theme.typography.sizes.md,
+    color: theme.colors.text.secondary,
+    textAlign: 'center',
+    lineHeight: theme.typography.lineHeights.relaxed,
+  },
+  continueButton: {
+    marginTop: theme.spacing.md,
+  },
+  closeButton: {
+    marginTop: theme.spacing.md,
   },
 });
 

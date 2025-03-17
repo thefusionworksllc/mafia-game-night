@@ -7,12 +7,9 @@ import {
   StatusBar,
   KeyboardAvoidingView,
   Platform,
-  TouchableWithoutFeedback,
-  Keyboard,
   Dimensions,
   Animated,
   ScrollView,
-  TextInput
 } from 'react-native';
 import { Input } from 'react-native-elements';
 import theme from '../theme';
@@ -100,119 +97,130 @@ const JoinGameScreen = ({ navigation }) => {
           behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
           style={styles.keyboardAvoidingView}
         >
-          <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-            <ScrollView
-              contentContainerStyle={[styles.contentContainer, { paddingTop: insets.top + theme.spacing.md }]}
-              showsVerticalScrollIndicator={false}
+          <ScrollView
+            contentContainerStyle={[styles.contentContainer, { paddingTop: insets.top + theme.spacing.md }]}
+            showsVerticalScrollIndicator={false}
+          >
+            <Animated.View 
+              style={[
+                styles.welcomeSection,
+                { opacity: fadeAnim, transform: [{ translateY: slideAnim }] }
+              ]}
             >
-              <Animated.View 
-                style={[
-                  styles.welcomeSection,
-                  { opacity: fadeAnim, transform: [{ translateY: slideAnim }] }
-                ]}
+              <Text style={styles.title}>Join Game</Text>
+              <Text style={styles.subtitle}>
+                Enter a 6-digit game code to join an existing game
+              </Text>
+            </Animated.View>
+
+            <Animated.View 
+              style={[
+                styles.formContainer,
+                { opacity: fadeAnim, transform: [{ translateY: slideAnim }] }
+              ]}
+            >
+              <LinearGradient
+                colors={['rgba(30, 30, 50, 0.8)', 'rgba(20, 20, 35, 0.9)']}
+                style={styles.formGradient}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
               >
-                <Text style={styles.title}>Join Game</Text>
-                <Text style={styles.subtitle}>
-                  Enter a 6-digit game code to join an existing game
+                <View style={styles.codeInputContainer}>
+                  <Text style={styles.inputLabel}>Game Code</Text>
+                  <Input
+                    placeholder="Enter 6-digit code"
+                    value={formatGameCode(gameCode)}
+                    onChangeText={(text) => setGameCode(text.replace(/\s/g, ''))}
+                    keyboardType={Platform.OS === 'web' ? 'numeric' : 'number-pad'}
+                    maxLength={7} // 6 digits + 1 space
+                    leftIcon={{ 
+                      type: 'material',
+                      name: 'games',
+                      color: theme.colors.primary,
+                      size: 24 
+                    }}
+                    inputStyle={{
+                      color: theme.colors.text.primary,
+                      fontSize: theme.typography.sizes.xl,
+                      fontWeight: theme.typography.weights.bold,
+                      textAlign: 'center',
+                      letterSpacing: 8,
+                    }}
+                    inputContainerStyle={{
+                      borderBottomColor: theme.colors.primary,
+                      borderBottomWidth: 2,
+                    }}
+                    containerStyle={{
+                      paddingHorizontal: 0,
+                    }}
+                    placeholderTextColor={theme.colors.text.secondary}
+                    editable={true}
+                    pointerEvents="auto"
+                  />
+                </View>
+
+                {user ? (
+                  <View style={styles.userInfoContainer}>
+                    <Icon name="person" size={20} color={theme.colors.success} />
+                    <Text style={styles.userInfoText}>
+                      Joining as: <Text style={styles.userName}>{user.displayName || user.email}</Text>
+                    </Text>
+                  </View>
+                ) : (
+                  <View style={styles.userInfoContainer}>
+                    <Icon name="warning" size={20} color={theme.colors.warning} />
+                    <Text style={styles.userInfoText}>
+                      You need to be logged in to join a game
+                    </Text>
+                  </View>
+                )}
+
+                <View style={styles.buttonContainer}>
+                  <CustomButton
+                    title="Join Game"
+                    onPress={handleJoinGame}
+                    loading={loading}
+                    disabled={gameCode.length !== 6 || loading}
+                    style={styles.joinButton}
+                    leftIcon={<Icon name="login" size={20} color={theme.colors.text.primary} />}
+                  />
+                  <CustomButton
+                    title="Back to Home"
+                    onPress={() => navigation.navigate('Home')}
+                    variant="outline"
+                    style={styles.backButton}
+                    leftIcon={<Icon name="home" size={20} color={theme.colors.text.accent} />}
+                  />
+                </View>
+              </LinearGradient>
+            </Animated.View>
+
+            <Animated.View 
+              style={[
+                styles.instructionsContainer,
+                { opacity: fadeAnim, transform: [{ translateY: slideAnim }] }
+              ]}
+            >
+              <View style={styles.instructionItem}>
+                <Icon name="info" size={20} color={theme.colors.info} />
+                <Text style={styles.instructionText}>
+                  Ask the game host for the 6-digit code
                 </Text>
-              </Animated.View>
-
-              <Animated.View 
-                style={[
-                  styles.formContainer,
-                  { opacity: fadeAnim, transform: [{ translateY: slideAnim }] }
-                ]}
-              >
-                <LinearGradient
-                  colors={['rgba(30, 30, 50, 0.8)', 'rgba(20, 20, 35, 0.9)']}
-                  style={styles.formGradient}
-                  start={{ x: 0, y: 0 }}
-                  end={{ x: 1, y: 1 }}
-                >
-                  <View style={styles.codeInputContainer}>
-                    <Text style={styles.inputLabel}>Game Code</Text>
-                    <View style={styles.directInputWrapper}>
-                      <Icon 
-                        name="games" 
-                        size={24} 
-                        color={theme.colors.primary} 
-                        style={styles.directInputIcon}
-                      />
-                      <TextInput
-                        placeholder="Enter 6-digit code"
-                        value={formatGameCode(gameCode)}
-                        onChangeText={(text) => setGameCode(text.replace(/\s/g, ''))}
-                        keyboardType="number-pad"
-                        maxLength={7} // 6 digits + 1 space
-                        style={styles.directInput}
-                        placeholderTextColor={theme.colors.text.secondary}
-                      />
-                    </View>
-                  </View>
-
-                  {user ? (
-                    <View style={styles.userInfoContainer}>
-                      <Icon name="person" size={20} color={theme.colors.success} />
-                      <Text style={styles.userInfoText}>
-                        Joining as: <Text style={styles.userName}>{user.displayName || user.email}</Text>
-                      </Text>
-                    </View>
-                  ) : (
-                    <View style={styles.userInfoContainer}>
-                      <Icon name="warning" size={20} color={theme.colors.warning} />
-                      <Text style={styles.userInfoText}>
-                        You need to be logged in to join a game
-                      </Text>
-                    </View>
-                  )}
-
-                  <View style={styles.buttonContainer}>
-                    <CustomButton
-                      title="Join Game"
-                      onPress={handleJoinGame}
-                      loading={loading}
-                      disabled={gameCode.length !== 6 || loading}
-                      style={styles.joinButton}
-                      leftIcon={<Icon name="login" size={20} color={theme.colors.text.primary} />}
-                    />
-                    <CustomButton
-                      title="Back to Home"
-                      onPress={() => navigation.navigate('Home')}
-                      variant="outline"
-                      style={styles.backButton}
-                      leftIcon={<Icon name="home" size={20} color={theme.colors.text.accent} />}
-                    />
-                  </View>
-                </LinearGradient>
-              </Animated.View>
-
-              <Animated.View 
-                style={[
-                  styles.instructionsContainer,
-                  { opacity: fadeAnim, transform: [{ translateY: slideAnim }] }
-                ]}
-              >
-                <View style={styles.instructionItem}>
-                  <Icon name="info" size={20} color={theme.colors.info} />
-                  <Text style={styles.instructionText}>
-                    Ask the game host for the 6-digit code
-                  </Text>
-                </View>
-                <View style={styles.instructionItem}>
-                  <Icon name="group" size={20} color={theme.colors.info} />
-                  <Text style={styles.instructionText}>
-                    Join the lobby and wait for the host to start the game
-                  </Text>
-                </View>
-                <View style={styles.instructionItem}>
-                  <Icon name="security" size={20} color={theme.colors.info} />
-                  <Text style={styles.instructionText}>
-                    Your role will be assigned when the game begins
-                  </Text>
-                </View>
-              </Animated.View>
-            </ScrollView>
-          </TouchableWithoutFeedback>
+              </View>
+              <View style={styles.instructionItem}>
+                <Icon name="group" size={20} color={theme.colors.info} />
+                <Text style={styles.instructionText}>
+                  Join the lobby and wait for the host to start the game
+                </Text>
+              </View>
+              <View style={styles.instructionItem}>
+                <Icon name="security" size={20} color={theme.colors.info} />
+                <Text style={styles.instructionText}>
+                  Your role will be assigned when the game begins
+                </Text>
+              </View>
+            </Animated.View>
+          </ScrollView>
         </KeyboardAvoidingView>
       </ModernBackground>
       <BottomNavigation navigation={navigation} activeScreen="JoinGame" />
@@ -270,29 +278,6 @@ const styles = StyleSheet.create({
     fontWeight: theme.typography.weights.bold,
     color: theme.colors.text.accent,
     marginBottom: theme.spacing.sm,
-  },
-  directInputWrapper: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-    borderRadius: theme.borderRadius.medium,
-    padding: theme.spacing.md,
-    marginBottom: theme.spacing.md,
-    borderBottomColor: theme.colors.primary,
-    borderBottomWidth: 2,
-    pointerEvents: 'auto',
-  },
-  directInputIcon: {
-    marginRight: theme.spacing.md,
-  },
-  directInput: {
-    flex: 1,
-    color: theme.colors.text.primary,
-    fontSize: theme.typography.sizes.xl,
-    fontWeight: theme.typography.weights.bold,
-    textAlign: 'center',
-    letterSpacing: 8,
-    pointerEvents: 'auto',
   },
   userInfoContainer: {
     flexDirection: 'row',

@@ -10,9 +10,6 @@ import {
   StatusBar,
   KeyboardAvoidingView,
   Platform,
-  TouchableWithoutFeedback,
-  Keyboard,
-  TextInput
 } from 'react-native';
 import { Input } from 'react-native-elements';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -41,7 +38,6 @@ const LoginScreen = ({ navigation }) => {
     console.log("Logging in with email:", email); // Debug message
     try {
       await signIn(email, password); // Use signIn from AuthContext
-      // Alert.alert('Success', 'Logged in successfully!');
       navigation.navigate('Home'); // Navigate to Home after successful login
     } catch (error) {
       console.error("Login error:", error); // Debug message
@@ -59,97 +55,113 @@ const LoginScreen = ({ navigation }) => {
           behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
           style={styles.keyboardAvoidingView}
         >
-          <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-            <ScrollView 
-              style={theme.commonStyles.scrollContainer}
-              contentContainerStyle={styles.scrollContentContainer}
-              showsVerticalScrollIndicator={false}
-            >
-              <View style={styles.logoContainer}>
-                <Image
-                  source={require('../../../assets/icon.png')}
-                  style={styles.logo}
-                />
-                <Text style={styles.welcomeText}>Let the Game Begin!</Text>
-              </View>
+          <ScrollView 
+            style={theme.commonStyles.scrollContainer}
+            contentContainerStyle={styles.scrollContentContainer}
+            showsVerticalScrollIndicator={false}
+          >
+            <View style={styles.logoContainer}>
+              <Image
+                source={require('../../../assets/icon.png')}
+                style={styles.logo}
+              />
+              <Text style={styles.welcomeText}>Let the Game Begin!</Text>
+            </View>
 
-              <View style={styles.card}>
-                <Text style={styles.title}>Login</Text>
-                <Text style={styles.subtitle}>Sign in to your account</Text>
-                
-                <View style={styles.inputContainer}>
-                  <Text style={styles.inputLabel}>Email</Text>
-                  <View style={styles.inputWrapper}>
-                    <Icon 
-                      name="email" 
-                      size={20} 
-                      color={theme.colors.text.secondary}
-                      style={styles.inputIcon}
-                    />
-                    <TextInput
-                      placeholder="Enter your email"
-                      value={email}
-                      onChangeText={setEmail}
-                      autoCapitalize="none"
-                      keyboardType="email-address"
-                      style={styles.directInput}
-                      placeholderTextColor={theme.colors.text.secondary}
-                    />
-                  </View>
-                </View>
-                
-                <View style={styles.inputContainer}>
-                  <Text style={styles.inputLabel}>Password</Text>
-                  <View style={styles.inputWrapper}>
-                    <Icon 
-                      name="lock" 
-                      size={20} 
-                      color={theme.colors.text.secondary}
-                      style={styles.inputIcon}
-                    />
-                    <TextInput
-                      placeholder="Enter your password"
-                      value={password}
-                      onChangeText={setPassword}
-                      secureTextEntry
-                      style={styles.directInput}
-                      placeholderTextColor={theme.colors.text.secondary}
-                    />
-                  </View>
-                </View>
-
-                <CustomButton
-                  title="LOGIN"
-                  onPress={handleLogin}
-                  loading={loading}
-                  leftIcon={<Icon name="login" size={20} color={theme.colors.text.primary} />}
-                  fullWidth
-                />
-                
-                <TouchableWithoutFeedback onPress={() => navigation.navigate('ForgotPassword')}>
-                  <View style={styles.forgotPasswordContainer}>
-                    <Text style={styles.forgotPasswordText}>Forgot Password?</Text>
-                  </View>
-                </TouchableWithoutFeedback>
-                
-                <View style={styles.divider}>
-                  <View style={styles.dividerLine} />
-                  <Text style={styles.dividerText}>OR</Text>
-                  <View style={styles.dividerLine} />
-                </View>
-                
-                <CustomButton
-                  title="CREATE ACCOUNT"
-                  onPress={() => navigation.navigate('Register')}
-                  variant="outline"
-                  style={styles.registerButton}
-                  leftIcon={<Icon name="person-add" size={20} color={theme.colors.text.accent} />}
-                  fullWidth
+            <View style={styles.card}>
+              <Text style={styles.title}>Login</Text>
+              <Text style={styles.subtitle}>Sign in to your account</Text>
+              
+              <View style={styles.inputContainer}>
+                <Input
+                  placeholder="Enter your email"
+                  value={email}
+                  onChangeText={setEmail}
+                  autoCapitalize="none"
+                  keyboardType="email-address"
+                  leftIcon={{ 
+                    type: 'material',
+                    name: 'email',
+                    color: theme.colors.text.secondary,
+                    size: 20 
+                  }}
+                  inputStyle={{
+                    color: theme.colors.text.primary,
+                    fontSize: theme.typography.sizes.md,
+                  }}
+                  inputContainerStyle={{
+                    borderBottomColor: theme.colors.primary,
+                    borderBottomWidth: 1,
+                  }}
+                  containerStyle={{
+                    paddingHorizontal: 0,
+                    marginHorizontal: 0,
+                  }}
+                  placeholderTextColor={theme.colors.text.secondary}
+                  editable={true}
+                  pointerEvents="auto"
                 />
               </View>
-              {loading && <LoadingSpinner />} 
-            </ScrollView>
-          </TouchableWithoutFeedback>
+              
+              <View style={styles.inputContainer}>
+                <Input
+                  placeholder="Enter your password"
+                  value={password}
+                  onChangeText={setPassword}
+                  secureTextEntry
+                  leftIcon={{ 
+                    type: 'material',
+                    name: 'lock',
+                    color: theme.colors.text.secondary,
+                    size: 20 
+                  }}
+                  inputStyle={{
+                    color: theme.colors.text.primary,
+                    fontSize: theme.typography.sizes.md,
+                  }}
+                  inputContainerStyle={{
+                    borderBottomColor: theme.colors.primary,
+                    borderBottomWidth: 1,
+                  }}
+                  containerStyle={{
+                    paddingHorizontal: 0,
+                    marginHorizontal: 0,
+                  }}
+                  placeholderTextColor={theme.colors.text.secondary}
+                  editable={true}
+                  pointerEvents="auto"
+                />
+              </View>
+
+              <CustomButton
+                title="LOGIN"
+                onPress={handleLogin}
+                loading={loading}
+                leftIcon={<Icon name="login" size={20} color={theme.colors.text.primary} />}
+                fullWidth
+              />
+              
+              <View style={styles.forgotPasswordContainer}>
+                <Text style={styles.forgotPasswordText} onPress={() => navigation.navigate('ForgotPassword')}>Forgot Password?</Text>
+              </View>
+              
+              <View style={styles.divider}>
+                <View style={styles.dividerLine} />
+                <Text style={styles.dividerText}>OR</Text>
+                <View style={styles.dividerLine} />
+              </View>
+              
+              <CustomButton
+                title="CREATE ACCOUNT"
+                onPress={() => navigation.navigate('Register')}
+                variant="outline"
+                style={styles.registerButton}
+                leftIcon={<Icon name="person-add" size={20} color={theme.colors.text.accent} />}
+                fullWidth
+              />
+            </View>
+            {loading && <LoadingSpinner />} 
+          </ScrollView>
         </KeyboardAvoidingView>
       </ModernBackground>
     </View>
@@ -212,25 +224,6 @@ const styles = StyleSheet.create({
     color: theme.colors.text.secondary,
     marginBottom: theme.spacing.xs,
     fontWeight: theme.typography.weights.medium,
-  },
-  inputWrapper: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-    borderRadius: theme.borderRadius.medium,
-    overflow: 'hidden',
-    pointerEvents: 'auto',
-  },
-  inputIcon: {
-    paddingLeft: theme.spacing.md,
-  },
-  directInput: {
-    flex: 1,
-    color: theme.colors.text.primary,
-    fontSize: theme.typography.sizes.md,
-    paddingLeft: 0,
-    paddingVertical: theme.spacing.sm,
-    paddingRight: theme.spacing.md
   },
   inputContainerStyle: {
     paddingHorizontal: 0,

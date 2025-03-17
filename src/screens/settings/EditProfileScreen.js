@@ -1,20 +1,44 @@
 import React, { useState } from 'react';
-import { View, StyleSheet, Text, ImageBackground, Alert, ScrollView } from 'react-native';
+import { View, StyleSheet, Text, Alert, ScrollView, StatusBar, TextInput, TouchableOpacity } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { Input, Button } from 'react-native-elements';
+import Icon from 'react-native-vector-icons/MaterialIcons';
 import theme from '../../theme';
 import { useAuth } from '../../context/AuthContext';
 import { userService } from '../../services/userService';
 import BottomNavigation from '../../components/BottomNavigation';
+import ModernBackground from '../../components/ModernBackground';
+import CustomButton from '../../components/CustomButton';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+
+const CustomInput = ({ placeholder, value, onChangeText, secureTextEntry, icon }) => (
+  <View style={styles.inputWrapper}>
+    <View style={styles.inputContainer}>
+      {icon && (
+        <View style={styles.inputIconContainer}>
+          <Icon name={icon} size={20} color={theme.colors.text.secondary} />
+        </View>
+      )}
+      <TextInput
+        placeholder={placeholder}
+        value={value}
+        onChangeText={onChangeText}
+        secureTextEntry={secureTextEntry}
+        style={styles.input}
+        placeholderTextColor={theme.colors.text.secondary}
+      />
+    </View>
+  </View>
+);
 
 const EditProfileScreen = ({ navigation }) => {
   const { user } = useAuth();
-  const [displayName, setDisplayName] = useState(user.displayName || '');
+  const [displayName, setDisplayName] = useState(user?.displayName || '');
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [passwordLoading, setPasswordLoading] = useState(false);
+  const insets = useSafeAreaInsets();
 
   const handleSaveProfile = async () => {
     if (!displayName.trim()) {
@@ -66,126 +90,159 @@ const EditProfileScreen = ({ navigation }) => {
   };
 
   return (
-    <ImageBackground
-      source={require('../../../assets/background.png')}
-      style={theme.commonStyles.content}
-      resizeMode="cover"
-    >
-      <LinearGradient
-        colors={theme.gradients.background}
-        style={theme.commonStyles.container}
-      >
-        <ScrollView style={styles.container}>
-          <Text style={styles.title}>Edit Profile</Text>
+    <View style={theme.commonStyles.container}>
+      <StatusBar translucent backgroundColor="transparent" barStyle="light-content" />
+      <ModernBackground>
+        <ScrollView 
+          style={theme.commonStyles.scrollContainer}
+          contentContainerStyle={theme.commonStyles.scrollContentContainer}
+          showsVerticalScrollIndicator={false}
+        >
+          <Text style={theme.commonStyles.title}>Edit Profile</Text>
           
           {/* Profile Section */}
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Profile Information</Text>
-            <Input
-              placeholder="Display Name"
-              value={displayName}
-              onChangeText={setDisplayName}
-              containerStyle={styles.inputContainer}
-              inputStyle={styles.input}
-              placeholderTextColor={theme.colors.text.secondary}
-            />
-            <Button
-              title="Save Profile"
-              onPress={handleSaveProfile}
-              loading={loading}
-              buttonStyle={styles.saveButton}
-              containerStyle={styles.buttonContainer}
-            />
+            <View style={styles.sectionHeader}>
+              <Icon name="person" size={24} color={theme.colors.primary} />
+              <Text style={styles.sectionTitle}>Profile Information</Text>
+            </View>
+            <LinearGradient
+              colors={theme.gradients.card}
+              style={styles.sectionContent}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+            >
+              <CustomInput
+                placeholder="Display Name"
+                value={displayName}
+                onChangeText={setDisplayName}
+                icon="badge"
+              />
+              <CustomButton
+                title="SAVE PROFILE"
+                onPress={handleSaveProfile}
+                loading={loading}
+                leftIcon={<Icon name="save" size={20} color={theme.colors.text.primary} />}
+                style={styles.saveButton}
+                fullWidth
+              />
+            </LinearGradient>
           </View>
 
           {/* Password Section */}
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Change Password</Text>
-            <Input
-              placeholder="Current Password"
-              value={currentPassword}
-              onChangeText={setCurrentPassword}
-              secureTextEntry
-              containerStyle={styles.inputContainer}
-              inputStyle={styles.input}
-              placeholderTextColor={theme.colors.text.secondary}
-            />
-            <Input
-              placeholder="New Password"
-              value={newPassword}
-              onChangeText={setNewPassword}
-              secureTextEntry
-              containerStyle={styles.inputContainer}
-              inputStyle={styles.input}
-              placeholderTextColor={theme.colors.text.secondary}
-            />
-            <Input
-              placeholder="Confirm New Password"
-              value={confirmPassword}
-              onChangeText={setConfirmPassword}
-              secureTextEntry
-              containerStyle={styles.inputContainer}
-              inputStyle={styles.input}
-              placeholderTextColor={theme.colors.text.secondary}
-            />
-            <Button
-              title="Change Password"
-              onPress={handleChangePassword}
-              loading={passwordLoading}
-              buttonStyle={[styles.saveButton, styles.passwordButton]}
-              containerStyle={styles.buttonContainer}
+            <View style={styles.sectionHeader}>
+              <Icon name="lock" size={24} color={theme.colors.info} />
+              <Text style={styles.sectionTitle}>Change Password</Text>
+            </View>
+            <LinearGradient
+              colors={theme.gradients.card}
+              style={styles.sectionContent}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+            >
+              <CustomInput
+                placeholder="Current Password"
+                value={currentPassword}
+                onChangeText={setCurrentPassword}
+                secureTextEntry
+                icon="vpn-key"
+              />
+              <CustomInput
+                placeholder="New Password"
+                value={newPassword}
+                onChangeText={setNewPassword}
+                secureTextEntry
+                icon="lock-outline"
+              />
+              <CustomInput
+                placeholder="Confirm New Password"
+                value={confirmPassword}
+                onChangeText={setConfirmPassword}
+                secureTextEntry
+                icon="lock-outline"
+              />
+              <CustomButton
+                title="CHANGE PASSWORD"
+                onPress={handleChangePassword}
+                loading={passwordLoading}
+                variant="secondary"
+                leftIcon={<Icon name="security" size={20} color={theme.colors.text.primary} />}
+                style={styles.passwordButton}
+                fullWidth
+              />
+            </LinearGradient>
+          </View>
+
+          <View style={styles.buttonContainer}>
+            <CustomButton
+              title="BACK TO SETTINGS"
+              onPress={() => navigation.navigate('Settings')}
+              variant="outline"
+              leftIcon={<Icon name="arrow-back" size={20} color={theme.colors.text.accent} />}
+              style={styles.backButton}
+              fullWidth
             />
           </View>
         </ScrollView>
-
-       
-      </LinearGradient>
-      <BottomNavigation navigation={navigation} activeScreen="EditProfile" />
-    </ImageBackground>
+      </ModernBackground>
+      <BottomNavigation navigation={navigation} activeScreen="Settings" />
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    paddingBottom: 80,
-  },
-  title: {
-    fontSize: theme.typography.sizes.xxl,
-    fontWeight: theme.typography.weights.bold,
-    color: theme.colors.text.accent,
-    textAlign: 'center',
-    marginBottom: theme.spacing.xl,
-    paddingHorizontal: theme.spacing.lg,
-  },
   section: {
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
-    borderRadius: 15,
-    padding: theme.spacing.lg,
     marginBottom: theme.spacing.xl,
-    marginHorizontal: theme.spacing.lg,
+  },
+  sectionHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: theme.spacing.md,
+    paddingHorizontal: theme.spacing.md,
   },
   sectionTitle: {
     fontSize: theme.typography.sizes.lg,
     fontWeight: theme.typography.weights.bold,
     color: theme.colors.text.accent,
+    marginLeft: theme.spacing.sm,
+  },
+  sectionContent: {
+    borderRadius: theme.borderRadius.large,
+    padding: theme.spacing.lg,
+    ...theme.shadows.medium,
+  },
+  inputWrapper: {
     marginBottom: theme.spacing.md,
   },
   inputContainer: {
-    marginBottom: theme.spacing.md,
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    borderRadius: theme.borderRadius.medium,
+    paddingHorizontal: theme.spacing.md,
+    height: 50,
+  },
+  inputIconContainer: {
+    marginRight: theme.spacing.sm,
   },
   input: {
+    flex: 1,
     color: theme.colors.text.primary,
+    fontSize: theme.typography.sizes.md,
+    height: 50,
   },
   saveButton: {
-    backgroundColor: theme.colors.primary,
-    borderRadius: 25,
-    paddingVertical: theme.spacing.md,
+    marginTop: theme.spacing.md,
   },
   passwordButton: {
-    backgroundColor: theme.colors.secondary,
+    marginTop: theme.spacing.md,
   },
   buttonContainer: {
+    marginTop: theme.spacing.md,
+    marginBottom: theme.spacing.xxl,
+  },
+  backButton: {
     marginTop: theme.spacing.md,
   },
 });

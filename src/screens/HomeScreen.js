@@ -74,6 +74,8 @@ const HomeScreen = ({ navigation }) => {
       <LinearGradient
         colors={theme.gradients.card}
         style={styles.cardGradient}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
       >
         <View style={styles.cardIconContainer}>
           <Icon name={icon} size={28} color={theme.colors.primary} />
@@ -90,7 +92,7 @@ const HomeScreen = ({ navigation }) => {
   return (
     <View style={theme.commonStyles.container}>
       <StatusBar translucent backgroundColor="transparent" barStyle="light-content" />
-      <ModernBackground>
+      <ModernBackground withAnimation={true}>
         <ScrollView 
           style={theme.commonStyles.scrollContainer}
           contentContainerStyle={theme.commonStyles.scrollContentContainer}
@@ -102,6 +104,7 @@ const HomeScreen = ({ navigation }) => {
             <Text style={styles.appTitle}>Mafia Game Night</Text>
             {isLoggedIn ? (
               <View style={styles.userInfoContainer}>
+                <Icon name="account-circle" size={20} color={theme.colors.primary} />
                 <Text style={styles.loggedInText}>
                   Logged in as: <Text style={styles.username}>{user.displayName}</Text>
                 </Text>
@@ -128,8 +131,10 @@ const HomeScreen = ({ navigation }) => {
                 activeOpacity={0.7}
               >
                 <LinearGradient
-                  colors={theme.gradients.button}
+                  colors={theme.gradients.accent}
                   style={styles.actionGradient}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 1 }}
                 >
                   <Icon name="add-circle" size={24} color={theme.colors.text.primary} />
                   <Text style={styles.actionText}>HOST GAME</Text>
@@ -142,8 +147,10 @@ const HomeScreen = ({ navigation }) => {
                 activeOpacity={0.7}
               >
                 <LinearGradient
-                  colors={theme.gradients.buttonSecondary}
+                  colors={theme.gradients.accentSecondary}
                   style={styles.actionGradient}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 1 }}
                 >
                   <Icon name="group-add" size={24} color={theme.colors.text.primary} />
                   <Text style={styles.actionText}>JOIN GAME</Text>
@@ -174,6 +181,8 @@ const HomeScreen = ({ navigation }) => {
               <LinearGradient
                 colors={theme.gradients.card}
                 style={styles.historyGradient}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
               >
                 <Icon name="history" size={24} color={theme.colors.primary} />
                 <Text style={styles.historyText}>VIEW GAME HISTORY</Text>
@@ -181,6 +190,29 @@ const HomeScreen = ({ navigation }) => {
               </LinearGradient>
             </TouchableOpacity>
           </View>
+
+          {/* Profile Section - Only shown when logged in */}
+          {isLoggedIn && (
+            <View style={styles.profileSection}>
+              <Text style={styles.sectionTitle}>Your Profile</Text>
+              <TouchableOpacity 
+                style={styles.historyButton}
+                onPress={() => navigation.navigate('EditProfile')}
+                activeOpacity={0.7}
+              >
+                <LinearGradient
+                  colors={theme.gradients.card}
+                  style={styles.historyGradient}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 1 }}
+                >
+                  <Icon name="person" size={24} color={theme.colors.primary} />
+                  <Text style={styles.historyText}>EDIT PROFILE</Text>
+                  <Icon name="chevron-right" size={20} color={theme.colors.text.secondary} />
+                </LinearGradient>
+              </TouchableOpacity>
+            </View>
+          )}
         </ScrollView>
       </ModernBackground>
       <BottomNavigation navigation={navigation} activeScreen="Home" />
@@ -217,10 +249,12 @@ const styles = StyleSheet.create({
     paddingHorizontal: theme.spacing.md,
     borderRadius: theme.borderRadius.medium,
     alignSelf: 'flex-start',
+    ...theme.shadows.small,
   },
   loggedInText: {
     fontSize: theme.typography.sizes.md,
     color: theme.colors.text.secondary,
+    marginLeft: theme.spacing.xs,
   },
   username: {
     color: theme.colors.primary,
@@ -241,7 +275,7 @@ const styles = StyleSheet.create({
   actionButton: {
     flex: 1,
     marginHorizontal: theme.spacing.xs,
-    borderRadius: theme.borderRadius.medium,
+    borderRadius: theme.borderRadius.large,
     overflow: 'hidden',
     ...theme.shadows.medium,
   },
@@ -310,6 +344,9 @@ const styles = StyleSheet.create({
     color: theme.colors.text.secondary,
   },
   historySection: {
+    marginBottom: theme.spacing.xl,
+  },
+  profileSection: {
     marginBottom: theme.spacing.xxl,
   },
   historyButton: {

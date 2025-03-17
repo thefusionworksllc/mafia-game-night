@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, Image, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, Image, ScrollView, Dimensions } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import theme from '../theme';
 import CustomButton from '../components/CustomButton';
@@ -7,48 +7,64 @@ import BottomNavigation from '../components/BottomNavigation';
 import { LinearGradient } from 'expo-linear-gradient';
 import ModernBackground from '../components/ModernBackground';
 import { StatusBar } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-const RoleSection = ({ title, description, icon, image }) => (
-  <View style={styles.roleCard}>
+const { width } = Dimensions.get('window');
+const CARD_WIDTH = width * 0.85;
+
+const RoleCard = ({ title, description, icon, image, color }) => (
+  <View style={styles.roleCardContainer}>
     <LinearGradient
-      colors={theme.gradients.card}
+      colors={[`${color}40`, `${color}20`]}
       style={styles.cardGradient}
+      start={{ x: 0, y: 0 }}
+      end={{ x: 1, y: 1 }}
     >
       <View style={styles.roleHeader}>
-        <Icon name={icon} size={24} color={theme.colors.text.accent} />
+        <View style={[styles.roleIconContainer, { backgroundColor: `${color}60` }]}>
+          <Icon name={icon} size={28} color={color} />
+        </View>
         <Text style={styles.roleTitle}>{title}</Text>
       </View>
-      <Image source={image} style={styles.roleImage} />
-      <Text style={styles.roleDescription}>{description}</Text>
+      <Image source={image} style={styles.roleImage} resizeMode="cover" />
+      <View style={styles.descriptionContainer}>
+        <Text style={styles.roleDescription}>{description}</Text>
+      </View>
     </LinearGradient>
   </View>
 );
 
 const RolesAndAbilitiesScreen = ({ navigation }) => {
+  const insets = useSafeAreaInsets();
+  
   const roles = [
     {
       title: 'Mafia',
       description: 'During the night phase, Mafia members secretly choose a civilian to eliminate. During the day phase, they must blend in and avoid suspicion.',
       icon: 'security',
-      image: require('../../assets/mafia.png')
+      image: require('../../assets/mafia.png'),
+      color: theme.colors.tertiary
     },
     {
       title: 'Detective',
       description: 'During the night phase, the Detective can investigate one player to determine if they are a member of the Mafia or a Civilian.',
       icon: 'search',
-      image: require('../../assets/detective.png')
+      image: require('../../assets/detective.png'),
+      color: theme.colors.info
     },
     {
       title: 'Doctor',
       description: 'During the night phase, the Doctor can choose one player to protect from elimination. The Doctor can save themselves.',
       icon: 'healing',
-      image: require('../../assets/doctor.png')
+      image: require('../../assets/doctor.png'),
+      color: theme.colors.success
     },
     {
       title: 'Civilian',
       description: 'Civilians must work together during the day phase to identify and vote out Mafia members before they are outnumbered.',
       icon: 'people',
-      image: require('../../assets/civilian.png')
+      image: require('../../assets/civilian.png'),
+      color: theme.colors.primary
     }
   ];
 
@@ -56,32 +72,49 @@ const RolesAndAbilitiesScreen = ({ navigation }) => {
     <View style={theme.commonStyles.container}>
       <StatusBar translucent backgroundColor="transparent" barStyle="light-content" />
       <ModernBackground>
-        <ScrollView contentContainerStyle={styles.scrollContainer}>
-          <View style={styles.container}>
-            <Text style={styles.title}>Roles & Abilities</Text>
-            <Text style={styles.description}>
-              Discover different roles and their special abilities in the Mafia game.
-            </Text>
+        <ScrollView 
+          style={theme.commonStyles.scrollContainer}
+          contentContainerStyle={[
+            theme.commonStyles.scrollContentContainer,
+            { paddingTop: insets.top + theme.spacing.md }
+          ]}
+          showsVerticalScrollIndicator={false}
+        >
+          <Text style={theme.commonStyles.title}>Roles & Abilities</Text>
+          <Text style={theme.commonStyles.subtitle}>
+            Discover different roles and their special abilities in the Mafia game.
+          </Text>
 
-            {/* Roles Section */}
-            <View style={styles.rolesSection}>
-              <Text style={styles.sectionTitle}>Game Roles</Text>
-              {roles.map((role, index) => (
-                <RoleSection
-                  key={index}
-                  title={role.title}
-                  description={role.description}
-                  icon={role.icon}
-                  image={role.image}
-                />
-              ))}
-            </View>
+          {/* Roles Section */}
+          <View style={styles.rolesSection}>
+            {roles.map((role, index) => (
+              <RoleCard
+                key={index}
+                title={role.title}
+                description={role.description}
+                icon={role.icon}
+                image={role.image}
+                color={role.color}
+              />
+            ))}
+          </View>
 
-            {/* Back to Home Button */}
+          {/* Navigation Buttons */}
+          <View style={styles.buttonContainer}>
             <CustomButton
-              title="Back to Home"
+              title="NEXT: GAME PHASES"
+              onPress={() => navigation.navigate('GamePhases')}
+              leftIcon={<Icon name="arrow-forward" size={20} color={theme.colors.text.primary} />}
+              fullWidth
+            />
+            
+            <CustomButton
+              title="BACK TO HOME"
               onPress={() => navigation.navigate('Home')}
+              variant="outline"
               style={styles.backButton}
+              leftIcon={<Icon name="home" size={20} color={theme.colors.text.accent} />}
+              fullWidth
             />
           </View>
         </ScrollView>
@@ -92,68 +125,69 @@ const RolesAndAbilitiesScreen = ({ navigation }) => {
 };
 
 const styles = StyleSheet.create({
-  scrollContainer: {
-    flexGrow: 1,
-  },
-  container: {
-    flex: 1,
-    padding: theme.spacing.lg,
-  },
-  title: {
-    fontSize: theme.typography.sizes.xxl,
-    fontWeight: theme.typography.weights.bold,
-    color: theme.colors.text.primary,
-  },
-  description: {
-    fontSize: theme.typography.sizes.md,
-    color: theme.colors.text.secondary,
-    textAlign: 'center',
-    marginBottom: theme.spacing.xl,
-  },
   rolesSection: {
-    marginTop: theme.spacing.xl,
+    marginTop: theme.spacing.lg,
+    alignItems: 'center',
   },
-  sectionTitle: {
-    fontSize: theme.typography.sizes.xl,
-    fontWeight: theme.typography.weights.bold,
-    color: theme.colors.text.accent,
-    marginBottom: theme.spacing.md,
+  roleCardContainer: {
+    width: CARD_WIDTH,
+    marginBottom: theme.spacing.xl,
+    borderRadius: theme.borderRadius.large,
+    overflow: 'hidden',
+    ...theme.shadows.medium,
   },
-  roleCard: {
-    backgroundColor: 'rgba(187, 134, 252, 0.1)',
-    borderRadius: 15,
+  cardGradient: {
+    borderRadius: theme.borderRadius.large,
     padding: theme.spacing.lg,
-    marginBottom: theme.spacing.md,
   },
   roleHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: theme.spacing.sm,
+    marginBottom: theme.spacing.md,
+  },
+  roleIconContainer: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: theme.spacing.md,
   },
   roleTitle: {
-    fontSize: theme.typography.sizes.lg,
+    fontSize: theme.typography.sizes.xl,
     fontWeight: theme.typography.weights.bold,
-    color: theme.colors.text.accent,
-    marginLeft: theme.spacing.sm,
+    color: theme.colors.text.primary,
+    textShadowColor: 'rgba(0, 0, 0, 0.75)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 3,
   },
   roleImage: {
     width: '100%',
-    height: 150,
-    borderRadius: 10,
-    marginVertical: theme.spacing.sm,
+    height: 180,
+    borderRadius: theme.borderRadius.medium,
+    marginBottom: theme.spacing.md,
+    ...theme.shadows.small,
+  },
+  descriptionContainer: {
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    borderRadius: theme.borderRadius.medium,
+    padding: theme.spacing.md,
   },
   roleDescription: {
     fontSize: theme.typography.sizes.md,
-    color: theme.colors.text.secondary,
-    lineHeight: 22,
+    color: '#FFFFFF',
+    lineHeight: theme.typography.lineHeights.relaxed,
+    textShadowColor: 'rgba(0, 0, 0, 0.75)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 3,
+    fontWeight: '500',
+  },
+  buttonContainer: {
+    marginTop: theme.spacing.lg,
+    marginBottom: theme.spacing.xxl,
   },
   backButton: {
-    marginTop: theme.spacing.lg,
-    marginBottom: theme.spacing.xxxl,
-  },
-  cardGradient: {
-    borderRadius: 15,
-    padding: theme.spacing.lg,
+    marginTop: theme.spacing.md,
   },
 });
 

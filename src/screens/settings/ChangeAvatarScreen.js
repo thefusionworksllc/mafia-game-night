@@ -1,16 +1,20 @@
 import React, { useState } from 'react';
-import { View, StyleSheet, Text, ImageBackground, Image, TouchableOpacity, ScrollView } from 'react-native';
+import { View, StyleSheet, Text, Image, TouchableOpacity, ScrollView, StatusBar, Alert } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import { Button } from 'react-native-elements';
 import theme from '../../theme';
 import { useAuth } from '../../context/AuthContext';
 import { userService } from '../../services/userService';
+import ModernBackground from '../../components/ModernBackground';
+import CustomButton from '../../components/CustomButton';
+import BottomNavigation from '../../components/BottomNavigation';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const ChangeAvatarScreen = ({ navigation }) => {
   const { user } = useAuth();
-  const [selectedAvatar, setSelectedAvatar] = useState(user.photoURL);
+  const [selectedAvatar, setSelectedAvatar] = useState(user?.photoURL);
   const [loading, setLoading] = useState(false);
+  const insets = useSafeAreaInsets();
 
   // Predefined avatar options
   const avatarOptions = [
@@ -41,38 +45,48 @@ const ChangeAvatarScreen = ({ navigation }) => {
   };
 
   return (
-    <ImageBackground
-      source={require('../../../assets/background.png')}
-      style={theme.commonStyles.content}
-      resizeMode="cover"
-    >
-      <LinearGradient
-        colors={theme.gradients.background}
-        style={theme.commonStyles.container}
-      >
-        <View style={styles.container}>
-          <Text style={styles.title}>Change Avatar</Text>
+    <View style={theme.commonStyles.container}>
+      <StatusBar translucent backgroundColor="transparent" barStyle="light-content" />
+      <ModernBackground>
+        <ScrollView 
+          style={theme.commonStyles.scrollContainer}
+          contentContainerStyle={theme.commonStyles.scrollContentContainer}
+          showsVerticalScrollIndicator={false}
+        >
+          <Text style={theme.commonStyles.title}>Change Avatar</Text>
 
           <View style={styles.currentAvatarContainer}>
-            <Text style={styles.subtitle}>Current Avatar</Text>
-            {user.photoURL ? (
-              <Image
-                source={{ uri: user.photoURL }}
-                style={styles.currentAvatar}
-              />
-            ) : (
-              <View style={[styles.currentAvatar, styles.defaultAvatar]}>
-                <Icon 
-                  name="person" 
-                  size={50} 
-                  color={theme.colors.text.secondary} 
+            <Text style={styles.sectionTitle}>Current Avatar</Text>
+            <LinearGradient
+              colors={theme.gradients.card}
+              style={styles.currentAvatarGradient}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+            >
+              {user?.photoURL ? (
+                <Image
+                  source={{ uri: user.photoURL }}
+                  style={styles.currentAvatar}
                 />
-              </View>
-            )}
+              ) : (
+                <LinearGradient
+                  colors={theme.gradients.accent}
+                  style={styles.defaultAvatar}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 1 }}
+                >
+                  <Icon 
+                    name="person" 
+                    size={50} 
+                    color={theme.colors.text.primary} 
+                  />
+                </LinearGradient>
+              )}
+            </LinearGradient>
           </View>
 
-          <Text style={styles.subtitle}>Choose New Avatar</Text>
-          <ScrollView style={styles.avatarGrid}>
+          <Text style={styles.sectionTitle}>Choose New Avatar</Text>
+          <View style={styles.avatarGrid}>
             <View style={styles.gridContainer}>
               {avatarOptions.map((avatar, index) => (
                 <TouchableOpacity
@@ -82,61 +96,83 @@ const ChangeAvatarScreen = ({ navigation }) => {
                     selectedAvatar === avatar && styles.selectedAvatar,
                   ]}
                   onPress={() => setSelectedAvatar(avatar)}
+                  activeOpacity={0.7}
                 >
-                  <Image source={avatar} style={styles.avatarImage} />
+                  <LinearGradient
+                    colors={theme.gradients.card}
+                    style={styles.avatarGradient}
+                    start={{ x: 0, y: 0 }}
+                    end={{ x: 1, y: 1 }}
+                  >
+                    <Image source={avatar} style={styles.avatarImage} />
+                  </LinearGradient>
                 </TouchableOpacity>
               ))}
             </View>
-          </ScrollView>
+          </View>
 
-          <Button
-            title="Save Avatar"
-            onPress={handleSaveAvatar}
-            loading={loading}
-            buttonStyle={styles.saveButton}
-            titleStyle={styles.buttonText}
-            disabled={!selectedAvatar || loading}
-          />
-        </View>
-      </LinearGradient>
-    </ImageBackground>
+          <View style={styles.buttonContainer}>
+            <CustomButton
+              title="SAVE AVATAR"
+              onPress={handleSaveAvatar}
+              loading={loading}
+              disabled={!selectedAvatar || loading}
+              leftIcon={<Icon name="save" size={20} color={theme.colors.text.primary} />}
+              fullWidth
+            />
+            
+            <CustomButton
+              title="BACK TO SETTINGS"
+              onPress={() => navigation.navigate('Settings')}
+              variant="outline"
+              style={styles.backButton}
+              leftIcon={<Icon name="arrow-back" size={20} color={theme.colors.text.accent} />}
+              fullWidth
+            />
+          </View>
+        </ScrollView>
+      </ModernBackground>
+      <BottomNavigation navigation={navigation} activeScreen="Settings" />
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: theme.spacing.lg,
-  },
-  title: {
-    fontSize: theme.typography.sizes.xxxl,
-    fontWeight: theme.typography.weights.bold,
-    color: theme.colors.text.accent,
-    textAlign: 'center',
-    marginVertical: theme.spacing.xl,
-  },
   currentAvatarContainer: {
     alignItems: 'center',
     marginBottom: theme.spacing.xl,
   },
-  subtitle: {
-    fontSize: theme.typography.sizes.lg,
-    color: theme.colors.text.primary,
+  sectionTitle: {
+    fontSize: theme.typography.sizes.xl,
+    fontWeight: theme.typography.weights.bold,
+    color: theme.colors.text.accent,
     marginBottom: theme.spacing.md,
+    textAlign: 'center',
+  },
+  currentAvatarGradient: {
+    padding: theme.spacing.md,
+    borderRadius: theme.borderRadius.large,
+    alignItems: 'center',
+    justifyContent: 'center',
+    ...theme.shadows.medium,
   },
   currentAvatar: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-    marginTop: theme.spacing.md,
+    width: 120,
+    height: 120,
+    borderRadius: 60,
+    borderWidth: 3,
+    borderColor: theme.colors.primary,
   },
   defaultAvatar: {
-    backgroundColor: 'rgba(187, 134, 252, 0.1)',
+    width: 120,
+    height: 120,
+    borderRadius: 60,
     justifyContent: 'center',
     alignItems: 'center',
+    borderWidth: 3,
+    borderColor: theme.colors.primary,
   },
   avatarGrid: {
-    flex: 1,
     marginBottom: theme.spacing.xl,
   },
   gridContainer: {
@@ -149,28 +185,30 @@ const styles = StyleSheet.create({
     width: '30%',
     aspectRatio: 1,
     marginBottom: theme.spacing.md,
-    borderRadius: 15,
+    borderRadius: theme.borderRadius.large,
+    overflow: 'hidden',
+    ...theme.shadows.small,
+  },
+  avatarGradient: {
+    width: '100%',
+    height: '100%',
     padding: theme.spacing.xs,
-    backgroundColor: 'rgba(187, 134, 252, 0.1)',
   },
   selectedAvatar: {
-    borderWidth: 2,
+    borderWidth: 3,
     borderColor: theme.colors.primary,
   },
   avatarImage: {
     width: '100%',
     height: '100%',
-    borderRadius: 12,
+    borderRadius: theme.borderRadius.medium,
   },
-  saveButton: {
-    backgroundColor: theme.colors.primary,
-    borderRadius: 25,
-    paddingVertical: theme.spacing.md,
-    marginBottom: theme.spacing.xl,
+  buttonContainer: {
+    marginTop: theme.spacing.lg,
+    marginBottom: theme.spacing.xxl,
   },
-  buttonText: {
-    fontSize: theme.typography.sizes.lg,
-    fontWeight: theme.typography.weights.medium,
+  backButton: {
+    marginTop: theme.spacing.md,
   },
 });
 

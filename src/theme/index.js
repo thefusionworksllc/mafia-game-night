@@ -237,18 +237,21 @@ export const theme = {
       borderRadius: 8,
       borderWidth: 1,
       borderColor: colors.input.border,
+      pointerEvents: 'auto',
+      width: '100%',
     },
     
     inputContainer: {
       marginBottom: spacing.medium,
       paddingHorizontal: 0,
+      pointerEvents: 'auto',
     },
     
     inputLabel: {
       color: colors.text.secondary,
       fontSize: typography.sizes.sm,
       marginBottom: spacing.xs,
-      fontWeight: typography.weights.medium,
+      pointerEvents: 'auto',
     },
     
     // Section headers

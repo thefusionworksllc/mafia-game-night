@@ -58,6 +58,8 @@ const RegisterScreen = ({ navigation }) => {
               inputStyle={theme.commonStyles.input}
               placeholderTextColor={theme.colors.text.secondary}
               containerStyle={theme.commonStyles.inputContainer}
+              editable={true}
+              pointerEvents="auto"
             />
             <Input
               placeholder="Email"
@@ -73,6 +75,8 @@ const RegisterScreen = ({ navigation }) => {
               inputStyle={theme.commonStyles.input}
               placeholderTextColor={theme.colors.text.secondary}
               containerStyle={theme.commonStyles.inputContainer}
+              editable={true}
+              pointerEvents="auto"
             />
             <Input
               placeholder="Password"
@@ -87,6 +91,8 @@ const RegisterScreen = ({ navigation }) => {
               inputStyle={theme.commonStyles.input}
               placeholderTextColor={theme.colors.text.secondary}
               containerStyle={theme.commonStyles.inputContainer}
+              editable={true}
+              pointerEvents="auto"
             />
 
             <CustomButton

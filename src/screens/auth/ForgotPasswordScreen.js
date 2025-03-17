@@ -57,6 +57,8 @@ const ForgotPasswordScreen = ({ navigation }) => {
             }}
             containerStyle={styles.inputContainer}
             inputStyle={styles.input}
+            editable={true}
+            pointerEvents="auto"
           />
 
           <CustomButton
@@ -94,9 +96,11 @@ const styles = StyleSheet.create({
   inputContainer: {
     width: '100%',
     marginBottom: theme.spacing.lg,
+    pointerEvents: 'auto',
   },
   input: {
     color: theme.colors.text.primary,
+    pointerEvents: 'auto',
   },
   linkButton: {
     marginTop: theme.spacing.md,

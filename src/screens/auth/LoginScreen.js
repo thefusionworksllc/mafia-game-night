@@ -11,7 +11,8 @@ import {
   KeyboardAvoidingView,
   Platform,
   TouchableWithoutFeedback,
-  Keyboard
+  Keyboard,
+  TextInput
 } from 'react-native';
 import { Input } from 'react-native-elements';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -85,16 +86,14 @@ const LoginScreen = ({ navigation }) => {
                       color={theme.colors.text.secondary}
                       style={styles.inputIcon}
                     />
-                    <Input
+                    <TextInput
                       placeholder="Enter your email"
                       value={email}
                       onChangeText={setEmail}
                       autoCapitalize="none"
                       keyboardType="email-address"
-                      inputStyle={styles.input}
+                      style={styles.directInput}
                       placeholderTextColor={theme.colors.text.secondary}
-                      containerStyle={styles.inputContainerStyle}
-                      inputContainerStyle={{ borderBottomWidth: 0 }}
                     />
                   </View>
                 </View>
@@ -108,15 +107,13 @@ const LoginScreen = ({ navigation }) => {
                       color={theme.colors.text.secondary}
                       style={styles.inputIcon}
                     />
-                    <Input
+                    <TextInput
                       placeholder="Enter your password"
                       value={password}
                       onChangeText={setPassword}
                       secureTextEntry
-                      inputStyle={styles.input}
+                      style={styles.directInput}
                       placeholderTextColor={theme.colors.text.secondary}
-                      containerStyle={styles.inputContainerStyle}
-                      inputContainerStyle={{ borderBottomWidth: 0 }}
                     />
                   </View>
                 </View>
@@ -222,19 +219,24 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(255, 255, 255, 0.1)',
     borderRadius: theme.borderRadius.medium,
     overflow: 'hidden',
+    pointerEvents: 'auto',
   },
   inputIcon: {
     paddingLeft: theme.spacing.md,
   },
-  input: {
+  directInput: {
+    flex: 1,
     color: theme.colors.text.primary,
     fontSize: theme.typography.sizes.md,
     paddingLeft: 0,
+    paddingVertical: theme.spacing.sm,
+    paddingRight: theme.spacing.md
   },
   inputContainerStyle: {
     paddingHorizontal: 0,
     marginHorizontal: 0,
     width: '90%',
+    pointerEvents: 'auto',
   },
   forgotPasswordContainer: {
     alignItems: 'center',

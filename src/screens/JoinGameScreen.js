@@ -11,7 +11,8 @@ import {
   Keyboard,
   Dimensions,
   Animated,
-  ScrollView
+  ScrollView,
+  TextInput
 } from 'react-native';
 import { Input } from 'react-native-elements';
 import theme from '../theme';
@@ -130,21 +131,23 @@ const JoinGameScreen = ({ navigation }) => {
                 >
                   <View style={styles.codeInputContainer}>
                     <Text style={styles.inputLabel}>Game Code</Text>
-                    <Input
-                      placeholder="Enter 6-digit code"
-                      value={formatGameCode(gameCode)}
-                      onChangeText={(text) => setGameCode(text.replace(/\s/g, ''))}
-                      keyboardType="number-pad"
-                      maxLength={7} // 6 digits + 1 space
-                      inputStyle={styles.input}
-                      inputContainerStyle={styles.inputContainer}
-                      leftIcon={
-                        <Icon name="games" size={24} color={theme.colors.primary} />
-                      }
-                      autoCapitalize="none"
-                      returnKeyType="done"
-                      onSubmitEditing={handleJoinGame}
-                    />
+                    <View style={styles.directInputWrapper}>
+                      <Icon 
+                        name="games" 
+                        size={24} 
+                        color={theme.colors.primary} 
+                        style={styles.directInputIcon}
+                      />
+                      <TextInput
+                        placeholder="Enter 6-digit code"
+                        value={formatGameCode(gameCode)}
+                        onChangeText={(text) => setGameCode(text.replace(/\s/g, ''))}
+                        keyboardType="number-pad"
+                        maxLength={7} // 6 digits + 1 space
+                        style={styles.directInput}
+                        placeholderTextColor={theme.colors.text.secondary}
+                      />
+                    </View>
                   </View>
 
                   {user ? (
@@ -259,6 +262,8 @@ const styles = StyleSheet.create({
   },
   codeInputContainer: {
     marginBottom: theme.spacing.md,
+    pointerEvents: 'auto',
+    width: '100%',
   },
   inputLabel: {
     fontSize: theme.typography.sizes.md,
@@ -266,16 +271,28 @@ const styles = StyleSheet.create({
     color: theme.colors.text.accent,
     marginBottom: theme.spacing.sm,
   },
-  inputContainer: {
+  directInputWrapper: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    borderRadius: theme.borderRadius.medium,
+    padding: theme.spacing.md,
+    marginBottom: theme.spacing.md,
     borderBottomColor: theme.colors.primary,
     borderBottomWidth: 2,
+    pointerEvents: 'auto',
   },
-  input: {
+  directInputIcon: {
+    marginRight: theme.spacing.md,
+  },
+  directInput: {
+    flex: 1,
     color: theme.colors.text.primary,
     fontSize: theme.typography.sizes.xl,
     fontWeight: theme.typography.weights.bold,
     textAlign: 'center',
     letterSpacing: 8,
+    pointerEvents: 'auto',
   },
   userInfoContainer: {
     flexDirection: 'row',

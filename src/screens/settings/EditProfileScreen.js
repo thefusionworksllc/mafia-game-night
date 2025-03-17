@@ -25,6 +25,8 @@ const CustomInput = ({ placeholder, value, onChangeText, secureTextEntry, icon }
         secureTextEntry={secureTextEntry}
         style={styles.input}
         placeholderTextColor={theme.colors.text.secondary}
+        editable={true}
+        pointerEvents="auto"
       />
     </View>
   </View>
@@ -214,23 +216,25 @@ const styles = StyleSheet.create({
   },
   inputWrapper: {
     marginBottom: theme.spacing.md,
+    pointerEvents: 'auto',
   },
   inputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: 'rgba(255, 255, 255, 0.1)',
     borderRadius: theme.borderRadius.medium,
-    paddingHorizontal: theme.spacing.md,
-    height: 50,
+    padding: theme.spacing.sm,
+    pointerEvents: 'auto',
   },
   inputIconContainer: {
     marginRight: theme.spacing.sm,
+    pointerEvents: 'auto',
   },
   input: {
     flex: 1,
     color: theme.colors.text.primary,
     fontSize: theme.typography.sizes.md,
-    height: 50,
+    pointerEvents: 'auto',
   },
   saveButton: {
     marginTop: theme.spacing.md,

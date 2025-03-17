@@ -84,6 +84,9 @@ Remove-Item -Force package-lock.json
 2. **Select Build Profile**:
    During the build process, you may be prompted to select a build profile. You can choose between `development`, `preview`, or `production`. For a production build, select the `production` profile.
 
+      eas build --platform android --profile preview
+
+
 3. **Monitor Build Progress**:
    After starting the build, EAS will provide a URL where you can monitor the build progress. Once the build is complete, you will receive a link to download the APK (for Android) or the IPA (for iOS).
 
@@ -97,6 +100,8 @@ Remove-Item -Force package-lock.json
 If you want to deploy your app to the web using EAS, you can do so by running:
 bash
 eas build --platform web
+
+npx expo export -p web
 
 This will create a production build of your web app. You can then deploy the generated files to a static hosting service like Vercel, Netlify, or GitHub Pages.
 

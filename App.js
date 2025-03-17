@@ -24,37 +24,39 @@ import { StatusBar } from 'expo-status-bar';
 import { AuthProvider } from './src/context/AuthContext';
 import {  ImageBackground} from 'react-native';
 import theme from './src/theme'; // Import the theme
+import { ErrorProvider } from './src/context/ErrorContext';
 
 const Stack = createNativeStackNavigator();
 
 export default function App() {
   return (
-   
     <AuthProvider>
-      <NavigationContainer>
-        <StatusBar style="auto" />
-        <Stack.Navigator screenOptions={{ headerShown: false }}>
-          <Stack.Screen name="Home" component={HomeScreen} />
-          <Stack.Screen name="GameOverview" component={GameOverview} />
-          <Stack.Screen name="RolesAndAbilities" component={RolesAndAbilities} />
-          <Stack.Screen name="WinningStrategies" component={WinningStrategies} /> 
-          <Stack.Screen name="GamePhases" component={GamePhases} />
-          <Stack.Screen name="Login" component={LoginScreen} />
-          <Stack.Screen name="Register" component={RegisterScreen} />
-          <Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen} />
-          <Stack.Screen name="GameLobby" component={GameLobbyScreen} />
-          <Stack.Screen name="RoleAssignment" component={RoleAssignmentScreen} />
-          <Stack.Screen name="GameHistory" component={GameHistoryScreen} />
-          <Stack.Screen name="Settings" component={SettingsScreen} />
-          <Stack.Screen name="EditProfile" component={EditProfileScreen} />
-          <Stack.Screen name="ChangeAvatar" component={ChangeAvatarScreen} />
-          <Stack.Screen name="GameStats" component={GameStatsScreen} />
-          <Stack.Screen name="HostGame" component={HostGameScreen} />
-          <Stack.Screen name="JoinGame" component={JoinGameScreen} />
-          <Stack.Screen name="GameTutorial" component={GameTutorialScreen} /> 
-          <Stack.Screen name="PlayerRole" component={PlayerRole} />
-        </Stack.Navigator>
-      </NavigationContainer>
+      <ErrorProvider>
+        <NavigationContainer>
+          <StatusBar style="auto" />
+          <Stack.Navigator screenOptions={{ headerShown: false }}>
+            <Stack.Screen name="Home" component={HomeScreen} />
+            <Stack.Screen name="GameOverview" component={GameOverview} />
+            <Stack.Screen name="RolesAndAbilities" component={RolesAndAbilities} />
+            <Stack.Screen name="WinningStrategies" component={WinningStrategies} /> 
+            <Stack.Screen name="GamePhases" component={GamePhases} />
+            <Stack.Screen name="Login" component={LoginScreen} />
+            <Stack.Screen name="Register" component={RegisterScreen} />
+            <Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen} />
+            <Stack.Screen name="GameLobby" component={GameLobbyScreen} />
+            <Stack.Screen name="RoleAssignment" component={RoleAssignmentScreen} />
+            <Stack.Screen name="GameHistory" component={GameHistoryScreen} />
+            <Stack.Screen name="Settings" component={SettingsScreen} />
+            <Stack.Screen name="EditProfile" component={EditProfileScreen} />
+            <Stack.Screen name="ChangeAvatar" component={ChangeAvatarScreen} />
+            <Stack.Screen name="GameStats" component={GameStatsScreen} />
+            <Stack.Screen name="HostGame" component={HostGameScreen} />
+            <Stack.Screen name="JoinGame" component={JoinGameScreen} />
+            <Stack.Screen name="GameTutorial" component={GameTutorialScreen} /> 
+            <Stack.Screen name="PlayerRole" component={PlayerRole} />
+          </Stack.Navigator>
+        </NavigationContainer>
+      </ErrorProvider>
     </AuthProvider>
   );
 }

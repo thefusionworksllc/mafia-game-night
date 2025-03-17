@@ -20,6 +20,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import CustomButton from '../components/CustomButton';
 import ModernBackground from '../components/ModernBackground';
+import { useError } from '../context/ErrorContext';
 
 const roleImages = {
   civilian: require('../../assets/civilian.png'),
@@ -36,8 +37,10 @@ const roleIcons = {
 };
 
 const PlayerRoleScreen = ({ route, navigation }) => {
-  const { role, isHost, gameCode } = route.params;
+  const { role = 'civilian', isHost = false, gameCode } = route.params || {};
+  const [loading, setLoading] = useState(false);
   const { user } = useAuth();
+  const { showError } = useError();
   const [modalVisible, setModalVisible] = useState(false);
   const [groupedPlayers, setGroupedPlayers] = useState({});
   const insets = useSafeAreaInsets();
@@ -48,6 +51,38 @@ const PlayerRoleScreen = ({ route, navigation }) => {
   console.log('Original Role:', role);
   console.log('Normalized Role:', normalizedRole);
   console.log('Image Source:', roleImages[normalizedRole]);
+
+  // Role displays
+  const roleData = {
+    civilian: {
+      name: 'Civilian',
+      icon: 'people',
+      color: theme.colors.accent,
+      description: 'Your goal is to work with other civilians to identify and eliminate the mafia during the day phase.',
+      ability: 'You can vote during the day phase to eliminate suspected mafia members.'
+    },
+    mafia: {
+      name: 'Mafia',
+      icon: 'security',
+      color: theme.colors.error,
+      description: 'Your goal is to eliminate all civilians without being detected.',
+      ability: 'During the night phase, you and your fellow mafia members can choose a civilian to eliminate.'
+    },
+    detective: {
+      name: 'Detective',
+      icon: 'search',
+      color: theme.colors.info,
+      description: 'Your goal is to identify the mafia and help the civilians eliminate them.',
+      ability: 'During the night phase, you can investigate one player to discover if they are a mafia member.'
+    },
+    doctor: {
+      name: 'Doctor',
+      icon: 'healing',
+      color: theme.colors.success,
+      description: 'Your goal is to protect civilians from the mafia\'s attacks.',
+      ability: 'During the night phase, you can choose one player to protect from elimination.'
+    }
+  };
 
   const handleViewAllRoles = async () => {
     try {
@@ -75,6 +110,23 @@ const PlayerRoleScreen = ({ route, navigation }) => {
     } catch (error) {
       console.error('Error ending game:', error);
       Alert.alert('Error', error.message || 'Failed to end game');
+    }
+  };
+
+  const handleContinue = () => {
+    try {
+      if (isHost) {
+        // Host can control game phases
+        navigation.replace('GameControl', { gameCode });
+      } else {
+        // Regular players go to game play screen
+        navigation.replace('GamePlay', { 
+          gameCode,
+          role 
+        });
+      }
+    } catch (error) {
+      showError(error.message || 'Failed to continue to game');
     }
   };
 
@@ -209,11 +261,7 @@ const PlayerRoleScreen = ({ route, navigation }) => {
           <View style={styles.buttonContainer}>
             <CustomButton
               title="CONTINUE TO GAME"
-              onPress={() => navigation.navigate('GamePlay', { 
-                gameCode, 
-                role: normalizedRole,
-                isHost 
-              })}
+              onPress={handleContinue}
               style={styles.continueButton}
               leftIcon={<Icon name="play-arrow" size={20} color={theme.colors.text.primary} />}
             />

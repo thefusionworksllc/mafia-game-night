@@ -16,6 +16,7 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 import CustomButton from '../components/CustomButton';
 import { useAuth } from '../context/AuthContext';
 import { gameService } from '../services/gameService';
+import { useError } from '../context/ErrorContext';
 
 const RoleCard = ({ role, name, description, icon }) => (
   <View style={styles.roleCard}>
@@ -40,6 +41,7 @@ const RoleAssignmentScreen = ({ route, navigation }) => {
   const [loading, setLoading] = useState(true);
   const { user } = useAuth();
   const insets = useSafeAreaInsets();
+  const { showError } = useError();
 
   useEffect(() => {
     const fetchRoles = async () => {
@@ -54,14 +56,14 @@ const RoleAssignmentScreen = ({ route, navigation }) => {
         setRoles(gameRoles);
       } catch (error) {
         console.error('Error fetching roles:', error);
-        Alert.alert('Error', 'Failed to fetch role assignments');
+        showError('Failed to fetch role assignments');
       } finally {
         setLoading(false);
       }
     };
 
     fetchRoles();
-  }, [gameCode]);
+  }, [gameCode, showError]);
 
   const getRoleIcon = (role) => {
     switch (role.toLowerCase()) {

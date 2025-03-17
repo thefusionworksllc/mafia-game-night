@@ -20,6 +20,7 @@ import { useAuth } from '../context/AuthContext';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import CustomButton from '../components/CustomButton';
 import ModernBackground from '../components/ModernBackground';
+import { useError } from '../context/ErrorContext';
 
 // Animated control component for all numeric inputs
 const AnimatedControl = ({ 
@@ -148,6 +149,7 @@ const HostGameScreen = ({ navigation }) => {
   const [gameCode, setGameCode] = useState(null);
   const { user } = useAuth();
   const insets = useSafeAreaInsets();
+  const { showError } = useError();
 
   // Handle total players changes
   const handleTotalPlayersChange = (value) => {
@@ -215,6 +217,7 @@ const HostGameScreen = ({ navigation }) => {
 
   const handleHostGame = async () => {
     if (!user) {
+      showError('You need to log in to host a game', 'warning');
       Alert.alert(
         'Login Required',
         'You need to log in to host a game.',
@@ -226,37 +229,39 @@ const HostGameScreen = ({ navigation }) => {
       return;
     }
 
-    console.log('Host Game button clicked');
-    const specialRolesCount = detectiveCount + doctorCount;
-    const civilians = totalPlayers - mafiaCount - specialRolesCount;
+    // Validate player count
+    if (totalPlayers < 4) {
+      showError('You need at least 4 players to start a game');
+      return;
+    }
 
-    if (civilians < 1) {
-      Alert.alert('Error', 'Not enough players for selected roles');
+    // Check if mafia count is valid (between 1 and totalPlayers/3)
+    if (mafiaCount < 1 || mafiaCount > Math.floor(totalPlayers / 3)) {
+      showError(`Mafia count should be between 1 and ${Math.floor(totalPlayers / 3)}`);
       return;
     }
 
     setLoading(true);
     try {
-      const createdGameCode = await gameService.createGame({
+      const gameCode = await gameService.createGame(
         totalPlayers,
         mafiaCount,
         detectiveCount,
         doctorCount
-      });
-
-      setGameCode(createdGameCode);
-      console.log('Game created with code:', createdGameCode);
-      navigation.navigate('GameLobby', { 
-        gameCode: createdGameCode, 
+      );
+      
+      showError('Game created successfully!', 'success');
+      
+      navigation.navigate('GameLobby', {
+        gameCode,
+        totalPlayers,
+        mafiaCount,
+        detectiveCount,
+        doctorCount,
         isHost: true,
-        totalPlayers,
-        mafiaCount,
-        detectiveCount,
-        doctorCount
       });
     } catch (error) {
-      console.error('Error creating game:', error);
-      Alert.alert('Error', error.message || 'Failed to create game');
+      showError(error.message || 'Failed to create game');
     } finally {
       setLoading(false);
     }

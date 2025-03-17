@@ -9,6 +9,7 @@ import BottomNavigation from '../../components/BottomNavigation';
 import ModernBackground from '../../components/ModernBackground';
 import CustomButton from '../../components/CustomButton';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useError } from '../../context/ErrorContext';
 
 const CustomInput = ({ placeholder, value, onChangeText, secureTextEntry, icon }) => (
   <View style={styles.inputWrapper}>
@@ -41,53 +42,66 @@ const EditProfileScreen = ({ navigation }) => {
   const [loading, setLoading] = useState(false);
   const [passwordLoading, setPasswordLoading] = useState(false);
   const insets = useSafeAreaInsets();
+  const { showError } = useError();
 
-  const handleSaveProfile = async () => {
-    if (!displayName.trim()) {
-      Alert.alert('Error', 'Display name cannot be empty');
+  const handleUpdateProfile = async () => {
+    if (displayName.trim() === '') {
+      showError('Display name cannot be empty');
       return;
     }
 
     setLoading(true);
     try {
-      await userService.updateProfile({ displayName });
-      Alert.alert('Success', 'Profile updated successfully');
+      await userService.updateUserProfile(displayName);
+      showError('Profile updated successfully!', 'success');
+      navigation.goBack();
     } catch (error) {
-      Alert.alert('Error', error.message);
+      showError(error.message || 'Failed to update profile');
     } finally {
       setLoading(false);
     }
   };
 
-  const handleChangePassword = async () => {
-    // Validate passwords
-    if (!currentPassword || !newPassword || !confirmPassword) {
-      Alert.alert('Error', 'All password fields are required');
+  const handleUpdateEmail = async () => {
+    if (email.trim() === '') {
+      showError('Email cannot be empty');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      await userService.updateUserEmail(email);
+      showError('Email updated successfully!', 'success');
+      navigation.goBack();
+    } catch (error) {
+      showError(error.message || 'Failed to update email');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleUpdatePassword = async () => {
+    if (newPassword.trim() === '') {
+      showError('New password cannot be empty');
       return;
     }
 
     if (newPassword !== confirmPassword) {
-      Alert.alert('Error', 'New passwords do not match');
+      showError('Passwords do not match');
       return;
     }
 
-    if (newPassword.length < 6) {
-      Alert.alert('Error', 'New password must be at least 6 characters long');
-      return;
-    }
-
-    setPasswordLoading(true);
+    setLoading(true);
     try {
-      await userService.updatePassword(currentPassword, newPassword);
-      Alert.alert('Success', 'Password updated successfully');
-      // Clear password fields
-      setCurrentPassword('');
+      await userService.updateUserPassword(newPassword);
+      showError('Password updated successfully!', 'success');
       setNewPassword('');
       setConfirmPassword('');
+      navigation.goBack();
     } catch (error) {
-      Alert.alert('Error', error.message);
+      showError(error.message || 'Failed to update password');
     } finally {
-      setPasswordLoading(false);
+      setLoading(false);
     }
   };
 
@@ -122,7 +136,7 @@ const EditProfileScreen = ({ navigation }) => {
               />
               <CustomButton
                 title="SAVE PROFILE"
-                onPress={handleSaveProfile}
+                onPress={handleUpdateProfile}
                 loading={loading}
                 leftIcon={<Icon name="save" size={20} color={theme.colors.text.primary} />}
                 style={styles.saveButton}
@@ -166,8 +180,8 @@ const EditProfileScreen = ({ navigation }) => {
               />
               <CustomButton
                 title="CHANGE PASSWORD"
-                onPress={handleChangePassword}
-                loading={passwordLoading}
+                onPress={handleUpdatePassword}
+                loading={loading}
                 variant="secondary"
                 leftIcon={<Icon name="security" size={20} color={theme.colors.text.primary} />}
                 style={styles.passwordButton}

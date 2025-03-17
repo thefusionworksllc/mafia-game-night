@@ -20,9 +20,11 @@ import LoadingSpinner from '../../components/LoadingSpinner'; // Import LoadingS
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import ModernBackground from '../../components/ModernBackground';
+import { useError } from '../../context/ErrorContext';
 
 const LoginScreen = ({ navigation }) => {
   const { signIn } = useAuth(); // Destructure signIn from useAuth
+  const { showError } = useError(); // Add error handling
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -30,7 +32,7 @@ const LoginScreen = ({ navigation }) => {
 
   const handleLogin = async () => {
     if (!email || !password) {
-      Alert.alert('Error', 'Please fill in all fields');
+      showError('Please fill in all fields');
       return;
     }
 
@@ -41,7 +43,7 @@ const LoginScreen = ({ navigation }) => {
       navigation.navigate('Home'); // Navigate to Home after successful login
     } catch (error) {
       console.error("Login error:", error); // Debug message
-      Alert.alert('Error', error.message);
+      showError(error.message || 'Login failed. Please check your credentials.');
     } finally {
       setLoading(false);
     }

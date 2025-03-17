@@ -1,5 +1,5 @@
 // src/screens/home/HomeScreen.js
-import React from 'react';
+import React, { useEffect } from 'react';
 import { 
   View, 
   StyleSheet, 
@@ -19,15 +19,26 @@ import { useAuth } from '../context/AuthContext';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import CustomButton from '../components/CustomButton';
 import ModernBackground from '../components/ModernBackground';
+import { useError } from '../context/ErrorContext';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
-const HomeScreen = ({ navigation }) => {
+const HomeScreen = ({ navigation, route }) => {
   const { user, signOut } = useAuth();
   const insets = useSafeAreaInsets();
+  const { showError } = useError();
 
   // Check if user is null and handle accordingly
   const isLoggedIn = !!user;
+
+  // Check for success messages passed from other screens
+  useEffect(() => {
+    if (route.params?.showSuccess && route.params?.successMessage) {
+      showError(route.params.successMessage, 'success');
+      // Clean up params after showing message
+      navigation.setParams({ showSuccess: undefined, successMessage: undefined });
+    }
+  }, [route.params?.showSuccess, route.params?.successMessage]);
 
   const handleSignOut = async () => {
     try {

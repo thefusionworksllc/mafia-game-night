@@ -6,9 +6,11 @@ import theme from '../../theme'; // Import the theme
 import { useAuth } from '../../context/AuthContext'; // Import useAuth hook
 import CustomButton from '../../components/CustomButton'; // Import CustomButton
 import ModernBackground from '../../components/ModernBackground';
+import { useError } from '../../context/ErrorContext';
 
 const RegisterScreen = ({ navigation }) => {
   const { signUp } = useAuth(); // Destructure signUp from useAuth
+  const { showError } = useError(); // Add error handling
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [displayName, setDisplayName] = useState('');
@@ -16,17 +18,19 @@ const RegisterScreen = ({ navigation }) => {
 
   const handleRegister = async () => {
     if (!email || !password || !displayName) {
-      Alert.alert('Error', 'Please fill in all fields');
+      showError('Please fill in all fields');
       return;
     }
 
     setLoading(true);
     try {
       await signUp(email, password, displayName); // Use signUp from AuthContext
-      Alert.alert('Success', 'Account created successfully!');
-      navigation.navigate('Home'); // Navigate to Home after successful registration
+      navigation.navigate('Home', { 
+        showSuccess: true, 
+        successMessage: 'Account created successfully!' 
+      }); // Navigate to Home after successful registration
     } catch (error) {
-      Alert.alert('Error', error.message); // Show error message
+      showError(error.message || 'Registration failed'); // Show error message
     } finally {
       setLoading(false);
     }

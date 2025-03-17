@@ -21,6 +21,7 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import ModernBackground from '../components/ModernBackground';
 import { LinearGradient } from 'expo-linear-gradient';
+import { useError } from '../context/ErrorContext';
 
 const { width } = Dimensions.get('window');
 const CARD_WIDTH = width * 0.9;
@@ -32,6 +33,7 @@ const JoinGameScreen = ({ navigation }) => {
   const insets = useSafeAreaInsets();
   const [fadeAnim] = useState(new Animated.Value(0));
   const [slideAnim] = useState(new Animated.Value(50));
+  const { showError } = useError();
 
   React.useEffect(() => {
     Animated.parallel([
@@ -50,6 +52,7 @@ const JoinGameScreen = ({ navigation }) => {
 
   const handleJoinGame = async () => {
     if (!user) {
+      showError('You need to log in to join a game', 'warning');
       Alert.alert(
         'Login Required',
         'You need to log in to join a game.',
@@ -62,7 +65,7 @@ const JoinGameScreen = ({ navigation }) => {
     }
 
     if (gameCode.length !== 6) {
-      Alert.alert('Error', 'Please enter a valid 6-digit game code');
+      showError('Please enter a valid 6-digit game code');
       return;
     }
 
@@ -74,7 +77,7 @@ const JoinGameScreen = ({ navigation }) => {
         isHost: false,
       });
     } catch (error) {
-      Alert.alert('Error', error.message);
+      showError(error.message || 'Failed to join game');
     } finally {
       setLoading(false);
     }

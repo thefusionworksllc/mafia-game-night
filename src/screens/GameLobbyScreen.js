@@ -17,6 +17,7 @@ import CustomButton from '../components/CustomButton';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import ModernBackground from '../components/ModernBackground';
+import { useError } from '../context/ErrorContext';
 
 const GameLobbyScreen = ({ route, navigation }) => {
   const { gameCode, totalPlayers, mafiaCount, detectiveCount, doctorCount, isHost } = route.params;
@@ -25,10 +26,11 @@ const GameLobbyScreen = ({ route, navigation }) => {
   const [loading, setLoading] = useState(false);
   const { user } = useAuth();
   const insets = useSafeAreaInsets();
+  const { showError } = useError();
 
   // Check if user is null and handle accordingly
   if (!user) {
-    Alert.alert('Login Required', 'You need to log in to access the game lobby.');
+    showError('You need to log in to access the game lobby', 'warning');
     navigation.replace('Login'); // Redirect to LoginScreen
     return null; // Prevent rendering the rest of the component
   }
@@ -80,23 +82,29 @@ const GameLobbyScreen = ({ route, navigation }) => {
   }, [gameCode, navigation, user.uid, isHost]);
 
   const handleStartGame = async () => {
+    if (players.length < 4) {
+      showError('At least 4 players are required to start the game', 'warning');
+      return;
+    }
+
+    setLoading(true);
     try {
       await gameService.startGame(gameCode);
+      showError('Game started!', 'success');
+      navigation.navigate('RoleAssignment', { gameCode, isHost });
     } catch (error) {
-      Alert.alert('Error', error.message);
+      showError(error.message || 'Failed to start the game');
+    } finally {
+      setLoading(false);
     }
   };
 
-  const handleLeaveLobby = async () => {
-    setLoading(true);
+  const handleLeaveGame = async () => {
     try {
       await gameService.leaveGame(gameCode);
-      navigation.replace('Home');
+      navigation.navigate('Home');
     } catch (error) {
-      console.error('Error leaving lobby:', error);
-      Alert.alert('Error', error.message || 'Failed to leave lobby');
-    } finally {
-      setLoading(false);
+      showError(error.message || 'Failed to leave the game');
     }
   };
 
@@ -205,7 +213,7 @@ const GameLobbyScreen = ({ route, navigation }) => {
                 </Text>
                 <CustomButton
                   title="LEAVE GAME"
-                  onPress={handleLeaveLobby}
+                  onPress={handleLeaveGame}
                   variant="outline"
                   style={styles.leaveButton}
                   leftIcon={<Icon name="exit-to-app" size={20} color={theme.colors.error} />}

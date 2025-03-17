@@ -8,24 +8,26 @@ import { sendPasswordResetEmail } from 'firebase/auth'; // Import reset email fu
 import { Icon } from 'react-native-elements'; 
 import CustomButton from '../../components/CustomButton'; // Import CustomButton
 import ModernBackground from '../../components/ModernBackground';
+import { useError } from '../../context/ErrorContext';
 
 const ForgotPasswordScreen = ({ navigation }) => {
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
+  const { showError } = useError();
 
   const handleResetPassword = async () => {
     if (!email) {
-      Alert.alert('Error', 'Please enter your email');
+      showError('Please enter your email');
       return;
     }
 
     setLoading(true);
     try {
       await sendPasswordResetEmail(auth, email);
-      Alert.alert('Success', 'Password reset email sent!');
+      showError('Password reset email sent!', 'success');
       navigation.navigate('Login');
     } catch (error) {
-      Alert.alert('Error', error.message);
+      showError(error.message || 'Failed to send reset email');
     } finally {
       setLoading(false);
     }

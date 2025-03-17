@@ -8,10 +8,12 @@ import BottomNavigation from '../../components/BottomNavigation';
 import ModernBackground from '../../components/ModernBackground';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import CustomButton from '../../components/CustomButton';
+import { useError } from '../../context/ErrorContext';
 
 const SettingsScreen = ({ navigation }) => {
   const { user, signOut } = useAuth();
   const insets = useSafeAreaInsets();
+  const { showError } = useError();
 
   const menuItems = [
     {
@@ -37,9 +39,11 @@ const SettingsScreen = ({ navigation }) => {
   const handleSignOut = async () => {
     try {
       await signOut();
+      showError('Signed out successfully', 'success');
       navigation.navigate('Home');
     } catch (error) {
       console.error('Error signing out:', error);
+      showError('Failed to sign out. Please try again.');
     }
   };
 

@@ -10,6 +10,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import CustomButton from '../components/CustomButton';
+import { useError } from '../context/ErrorContext';
 
 const { width } = Dimensions.get('window');
 const CARD_WIDTH = width * 0.9;
@@ -23,6 +24,7 @@ const GameHistoryScreen = ({ navigation }) => {
   const [selectedGame, setSelectedGame] = useState(null);
   const [newStatus, setNewStatus] = useState('ended');
   const insets = useSafeAreaInsets();
+  const { showError } = useError();
 
   const fetchGameHistory = async () => {
     if (!user) {
@@ -40,9 +42,13 @@ const GameHistoryScreen = ({ navigation }) => {
         new Date(b.createdAt) - new Date(a.createdAt)
       );
       setGames(sortedGames);
-    } catch (error) {
-      console.error('Error fetching game history:', error);
-      setError('Failed to load game history');
+      if (sortedGames.length === 0) {
+        showError('No game history found', 'info');
+      }
+    } catch (err) {
+      console.error('Error fetching game history:', err);
+      setError(err.message || 'Failed to load game history');
+      showError('Failed to load game history', 'error');
     } finally {
       setLoading(false);
     }
@@ -107,6 +113,26 @@ const GameHistoryScreen = ({ navigation }) => {
         return 'people';
       default:
         return 'person';
+    }
+  };
+
+  const handleRejoinGame = async (gameCode) => {
+    setLoading(true);
+    try {
+      const gameExists = await gameService.checkGameExists(gameCode);
+      if (!gameExists) {
+        showError('This game is no longer active');
+        return;
+      }
+      
+      navigation.navigate('GameLobby', { 
+        gameCode,
+        isHost: false,
+      });
+    } catch (error) {
+      showError(error.message || 'Failed to rejoin game');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -218,14 +244,7 @@ const GameHistoryScreen = ({ navigation }) => {
               
               <CustomButton
                 title="Back to Lobby"
-                onPress={() => navigation.navigate('GameLobby', {
-                  gameCode: item.gameCode,
-                  totalPlayers: item.totalPlayers,
-                  mafiaCount: item.mafiaCount,
-                  detectiveCount: item.detectiveCount || 1,
-                  doctorCount: item.doctorCount || 1,
-                  isHost: item.hostId === user.uid
-                })}
+                onPress={() => handleRejoinGame(item.gameCode)}
                 style={styles.actionButton}
                 leftIcon={<Icon name="meeting-room" size={18} color={theme.colors.text.primary} />}
               />

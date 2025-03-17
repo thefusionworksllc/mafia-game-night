@@ -89,7 +89,7 @@ const GameTutorialScreen = ({ navigation }) => {
     {
       title: 'Detective',
       description: 'During the night phase, the Detective can investigate one player to determine if they are a member of the Mafia or a Civilian.',
-      icon: 'search',
+      icon: 'visibility',
       image: require('../../assets/detective.png'),
       color: theme.colors.info
     },

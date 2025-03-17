@@ -22,7 +22,7 @@ const getDbInstance = () => {
 
 export const gameService = {
   // Create a new game session
-  createGame: async ({ totalPlayers, mafiaCount, detectiveCount, doctorCount }) => {
+  createGame: async (totalPlayers, mafiaCount, detectiveCount, doctorCount) => {
     if (!auth.currentUser) {
       throw new Error('User must be authenticated to create a game');
     }

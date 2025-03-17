@@ -250,18 +250,20 @@ const HostGameScreen = ({ navigation }) => {
         doctorCount
       );
       
-      showError('Game created successfully!', 'success');
-      
+      setGameCode(gameCode);
+      showError('Game created successfully! Share the code with your friends.', 'success');
+      // Navigate to game lobby
       navigation.navigate('GameLobby', {
         gameCode,
         totalPlayers,
         mafiaCount,
         detectiveCount,
         doctorCount,
-        isHost: true,
+        isHost: true
       });
     } catch (error) {
-      showError(error.message || 'Failed to create game');
+      console.error('Error creating game:', error);
+      showError('Failed to create game: ' + error.message);
     } finally {
       setLoading(false);
     }

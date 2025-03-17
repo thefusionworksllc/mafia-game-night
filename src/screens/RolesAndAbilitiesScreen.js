@@ -48,7 +48,7 @@ const RolesAndAbilitiesScreen = ({ navigation }) => {
     {
       title: 'Detective',
       description: 'During the night phase, the Detective can investigate one player to determine if they are a member of the Mafia or a Civilian.',
-      icon: 'search',
+      icon: 'visibility',
       image: require('../../assets/detective.png'),
       color: theme.colors.info
     },
@@ -169,17 +169,20 @@ const styles = StyleSheet.create({
     ...theme.shadows.small,
   },
   descriptionContainer: {
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    backgroundColor: 'rgba(20, 20, 30, 0.75)',
     borderRadius: theme.borderRadius.medium,
     padding: theme.spacing.md,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.1)',
+    marginTop: theme.spacing.sm,
   },
   roleDescription: {
     fontSize: theme.typography.sizes.md,
-    color: '#FFFFFF',
-    //lineHeight: theme.typography.lineHeights.relaxed,
-    textShadowColor: 'rgba(0, 0, 0, 0.75)',
+    color: theme.colors.text.primary,
+    lineHeight: 22,
+    textShadowColor: 'rgba(0, 0, 0, 0.5)',
     textShadowOffset: { width: 0, height: 1 },
-    textShadowRadius: 3,
+    textShadowRadius: 2,
     fontWeight: '500',
   },
   buttonContainer: {

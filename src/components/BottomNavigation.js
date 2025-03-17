@@ -135,11 +135,11 @@ const BottomNavigation = ({ navigation, activeScreen }) => {
   return (
     <View style={[
       styles.bottomNav,
-      { paddingBottom: Math.max(insets.bottom, 8) }
+      Platform.OS === 'ios' && { paddingBottom: insets.bottom },
     ]}>
       <LinearGradient
         colors={[
-          'rgba(25, 25, 35, 0.95)',
+          'rgba(25, 25, 35, 0.98)',
           'rgba(18, 18, 30, 0.99)',
         ]}
         style={styles.bottomNavGradient}
@@ -208,12 +208,16 @@ const styles = StyleSheet.create({
     paddingTop: theme.spacing.md,
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.05)',
+    borderBottomWidth: 0,
   },
   bottomNavContent: {
     flexDirection: 'row',
     justifyContent: 'space-around',
     alignItems: 'center',
     paddingHorizontal: theme.spacing.sm,
+    paddingBottom: Platform.OS === 'ios' ? 0 : 8,
   },
   navButton: {
     alignItems: 'center',
@@ -234,7 +238,9 @@ const styles = StyleSheet.create({
     marginBottom: 2,
   },
   activeIconContainer: {
-    backgroundColor: 'rgba(108, 99, 255, 0.15)',
+    backgroundColor: 'rgba(108, 99, 255, 0.2)',
+    borderWidth: 1,
+    borderColor: 'rgba(108, 99, 255, 0.3)',
   },
   navButtonText: {
     color: theme.colors.text.secondary,

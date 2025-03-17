@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   View, 
   StyleSheet, 
@@ -44,6 +44,7 @@ const PlayerRoleScreen = ({ route, navigation }) => {
   const [modalVisible, setModalVisible] = useState(false);
   const [groupedPlayers, setGroupedPlayers] = useState({});
   const insets = useSafeAreaInsets();
+  const [gameData, setGameData] = useState(null);
 
   // Convert role to lowercase for matching
   const normalizedRole = role ? role.toLowerCase() : '';
@@ -129,6 +130,36 @@ const PlayerRoleScreen = ({ route, navigation }) => {
       showError(error.message || 'Failed to continue to game');
     }
   };
+
+  const handleReturnToLobby = () => {
+    try {
+      navigation.replace('GameLobby', {
+        gameCode,
+        isHost,
+        role,
+        totalPlayers: gameData?.settings?.totalPlayers || 0,
+        mafiaCount: gameData?.settings?.mafiaCount || 0,
+        detectiveCount: gameData?.settings?.detectiveCount || 0,
+        doctorCount: gameData?.settings?.doctorCount || 0
+      });
+    } catch (error) {
+      showError(error.message || 'Failed to return to lobby');
+    }
+  };
+
+  // Function to get game data
+  useEffect(() => {
+    const fetchGameData = async () => {
+      try {
+        const data = await gameService.getGameData(gameCode);
+        setGameData(data);
+      } catch (error) {
+        console.error('Error fetching game data:', error);
+      }
+    };
+
+    fetchGameData();
+  }, [gameCode]);
 
   const renderRoleSection = ({ item }) => {
     const roleName = item.key;
@@ -262,9 +293,29 @@ const PlayerRoleScreen = ({ route, navigation }) => {
             <CustomButton
               title="CONTINUE TO GAME"
               onPress={handleContinue}
-              style={styles.continueButton}
               leftIcon={<Icon name="play-arrow" size={20} color={theme.colors.text.primary} />}
+              fullWidth
             />
+            
+            <CustomButton
+              title="RETURN TO LOBBY"
+              onPress={handleReturnToLobby}
+              variant="outline"
+              style={styles.returnButton}
+              leftIcon={<Icon name="meeting-room" size={20} color={theme.colors.text.accent} />}
+              fullWidth
+            />
+            
+            {isHost && (
+              <CustomButton
+                title="END GAME"
+                onPress={handleEndGame}
+                variant="outline"
+                style={styles.endGameButton}
+                leftIcon={<Icon name="cancel" size={20} color={theme.colors.error} />}
+                fullWidth
+              />
+            )}
           </View>
         </ScrollView>
         
@@ -513,6 +564,9 @@ const styles = StyleSheet.create({
     marginTop: theme.spacing.md,
   },
   closeButton: {
+    marginTop: theme.spacing.md,
+  },
+  returnButton: {
     marginTop: theme.spacing.md,
   },
 });

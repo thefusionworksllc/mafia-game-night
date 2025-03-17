@@ -104,6 +104,28 @@ const RoleAssignmentScreen = ({ route, navigation }) => {
     navigation.navigate('GamePlay', { gameCode });
   };
 
+  const handleReturnToLobby = async () => {
+    try {
+      // Check if user is the host
+      const isUserHost = await gameService.isGameHost(gameCode);
+      
+      // Fetch game settings
+      const gameData = await gameService.getGameData(gameCode);
+      const settings = gameData?.settings || {};
+      
+      navigation.replace('GameLobby', {
+        gameCode,
+        isHost: isUserHost,
+        totalPlayers: settings.totalPlayers || 0,
+        mafiaCount: settings.mafiaCount || 0, 
+        detectiveCount: settings.detectiveCount || 0,
+        doctorCount: settings.doctorCount || 0
+      });
+    } catch (error) {
+      showError('Failed to return to lobby: ' + error.message);
+    }
+  };
+
   return (
     <View style={styles.container}>
       <StatusBar translucent backgroundColor="transparent" barStyle="light-content" />
@@ -155,10 +177,11 @@ const RoleAssignmentScreen = ({ route, navigation }) => {
               />
               
               <CustomButton
-                title="BACK TO LOBBY"
-                onPress={() => navigation.goBack()}
+                title="RETURN TO LOBBY"
+                onPress={handleReturnToLobby}
                 variant="outline"
                 style={styles.backButton}
+                leftIcon={<Icon name="meeting-room" size={20} color={theme.colors.text.accent} />}
                 fullWidth
               />
             </View>

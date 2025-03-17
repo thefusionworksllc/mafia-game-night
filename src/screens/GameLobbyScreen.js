@@ -6,7 +6,8 @@ import {
   Alert, 
   FlatList,
   StatusBar,
-  TouchableOpacity
+  TouchableOpacity,
+  BackHandler
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import theme from '../theme'; 
@@ -28,6 +29,16 @@ const GameLobbyScreen = ({ route, navigation }) => {
   const insets = useSafeAreaInsets();
   const { showError } = useError();
 
+  // Add back button handler to navigate to Game History
+  useEffect(() => {
+    const backHandler = BackHandler.addEventListener('hardwareBackPress', () => {
+      navigation.navigate('GameHistory');
+      return true;
+    });
+
+    return () => backHandler.remove();
+  }, [navigation]);
+
   // Check if user is null and handle accordingly
   if (!user) {
     showError('You need to log in to access the game lobby', 'warning');
@@ -38,8 +49,8 @@ const GameLobbyScreen = ({ route, navigation }) => {
   useEffect(() => {
     const unsubscribe = gameService.subscribeToGame(gameCode, (data) => {
       if (!data) {
-        Alert.alert('Game Ended', 'The game has been ended by the host');
-        navigation.replace('Home');
+        showError('Game Ended', 'warning');
+        navigation.replace('GameHistory');
         return;
       }
 
@@ -51,8 +62,8 @@ const GameLobbyScreen = ({ route, navigation }) => {
         const message = data.endReason === 'timeout' 
           ? 'Game has ended due to timeout (2 hours limit)'
           : 'Game has been ended by the host';
-        Alert.alert('Game Ended', message);
-        navigation.replace('Home');
+        showError(message, 'info');
+        navigation.replace('GameHistory');
         return;
       }
 
@@ -79,7 +90,7 @@ const GameLobbyScreen = ({ route, navigation }) => {
     return () => {
       unsubscribe();
     };
-  }, [gameCode, navigation, user.uid, isHost]);
+  }, [gameCode, navigation, user.uid, isHost, showError]);
 
   const handleStartGame = async () => {
     if (players.length < 4) {
@@ -102,7 +113,8 @@ const GameLobbyScreen = ({ route, navigation }) => {
   const handleLeaveGame = async () => {
     try {
       await gameService.leaveGame(gameCode);
-      navigation.navigate('Home');
+      showError('You have left the game', 'info');
+      navigation.navigate('GameHistory');
     } catch (error) {
       showError(error.message || 'Failed to leave the game');
     }
@@ -112,12 +124,22 @@ const GameLobbyScreen = ({ route, navigation }) => {
     setLoading(true);
     try {
       await gameService.endGame(gameCode);
-      navigation.replace('Home');
+      showError('Game ended successfully', 'success');
+      navigation.replace('GameHistory');
     } catch (error) {
       console.error('Error ending game:', error);
-      Alert.alert('Error', error.message || 'Failed to end game');
+      showError(error.message || 'Failed to end game', 'error');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleCopyGameCode = () => {
+    if (navigator && navigator.clipboard) {
+      navigator.clipboard.writeText(gameCode);
+      showError('Game code copied to clipboard!', 'success');
+    } else {
+      showError('Unable to copy game code to clipboard', 'warning');
     }
   };
 
@@ -136,10 +158,15 @@ const GameLobbyScreen = ({ route, navigation }) => {
         <View style={styles.content}>
           <View style={styles.header}>
             <Text style={styles.title}>Game Lobby</Text>
-            <View style={styles.gameCodeContainer}>
+            <TouchableOpacity 
+              style={styles.gameCodeContainer}
+              onPress={handleCopyGameCode}
+              activeOpacity={0.7}
+            >
               <Text style={styles.gameCodeLabel}>Game Code:</Text>
               <Text style={styles.gameCode}>{gameCode}</Text>
-            </View>
+              <Icon name="content-copy" size={18} color={theme.colors.text.accent} style={styles.copyIcon} />
+            </TouchableOpacity>
           </View>
 
           <View style={styles.infoContainer}>
@@ -156,7 +183,7 @@ const GameLobbyScreen = ({ route, navigation }) => {
               </Text>
             </View>
             <View style={styles.infoItem}>
-              <Icon name="search" size={24} color={theme.colors.info} />
+              <Icon name="visibility" size={24} color={theme.colors.info} />
               <Text style={styles.infoText}>
                 Detective: {detectiveCount}
               </Text>
@@ -186,13 +213,13 @@ const GameLobbyScreen = ({ route, navigation }) => {
                   title="START GAME"
                   onPress={handleStartGame}
                   loading={loading}
-                  disabled={players.length < totalPlayers || loading}
+                  disabled={players.length < 4 || loading}
                   leftIcon={<Icon name="play-arrow" size={20} color={theme.colors.text.primary} />}
                   fullWidth
                 />
                 <Text style={styles.waitingText}>
-                  {players.length < totalPlayers 
-                    ? `Waiting for ${totalPlayers - players.length} more player(s)...` 
+                  {players.length < 4 
+                    ? `Waiting for ${4 - players.length} more player(s)...` 
                     : 'All players have joined! You can start the game.'}
                 </Text>
                 <CustomButton
@@ -201,6 +228,14 @@ const GameLobbyScreen = ({ route, navigation }) => {
                   variant="outline"
                   style={styles.endGameButton}
                   leftIcon={<Icon name="cancel" size={20} color={theme.colors.error} />}
+                  fullWidth
+                />
+                <CustomButton
+                  title="RETURN TO HISTORY"
+                  onPress={() => navigation.navigate('GameHistory')}
+                  variant="outline"
+                  style={styles.backButton}
+                  leftIcon={<Icon name="history" size={20} color={theme.colors.text.accent} />}
                   fullWidth
                 />
               </>
@@ -217,6 +252,14 @@ const GameLobbyScreen = ({ route, navigation }) => {
                   variant="outline"
                   style={styles.leaveButton}
                   leftIcon={<Icon name="exit-to-app" size={20} color={theme.colors.error} />}
+                  fullWidth
+                />
+                <CustomButton
+                  title="RETURN TO HISTORY"
+                  onPress={() => navigation.navigate('GameHistory')}
+                  variant="outline"
+                  style={styles.backButton}
+                  leftIcon={<Icon name="history" size={20} color={theme.colors.text.accent} />}
                   fullWidth
                 />
               </>
@@ -390,6 +433,12 @@ const styles = StyleSheet.create({
   endGameButton: {
     marginTop: theme.spacing.md,
     borderColor: theme.colors.error,
+  },
+  copyIcon: {
+    marginLeft: 8,
+  },
+  backButton: {
+    marginTop: theme.spacing.md,
   },
 });
 

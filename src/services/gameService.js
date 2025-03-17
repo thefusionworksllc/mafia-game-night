@@ -443,6 +443,44 @@ export const gameService = {
       throw new Error('Failed to fetch role assignments');
     }
   },
+
+  // Check if a game exists
+  checkGameExists: async (gameCode) => {
+    const db = getDbInstance();
+    const gameRef = ref(db, `games/${gameCode}`);
+    const snapshot = await get(gameRef);
+    return snapshot.exists();
+  },
+
+  // Get a player's role in the game
+  getPlayerRole: async (gameCode, userId) => {
+    if (!userId) userId = auth.currentUser.uid;
+    
+    const db = getDbInstance();
+    const playerRef = ref(db, `games/${gameCode}/players/${userId}`);
+    const snapshot = await get(playerRef);
+    
+    if (!snapshot.exists()) {
+      return null;
+    }
+    
+    const playerData = snapshot.val();
+    return playerData.role;
+  },
+
+  // Check if a user is the host of a game
+  isGameHost: async (gameCode) => {
+    const db = getDbInstance();
+    const gameRef = ref(db, `games/${gameCode}`);
+    const snapshot = await get(gameRef);
+    
+    if (!snapshot.exists()) {
+      return false;
+    }
+    
+    const gameData = snapshot.val();
+    return gameData.hostId === auth.currentUser.uid;
+  },
 };
 
 // Helper function to assign roles

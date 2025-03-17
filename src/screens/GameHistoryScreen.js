@@ -140,6 +140,7 @@ const GameHistoryScreen = ({ navigation }) => {
     const players = Object.values(item.players || {}).filter(player => player.id !== item.hostId);
     const playerCount = players.length;
     const statusColor = getStatusColor(item.status);
+    const currentPlayerRole = item.players && item.players[user.uid]?.role;
 
     return (
       <View style={styles.historyItemContainer}>
@@ -197,32 +198,42 @@ const GameHistoryScreen = ({ navigation }) => {
                 Players: {playerCount}
               </Text>
             </View>
+
+            {/* Show current player's role if game is started or ended */}
+            {(item.status === 'started' || item.status === 'ended') && currentPlayerRole && (
+              <View style={styles.infoRow}>
+                <Icon name={getRoleIcon(currentPlayerRole)} size={18} color={getRoleColor(currentPlayerRole)} />
+                <Text style={styles.roleText}>
+                  Your Role: <Text style={[styles.roleName, { color: getRoleColor(currentPlayerRole) }]}>{currentPlayerRole}</Text>
+                </Text>
+              </View>
+            )}
           </View>
 
           {/* Divider */}
           <View style={styles.divider} />
 
-          {/* Players List */}
+          {/* Players List - Only show players, not their roles */}
           <Text style={styles.sectionTitle}>Players</Text>
           <View style={styles.playersContainer}>
             {players.map((player) => (
               <View key={player.id} style={styles.playerRow}>
-                {item.status === 'ended' && player.role && (
-                  <View style={[styles.roleIconContainer, { backgroundColor: `${getRoleColor(player.role)}40` }]}>
-                    <Icon name={getRoleIcon(player.role)} size={16} color={getRoleColor(player.role)} />
-                  </View>
-                )}
                 <Text style={[
                   styles.playerText,
                   player.id === user.uid ? styles.currentPlayerText : null
                 ]}>
                   {player.name || 'Unknown'}
                 </Text>
-                {/* Show role only if the game status is "Ended" */}
-                {item.status === 'ended' && (
-                  <Text style={[styles.roleText, { color: getRoleColor(player.role) }]}>
-                    {player.role ? player.role : ''}
-                  </Text>
+                {/* Show role only if this is the current user OR host views ended game */}
+                {item.status === 'ended' && player.role && player.id === user.uid && (
+                  <View style={styles.roleContainer}>
+                    <View style={[styles.roleIconContainer, { backgroundColor: `${getRoleColor(player.role)}40` }]}>
+                      <Icon name={getRoleIcon(player.role)} size={16} color={getRoleColor(player.role)} />
+                    </View>
+                    <Text style={[styles.roleText, { color: getRoleColor(player.role) }]}>
+                      {player.role}
+                    </Text>
+                  </View>
                 )}
               </View>
             ))}
@@ -231,19 +242,21 @@ const GameHistoryScreen = ({ navigation }) => {
           {/* Action Buttons */}
           {item.status !== 'ended' && (
             <View style={styles.actionButtonsContainer}>
-              <CustomButton
-                title="End Game"
-                onPress={() => {
-                  setSelectedGame(item);
-                  setModalVisible(true);
-                }}
-                variant="outline"
-                style={styles.actionButton}
-                leftIcon={<Icon name="stop" size={18} color={theme.colors.error} />}
-              />
+              {item.hostId === user.uid && (
+                <CustomButton
+                  title="End Game"
+                  onPress={() => {
+                    setSelectedGame(item);
+                    setModalVisible(true);
+                  }}
+                  variant="outline"
+                  style={styles.actionButton}
+                  leftIcon={<Icon name="stop" size={18} color={theme.colors.error} />}
+                />
+              )}
               
               <CustomButton
-                title="Back to Lobby"
+                title="Return to Lobby"
                 onPress={() => handleRejoinGame(item.gameCode)}
                 style={styles.actionButton}
                 leftIcon={<Icon name="meeting-room" size={18} color={theme.colors.text.primary} />}
@@ -571,6 +584,13 @@ const styles = StyleSheet.create({
     marginBottom: theme.spacing.md,
   },
   cancelButton: {
+  },
+  roleContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  roleName: {
+    fontWeight: theme.typography.weights.bold,
   },
 });
 

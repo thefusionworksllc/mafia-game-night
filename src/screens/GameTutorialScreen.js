@@ -83,28 +83,28 @@ const GameTutorialScreen = ({ navigation }) => {
       title: 'Mafia',
       description: 'During the night phase, Mafia members secretly choose a civilian to eliminate. During the day phase, they must blend in and avoid suspicion.',
       icon: 'security',
-      image: require('../../assets/mafia.png'),
+      image: require('../../assets/roles/mafia.png'),
       color: theme.colors.tertiary
     },
     {
       title: 'Detective',
       description: 'During the night phase, the Detective can investigate one player to determine if they are a member of the Mafia or a Civilian.',
       icon: 'visibility',
-      image: require('../../assets/detective.png'),
+      image: require('../../assets/roles/detective.png'),
       color: theme.colors.info
     },
     {
       title: 'Doctor',
       description: 'During the night phase, the Doctor can choose one player to protect from elimination. The Doctor can save themselves.',
       icon: 'healing',
-      image: require('../../assets/doctor.png'),
+      image: require('../../assets/roles/doctor.png'),
       color: theme.colors.success
     },
     {
       title: 'Civilian',
       description: 'Civilians must work together during the day phase to identify and vote out Mafia members before they are outnumbered.',
       icon: 'people',
-      image: require('../../assets/civilian.png'),
+      image: require('../../assets/roles/civilian.png'),
       color: theme.colors.primary
     }
   ];
@@ -249,7 +249,7 @@ const styles = StyleSheet.create({
   },
   roleImage: {
     width: '100%',
-    height: 180,
+    height: 250,
     borderRadius: theme.borderRadius.medium,
     marginBottom: theme.spacing.md,
     ...theme.shadows.small,

@@ -315,7 +315,7 @@ const HostGameScreen = ({ navigation }) => {
                     maxValue={2}
                     onIncrement={incrementDetective}
                     onDecrement={decrementDetective}
-                    icon="search"
+                    icon="visibility"
                     description="Detectives can investigate players (0-2)"
                   />
                   
@@ -357,7 +357,7 @@ const HostGameScreen = ({ navigation }) => {
                       style={styles.roleCardGradient}
                     >
                       <View style={[styles.roleIconContainer, { backgroundColor: `${theme.colors.info}30` }]}>
-                        <Icon name="search" size={24} color={theme.colors.info} />
+                        <Icon name="visibility" size={24} color={theme.colors.info} />
                       </View>
                       <Text style={styles.roleName}>Detective</Text>
                       <View style={styles.roleCountContainer}>
@@ -492,7 +492,7 @@ const styles = StyleSheet.create({
     borderRadius: theme.borderRadius.medium,
     alignItems: 'center',
     justifyContent: 'center',
-    height: 80,
+    height: 100,
   },
   roleIconContainer: {
     width: 40,

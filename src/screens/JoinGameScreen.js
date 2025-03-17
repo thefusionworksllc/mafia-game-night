@@ -10,7 +10,8 @@ import {
   TouchableWithoutFeedback,
   Keyboard,
   Dimensions,
-  Animated
+  Animated,
+  ScrollView
 } from 'react-native';
 import { Input } from 'react-native-elements';
 import theme from '../theme';
@@ -99,7 +100,10 @@ const JoinGameScreen = ({ navigation }) => {
           style={styles.keyboardAvoidingView}
         >
           <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-            <View style={[styles.contentContainer, { paddingTop: insets.top + theme.spacing.md }]}>
+            <ScrollView
+              contentContainerStyle={[styles.contentContainer, { paddingTop: insets.top + theme.spacing.md }]}
+              showsVerticalScrollIndicator={false}
+            >
               <Animated.View 
                 style={[
                   styles.welcomeSection,
@@ -204,7 +208,7 @@ const JoinGameScreen = ({ navigation }) => {
                   </Text>
                 </View>
               </Animated.View>
-            </View>
+            </ScrollView>
           </TouchableWithoutFeedback>
         </KeyboardAvoidingView>
       </ModernBackground>

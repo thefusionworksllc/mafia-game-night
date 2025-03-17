@@ -31,7 +31,7 @@ const roleImages = {
 const roleIcons = {
   civilian: 'people',
   mafia: 'person',
-  detective: 'search',
+  detective: 'visibility',
   doctor: 'healing',
 };
 

@@ -101,7 +101,11 @@ const HomeScreen = ({ navigation }) => {
           {/* Welcome Section */}
           <View style={styles.welcomeSection}>
             <Text style={styles.welcomeText}>Welcome to</Text>
-            <Text style={styles.appTitle}>Mafia Game Night</Text>
+            <View style={styles.appTitleContainer}>
+              <Icon name="security" size={30} color={theme.colors.warning } />
+              <Text style={styles.appTitle}>Mafia</Text>
+            </View>
+            <Text style={styles.welcomeText} >The Game Night</Text>
             {isLoggedIn ? (
               <View style={styles.userInfoContainer}>
                 <Icon name="account-circle" size={20} color={theme.colors.primary} />
@@ -229,6 +233,10 @@ const styles = StyleSheet.create({
     fontSize: theme.typography.sizes.lg,
     color: theme.colors.text.secondary,
     fontWeight: theme.typography.weights.medium,
+  },
+  appTitleContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   appTitle: {
     fontSize: theme.typography.sizes.display,

@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
-import { View, Text, Alert, ImageBackground, StyleSheet } from 'react-native';
-import { Input, Button } from 'react-native-elements';
+import { View, Text, Alert, ImageBackground, StyleSheet, ScrollView, StatusBar } from 'react-native';
+import { Input } from 'react-native-elements';
 import { LinearGradient } from 'expo-linear-gradient';
 import theme from '../../theme'; // Import the theme
 import { auth } from '../../config/firebase'; // Import Firebase auth
 import { sendPasswordResetEmail } from 'firebase/auth'; // Import reset email function
 import { Icon } from 'react-native-elements'; 
-import { Image } from 'react-native';
 import CustomButton from '../../components/CustomButton'; // Import CustomButton
+import ModernBackground from '../../components/ModernBackground';
 
 const ForgotPasswordScreen = ({ navigation }) => {
   const [email, setEmail] = useState('');
@@ -32,18 +32,13 @@ const ForgotPasswordScreen = ({ navigation }) => {
   };
 
   return (
-    <ImageBackground
-      source={require('../../../assets/background.png')}
-      style={theme.commonStyles.content}
-      resizeMode="cover"
-    >
-      <LinearGradient
-        colors={theme.gradients.background}
-        style={theme.commonStyles.container}
-      >
-                
-        <View style={theme.commonStyles.card}>
-          <Icon name="lock-reset" size={80} color={theme.colors.text.accent} />
+    <View style={theme.commonStyles.container}>
+      <StatusBar translucent backgroundColor="transparent" barStyle="light-content" />
+      <ModernBackground>
+        <ScrollView contentContainerStyle={theme.commonStyles.content}>
+          <View style={theme.commonStyles.logoContainer}>
+            <Icon name="lock-reset" size={80} color={theme.colors.text.accent} />
+          </View>
           <Text style={styles.title}>Reset Password</Text>
           <Text style={styles.subtitle}>
             Enter your email address and we'll send you instructions to reset your password.
@@ -55,9 +50,11 @@ const ForgotPasswordScreen = ({ navigation }) => {
             onChangeText={setEmail}
             keyboardType="email-address"
             autoCapitalize="none"
-            leftIcon={
-              <Icon name="email" size={24} color={theme.colors.text.secondary} />
-            }
+            leftIcon={{ 
+              type: 'material',
+              name: 'email',
+              color: theme.colors.text.secondary 
+            }}
             containerStyle={styles.inputContainer}
             inputStyle={styles.input}
           />
@@ -68,26 +65,19 @@ const ForgotPasswordScreen = ({ navigation }) => {
             loading={loading}
           />
 
-          <Button
+          <CustomButton
             title="Back to Login"
             onPress={() => navigation.goBack()}
-            type="clear"
-            titleStyle={styles.linkButton}
-
+            variant="outline"
+            style={styles.linkButton}
           />
-        </View>
-      </LinearGradient>
-    </ImageBackground>
+        </ScrollView>
+      </ModernBackground>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: theme.spacing.xl,
-  },
   title: {
     fontSize: theme.typography.sizes.xxl,
     fontWeight: theme.typography.weights.bold,
@@ -106,19 +96,6 @@ const styles = StyleSheet.create({
     marginBottom: theme.spacing.lg,
   },
   input: {
-    color: theme.colors.text.primary,
-  },
-  button: {
-    backgroundColor: theme.colors.primary,
-    borderRadius: 25,
-    paddingVertical: theme.spacing.md,
-    paddingHorizontal: theme.spacing.xl,
-    marginBottom: theme.spacing.md,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  buttonText: {
-    fontSize: theme.typography.sizes.xl,
     color: theme.colors.text.primary,
   },
   linkButton: {

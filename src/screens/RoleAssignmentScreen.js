@@ -68,7 +68,7 @@ const RoleAssignmentScreen = ({ route, navigation }) => {
       case 'mafia':
         return 'person';
       case 'detective':
-        return 'search';
+        return 'visibility';
       case 'doctor':
         return 'healing';
       default:

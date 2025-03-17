@@ -90,9 +90,6 @@ const AnimatedControl = ({
           ]}
         >
           <Text style={styles.controlValue}>{value}</Text>
-          {maxValue && (
-            <Text style={styles.controlMaxValue}>Max: {maxValue}</Text>
-          )}
         </Animated.View>
 
         <TouchableOpacity 
@@ -297,7 +294,6 @@ const HostGameScreen = ({ navigation }) => {
               />
               
               {/* Role Distribution */}
-              <Text style={styles.roleDistributionTitle}>Role Distribution</Text>
               
               <View style={styles.rolesContainer}>
                 <View style={styles.roleControls}>
@@ -448,22 +444,22 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   section: {
-    marginBottom: theme.spacing.lg,
+    marginBottom: theme.spacing.md,
   },
   sectionTitle: {
-    fontSize: theme.typography.sizes.xl,
+    fontSize: theme.typography.sizes.lg,
     fontWeight: theme.typography.weights.bold,
     color: theme.colors.text.accent,
     marginBottom: theme.spacing.xs,
   },
   roleDistributionTitle: {
-    fontSize: theme.typography.sizes.xl,
+    fontSize: theme.typography.sizes.lg,
     fontWeight: theme.typography.weights.bold,
     color: theme.colors.text.accent,
     marginBottom: theme.spacing.md,
   },
   rolesContainer: {
-    marginBottom: theme.spacing.lg,
+    marginBottom: theme.spacing.md,
   },
   roleControls: {
     flexDirection: 'column',
@@ -485,18 +481,18 @@ const styles = StyleSheet.create({
     marginBottom: theme.spacing.md,
   },
   roleCard: {
-    width: '48%',
+    width: '45%',
     marginBottom: theme.spacing.md,
     borderRadius: theme.borderRadius.medium,
     overflow: 'hidden',
     ...theme.shadows.small,
   },
   roleCardGradient: {
-    padding: theme.spacing.md,
+    padding: theme.spacing.sm,
     borderRadius: theme.borderRadius.medium,
     alignItems: 'center',
     justifyContent: 'center',
-    height: 100,
+    height: 80,
   },
   roleIconContainer: {
     width: 40,
@@ -507,7 +503,7 @@ const styles = StyleSheet.create({
     marginBottom: theme.spacing.xs,
   },
   roleName: {
-    fontSize: theme.typography.sizes.md,
+    fontSize: theme.typography.sizes.sm,
     fontWeight: theme.typography.weights.bold,
     color: theme.colors.text.primary,
     marginBottom: theme.spacing.xs,
@@ -516,7 +512,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   roleCount: {
-    fontSize: theme.typography.sizes.xl,
+    fontSize: theme.typography.sizes.lg,
     fontWeight: theme.typography.weights.bold,
   },
   maxLabel: {

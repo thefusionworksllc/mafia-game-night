@@ -262,7 +262,7 @@ const styles = StyleSheet.create({
   roleDescription: {
     fontSize: theme.typography.sizes.md,
     color: '#FFFFFF',
-    lineHeight: theme.typography.lineHeights.relaxed,
+    // lineHeight: theme.typography.lineHeights.relaxed,
     textShadowColor: 'rgba(0, 0, 0, 0.75)',
     textShadowOffset: { width: 0, height: 1 },
     textShadowRadius: 3,
@@ -305,7 +305,7 @@ const styles = StyleSheet.create({
   phaseDescription: {
     fontSize: theme.typography.sizes.md,
     color: '#FFFFFF',
-    lineHeight: theme.typography.lineHeights.relaxed,
+    // lineHeight: theme.typography.lineHeights.relaxed,
     textShadowColor: 'rgba(0, 0, 0, 0.75)',
     textShadowOffset: { width: 0, height: 1 },
     textShadowRadius: 3,
@@ -348,7 +348,7 @@ const styles = StyleSheet.create({
   winDescription: {
     fontSize: theme.typography.sizes.md,
     color: '#FFFFFF',
-    lineHeight: theme.typography.lineHeights.relaxed,
+    // lineHeight: theme.typography.lineHeights.relaxed,
     textShadowColor: 'rgba(0, 0, 0, 0.75)',
     textShadowOffset: { width: 0, height: 1 },
     textShadowRadius: 3,

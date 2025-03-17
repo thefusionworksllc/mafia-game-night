@@ -6,7 +6,11 @@
     "start": "expo start",
     "android": "expo start --android",
     "ios": "expo start --ios",
-    "web": "expo start --web"
+    "web": "expo start --web",
+    "build": "npx expo export",
+    "build:web": "npx expo export -p web",
+    "predeploy": "node fix-deploy.js",
+    "deploy": "npm run build && npm run predeploy"
   },
   "dependencies": {
     "@expo/metro-runtime": "~4.0.1",

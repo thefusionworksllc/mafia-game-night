@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { 
   View, 
   StyleSheet, 
@@ -28,6 +28,17 @@ const GameLobbyScreen = ({ route, navigation }) => {
   const { user } = useAuth();
   const insets = useSafeAreaInsets();
   const { showError } = useError();
+
+  // Get actual players (excluding host)
+  const actualPlayers = useMemo(() => {
+    return players.filter(player => !player.isHost);
+  }, [players]);
+
+  // Get the required number of players for this game (excluding host)
+  const requiredPlayers = useMemo(() => {
+    // totalPlayers includes the host in the setting, so we subtract 1
+    return totalPlayers - 1;
+  }, [totalPlayers]);
 
   // Add back button handler to navigate to Game History
   useEffect(() => {
@@ -93,8 +104,15 @@ const GameLobbyScreen = ({ route, navigation }) => {
   }, [gameCode, navigation, user.uid, isHost, showError]);
 
   const handleStartGame = async () => {
+    // Check if we have at least 4 players total (3 players + host) for minimum game requirements
     if (players.length < 4) {
-      showError('At least 4 players are required to start the game', 'warning');
+      showError('At least 4 participants (including host) are required to start the game', 'warning');
+      return;
+    }
+
+    // Check if we have enough non-host players based on game settings
+    if (actualPlayers.length < requiredPlayers) {
+      showError(`Waiting for ${requiredPlayers - actualPlayers.length} more player(s)...`, 'warning');
       return;
     }
 
@@ -143,8 +161,17 @@ const GameLobbyScreen = ({ route, navigation }) => {
     }
   };
 
+  // Sort players to show host at the top
+  const sortedPlayers = useMemo(() => {
+    return [...players].sort((a, b) => {
+      if (a.isHost) return -1;
+      if (b.isHost) return 1;
+      return 0;
+    });
+  }, [players]);
+
   const renderPlayer = ({ item }) => (
-    <View style={styles.playerItem}>
+    <View style={[styles.playerItem, item.isHost && styles.hostPlayerItem]}>
       <Text style={[styles.playerName, item.isHost && styles.hostName]}>
         {item.name} {item.isHost ? '(Host)' : ''}
       </Text>
@@ -173,7 +200,7 @@ const GameLobbyScreen = ({ route, navigation }) => {
             <View style={styles.infoItem}>
               <Icon name="people" size={24} color={theme.colors.primary} />
               <Text style={styles.infoText}>
-                Players: {players.length}/{totalPlayers}
+                Players: {actualPlayers.length}/{requiredPlayers}
               </Text>
             </View>
             <View style={styles.infoItem}>
@@ -197,9 +224,9 @@ const GameLobbyScreen = ({ route, navigation }) => {
           </View>
 
           <View style={styles.playersSection}>
-            <Text style={styles.sectionTitle}>Players</Text>
+            <Text style={styles.sectionTitle}>Participants</Text>
             <FlatList
-              data={players}
+              data={sortedPlayers}
               keyExtractor={(item) => item.id}
               renderItem={renderPlayer}
               contentContainerStyle={styles.playersList}
@@ -213,13 +240,13 @@ const GameLobbyScreen = ({ route, navigation }) => {
                   title="START GAME"
                   onPress={handleStartGame}
                   loading={loading}
-                  disabled={players.length < 4 || loading}
+                  disabled={actualPlayers.length < requiredPlayers || loading}
                   leftIcon={<Icon name="play-arrow" size={20} color={theme.colors.text.primary} />}
                   fullWidth
                 />
                 <Text style={styles.waitingText}>
-                  {players.length < 4 
-                    ? `Waiting for ${4 - players.length} more player(s)...` 
+                  {actualPlayers.length < requiredPlayers
+                    ? `Waiting for ${requiredPlayers - actualPlayers.length} more player(s)...` 
                     : 'All players have joined! You can start the game.'}
                 </Text>
                 <CustomButton
@@ -242,8 +269,8 @@ const GameLobbyScreen = ({ route, navigation }) => {
             ) : (
               <>
                 <Text style={styles.waitingText}>
-                  {players.length < totalPlayers 
-                    ? `Waiting for ${totalPlayers - players.length} more player(s)...` 
+                  {actualPlayers.length < requiredPlayers
+                    ? `Waiting for ${requiredPlayers - actualPlayers.length} more player(s)...` 
                     : 'All players have joined! Waiting for host to start the game.'}
                 </Text>
                 <CustomButton
@@ -349,6 +376,10 @@ const styles = StyleSheet.create({
     marginBottom: theme.spacing.sm,
     borderWidth: 1,
     borderColor: theme.colors.text.secondary + '40',
+  },
+  hostPlayerItem: {
+    backgroundColor: 'rgba(187, 134, 252, 0.2)',
+    borderColor: theme.colors.primary + '60',
   },
   playerName: {
     fontSize: theme.typography.sizes.md,

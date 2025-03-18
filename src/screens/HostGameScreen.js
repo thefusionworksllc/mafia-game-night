@@ -231,7 +231,7 @@ const HostGameScreen = ({ navigation }) => {
 
     // Validate player count
     if (totalPlayers < 4) {
-      showError('You need at least 4 players to start a game');
+      showError('You need at least 4 participants (including you as host) to start a game');
       return;
     }
 
@@ -288,20 +288,35 @@ const HostGameScreen = ({ navigation }) => {
             <View style={styles.section}>
               <Text style={styles.sectionTitle}>Game Settings</Text>
               
+              {/* Host Information */}
+              <View style={styles.hostInfoContainer}>
+                <Icon name="stars" size={24} color={theme.colors.primary} />
+                <Text style={styles.hostInfoText}>
+                  You will be the host of this game (not counted as a player for role assignments)
+                </Text>
+              </View>
+              
               {/* Total Players Control */}
               <AnimatedControl
-                label="Total Players"
+                label="Total Participants"
                 value={totalPlayers}
                 minValue={4}
                 maxValue={12}
                 onIncrement={incrementTotalPlayers}
                 onDecrement={decrementTotalPlayers}
                 icon="group"
-                description="Number of players in the game (4-12)"
+                description="Number of participants including you as host and players (4-12)"
               />
               
-              {/* Role Distribution */}
+              {/* Actual Players Count */}
+              <View style={styles.playerCountInfo}>
+                <Icon name="people" size={20} color={theme.colors.info} />
+                <Text style={styles.playerCountText}>
+                  Players receiving roles: {totalPlayers - 1} ({totalPlayers} total participants - 1 host)
+                </Text>
+              </View>
               
+              {/* Role Distribution */}
               <View style={styles.rolesContainer}>
                 <View style={styles.roleControls}>
                   <AnimatedControl
@@ -616,6 +631,31 @@ const styles = StyleSheet.create({
   roleDescription: {
     fontSize: theme.typography.sizes.sm,
     color: theme.colors.text.secondary,
+  },
+  hostInfoContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(108, 99, 255, 0.1)',
+    borderRadius: theme.borderRadius.medium,
+    padding: theme.spacing.md,
+    marginBottom: theme.spacing.md,
+  },
+  hostInfoText: {
+    flex: 1,
+    marginLeft: theme.spacing.sm,
+    fontSize: theme.typography.sizes.sm,
+    color: theme.colors.text.secondary,
+  },
+  playerCountInfo: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: theme.spacing.md,
+    paddingHorizontal: theme.spacing.md,
+  },
+  playerCountText: {
+    marginLeft: theme.spacing.sm,
+    fontSize: theme.typography.sizes.sm,
+    color: theme.colors.info,
   },
 });
 

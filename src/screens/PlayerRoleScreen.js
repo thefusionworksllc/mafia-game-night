@@ -85,6 +85,44 @@ const PlayerRoleScreen = ({ route, navigation }) => {
     }
   };
 
+  // Function to get role color based on role name
+  const getRoleColor = (role) => {
+    const normalizedRole = role?.toLowerCase();
+    if (roleData[normalizedRole]) {
+      return roleData[normalizedRole].color;
+    }
+    switch(normalizedRole) {
+      case 'mafia':
+        return theme.colors.tertiary;
+      case 'detective':
+        return theme.colors.info;
+      case 'doctor':
+        return theme.colors.success;
+      case 'civilian':
+        return theme.colors.primary;
+      default:
+        return theme.colors.text.secondary;
+    }
+  };
+
+  // Function to get role description based on role name
+  const getRoleDescription = (role) => {
+    const normalizedRole = role?.toLowerCase();
+    if (roleData[normalizedRole]) {
+      return roleData[normalizedRole].description;
+    }
+    switch(normalizedRole) {
+      case 'mafia':
+        return 'Eliminate civilians without being caught';
+      case 'detective':
+        return 'Investigate players to find the mafia';
+      case 'doctor':
+        return 'Save one player each night from elimination';
+      default:
+        return 'Vote to eliminate suspected mafia members';
+    }
+  };
+
   const handleViewAllRoles = async () => {
     try {
       const gameData = await gameService.getGameData(gameCode);
@@ -276,14 +314,14 @@ const PlayerRoleScreen = ({ route, navigation }) => {
               <View style={styles.instructionsCard}>
                 <Text style={styles.sectionTitle}>Your Objective</Text>
                 <Text style={styles.instructionsText}>
-                  {getRoleObjective(normalizedRole)}
+                  {getRoleDescription(normalizedRole)}
                 </Text>
               </View>
               
               <View style={styles.instructionsCard}>
                 <Text style={styles.sectionTitle}>Game Instructions</Text>
                 <Text style={styles.instructionsText}>
-                  {getGameInstructions(normalizedRole)}
+                  {getRoleDescription(normalizedRole)}
                 </Text>
               </View>
             </View>
@@ -398,7 +436,7 @@ const styles = StyleSheet.create({
     fontSize: theme.typography.sizes.md,
     color: theme.colors.text.secondary,
     textAlign: 'center',
-    lineHeight: theme.typography.lineHeights.relaxed,
+   // lineHeight: theme.typography.lineHeights.relaxed,
   },
   hostText: {
     fontSize: theme.typography.sizes.lg,
@@ -558,7 +596,7 @@ const styles = StyleSheet.create({
     fontSize: theme.typography.sizes.md,
     color: theme.colors.text.secondary,
     textAlign: 'center',
-    lineHeight: theme.typography.lineHeights.relaxed,
+    //lineHeight: theme.typography.lineHeights.relaxed,
   },
   continueButton: {
     marginTop: theme.spacing.md,

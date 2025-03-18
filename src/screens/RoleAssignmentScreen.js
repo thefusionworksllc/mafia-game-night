@@ -270,7 +270,7 @@ const styles = StyleSheet.create({
   roleDescription: {
     fontSize: theme.typography.sizes.sm,
     color: theme.colors.text.secondary,
-    lineHeight: theme.typography.lineHeights.relaxed,
+   // lineHeight: theme.typography.lineHeights.relaxed,
   },
   loadingText: {
     textAlign: 'center',

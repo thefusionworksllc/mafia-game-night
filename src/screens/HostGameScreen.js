@@ -524,7 +524,7 @@ const styles = StyleSheet.create({
     borderRadius: theme.borderRadius.medium,
     alignItems: 'center',
     justifyContent: 'center',
-    height: 80,
+    height: 100,
   },
   roleIconContainer: {
     width: 32,

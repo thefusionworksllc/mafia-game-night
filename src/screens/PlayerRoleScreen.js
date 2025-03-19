@@ -152,39 +152,30 @@ const PlayerRoleScreen = ({ route, navigation }) => {
     }
   };
 
-  const handleContinue = () => {
+  const handleReturnToLobby = async () => {
     try {
-      if (isHost) {
-        // Host controls game phases
-        navigation.replace('GameControl', { 
-          gameCode
-        });
-      } else {
-        // Regular players go to game play screen
-        navigation.replace('GamePlay', { 
-          gameCode,
-          role 
-        });
-      }
+      // Check if user is the host
+      const isUserHost = await gameService.isGameHost(gameCode);
+      
+      // Fetch game settings
+      const gameData = await gameService.getGameData(gameCode);
+      const settings = gameData?.settings || {};
+      
+      navigation.replace('GameLobby', {
+        gameCode,
+        isHost: isUserHost,
+        totalPlayers: settings.totalPlayers || 0,
+        mafiaCount: settings.mafiaCount || 0, 
+        detectiveCount: settings.detectiveCount || 0,
+        doctorCount: settings.doctorCount || 0
+      });
     } catch (error) {
-      showError(error.message || 'Failed to continue to game');
+      showError('Failed to return to lobby: ' + (error.message || 'Unknown error'));
     }
   };
 
-  const handleReturnToLobby = () => {
-    try {
-      navigation.replace('GameLobby', {
-        gameCode,
-        isHost,
-        role,
-        totalPlayers: gameData?.settings?.totalPlayers || 0,
-        mafiaCount: gameData?.settings?.mafiaCount || 0,
-        detectiveCount: gameData?.settings?.detectiveCount || 0,
-        doctorCount: gameData?.settings?.doctorCount || 0
-      });
-    } catch (error) {
-      showError(error.message || 'Failed to return to lobby');
-    }
+  const handleViewGameHistory = () => {
+    navigation.navigate('GameHistory');
   };
 
   // Function to get game data
@@ -251,99 +242,110 @@ const PlayerRoleScreen = ({ route, navigation }) => {
           
           {isHost ? (
             <View style={styles.hostContainer}>
-              <Text style={styles.hostText}>
-                You are the Game Host
-              </Text>
+              <Icon name="stars" size={48} color={theme.colors.primary} />
+              <Text style={styles.hostTitle}>You are the Host</Text>
+              <Text style={styles.hostName}>{user?.displayName || 'Unknown'}</Text>
               <Text style={styles.hostDescription}>
-                As the host, you can see all player roles and monitor the game progress.
+                As the host, you will guide players through the game and see all roles.
               </Text>
-              
-              <View style={styles.roleDistributionCard}>
-                <Text style={styles.sectionTitle}>Role Distribution</Text>
-                <View style={styles.rolesList}>
-                  {Object.entries(groupedPlayers).map(([role, players]) => (
-                    <View key={role} style={styles.roleGroup}>
-                      <View style={styles.roleHeader}>
-                        <Icon 
-                          name={roleIcons[role.toLowerCase()] || 'person'} 
-                          size={24} 
-                          color={getRoleColor(role)}
-                        />
-                        <Text style={styles.roleName}>{role} ({players.length})</Text>
-                      </View>
-                      {players.map(player => (
-                        <Text key={player.id} style={styles.playerName}>
-                          {player.name}
-                        </Text>
-                      ))}
-                    </View>
-                  ))}
-                </View>
-              </View>
-              
-              <CustomButton
-                title="VIEW PLAYER ACTIONS"
-                onPress={() => setModalVisible(true)}
-                style={styles.actionButton}
-                leftIcon={<Icon name="visibility" size={20} color={theme.colors.text.primary} />}
-              />
+              {isHost && (
+                <CustomButton
+                  title="VIEW ALL ROLES"
+                  onPress={handleViewAllRoles}
+                  leftIcon={<Icon name="visibility" size={20} color={theme.colors.text.primary} />}
+                  style={styles.viewRolesButton}
+                />
+              )}
             </View>
           ) : (
             <View style={styles.playerContainer}>
-              <View style={styles.roleCard}>
+              <Text style={styles.playerName}>{user?.displayName || 'Unknown'}</Text>
+              <View style={[styles.roleInfoCard, { borderColor: getRoleColor(normalizedRole) }]}>
                 <LinearGradient
-                  colors={theme.gradients.card}
-                  style={styles.roleCardGradient}
+                  colors={[`${getRoleColor(normalizedRole)}40`, `${getRoleColor(normalizedRole)}15`]}
+                  style={styles.roleGradient}
                 >
                   <View style={styles.roleImageContainer}>
                     <Image 
-                      source={roleImages[normalizedRole] || roleImages.civilian}
-                      style={styles.roleImage}
+                      source={roleImages[normalizedRole]} 
+                      style={styles.roleImage} 
                       resizeMode="contain"
                     />
                   </View>
-                  
-                  <Text style={styles.roleName}>
-                    {role || 'Civilian'}
+                  <Text style={[styles.roleName, { color: getRoleColor(normalizedRole) }]}>
+                    {roleData[normalizedRole]?.name || role}
                   </Text>
-                  
+                  <View style={styles.divider} />
                   <Text style={styles.roleDescription}>
-                    {getRoleDescription(normalizedRole)}
+                    {roleData[normalizedRole]?.description || 'No description available.'}
+                  </Text>
+                  <View style={styles.abilityContainer}>
+                    <Icon name="flash-on" size={24} color={getRoleColor(normalizedRole)} />
+                    <Text style={styles.abilityTitle}>Your Ability:</Text>
+                  </View>
+                  <Text style={styles.abilityText}>
+                    {roleData[normalizedRole]?.ability || 'No special ability.'}
                   </Text>
                 </LinearGradient>
               </View>
-              
-              <View style={styles.instructionsCard}>
-                <Text style={styles.sectionTitle}>Your Objective</Text>
-                <Text style={styles.instructionsText}>
-                  {getRoleDescription(normalizedRole)}
-                </Text>
-              </View>
-              
-              <View style={styles.instructionsCard}>
-                <Text style={styles.sectionTitle}>Game Instructions</Text>
-                <Text style={styles.instructionsText}>
-                  {getRoleDescription(normalizedRole)}
-                </Text>
-              </View>
             </View>
           )}
+
+          {/* Modal to view all roles */}
+          <Modal
+            visible={modalVisible}
+            transparent={true}
+            animationType="fade"
+            onRequestClose={() => setModalVisible(false)}
+          >
+            <View style={styles.modalOverlay}>
+              <View style={styles.modalContent}>
+                <LinearGradient
+                  colors={theme.gradients.modalBackground}
+                  style={styles.modalGradient}
+                >
+                  <View style={styles.modalHeader}>
+                    <Text style={styles.modalTitle}>All Player Roles</Text>
+                    <TouchableOpacity 
+                      style={styles.closeButton}
+                      onPress={() => setModalVisible(false)}
+                    >
+                      <Icon name="close" size={24} color={theme.colors.text.secondary} />
+                    </TouchableOpacity>
+                  </View>
+                  
+                  <FlatList
+                    data={Object.entries(groupedPlayers).map(([key, value]) => ({
+                      key,
+                      data: value
+                    }))}
+                    renderItem={renderRoleSection}
+                    keyExtractor={(item) => item.key}
+                    style={styles.modalList}
+                    contentContainerStyle={styles.modalListContent}
+                  />
+                </LinearGradient>
+              </View>
+            </View>
+          </Modal>
           
           <View style={styles.buttonContainer}>
             <CustomButton
-              title="CONTINUE TO GAME"
-              onPress={handleContinue}
-              leftIcon={<Icon name="play-arrow" size={20} color={theme.colors.text.primary} />}
+              title="RETURN TO LOBBY"
+              onPress={handleReturnToLobby}
+              leftIcon={<Icon name="arrow-back" size={20} color={theme.colors.text.accent} />}
+              variant="outline"
               fullWidth
+              style={styles.returnButton}
             />
             
             <CustomButton
-              title="RETURN TO LOBBY"
-              onPress={handleReturnToLobby}
+              title="BACK TO HISTORY"
+              onPress={handleViewGameHistory}
               variant="outline"
-              style={styles.returnButton}
-              leftIcon={<Icon name="meeting-room" size={20} color={theme.colors.text.accent} />}
+              leftIcon={<Icon name="history" size={20} color={theme.colors.text.accent} />}
               fullWidth
+              style={styles.historyButton}
             />
             
             {isHost && (
@@ -352,35 +354,12 @@ const PlayerRoleScreen = ({ route, navigation }) => {
                 onPress={handleEndGame}
                 variant="outline"
                 style={styles.endGameButton}
-                leftIcon={<Icon name="cancel" size={20} color={theme.colors.error} />}
+                leftIcon={<Icon name="stop" size={20} color={theme.colors.error} />}
                 fullWidth
               />
             )}
           </View>
         </ScrollView>
-        
-        {/* Modal for host to view player actions */}
-        <Modal
-          animationType="slide"
-          transparent={true}
-          visible={modalVisible}
-          onRequestClose={() => setModalVisible(false)}
-        >
-          <View style={styles.modalContainer}>
-            <View style={styles.modalContent}>
-              <Text style={styles.modalTitle}>Player Actions</Text>
-              
-              {/* Modal content here */}
-              
-              <CustomButton
-                title="CLOSE"
-                onPress={() => setModalVisible(false)}
-                variant="outline"
-                style={styles.closeButton}
-              />
-            </View>
-          </View>
-        </Modal>
       </ModernBackground>
       <BottomNavigation navigation={navigation} activeScreen="Home" />
     </View>
@@ -530,84 +509,110 @@ const styles = StyleSheet.create({
     marginBottom: theme.spacing.xs,
   },
   playerName: {
-    fontSize: theme.typography.sizes.md,
-    color: theme.colors.text.primary,
-  },
-  hostContainer: {
-    padding: theme.spacing.lg,
-    backgroundColor: theme.colors.card.background,
-    borderRadius: theme.borderRadius.large,
-    alignItems: 'center',
-    ...theme.shadows.medium,
-  },
-  hostDescription: {
-    fontSize: theme.typography.sizes.lg,
-    color: theme.colors.text.secondary,
-    marginBottom: theme.spacing.lg,
-  },
-  roleDistributionCard: {
-    padding: theme.spacing.lg,
-    backgroundColor: theme.colors.card.background,
-    borderRadius: theme.borderRadius.large,
-    marginBottom: theme.spacing.lg,
-    ...theme.shadows.medium,
-  },
-  sectionTitle: {
     fontSize: theme.typography.sizes.xl,
     fontWeight: theme.typography.weights.bold,
     color: theme.colors.text.accent,
     marginBottom: theme.spacing.md,
+    textAlign: 'center',
+    textShadowColor: 'rgba(0, 0, 0, 0.75)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 3,
   },
-  roleGroup: {
+  hostContainer: {
+    alignItems: 'center',
+    padding: theme.spacing.lg,
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    borderRadius: theme.borderRadius.large,
+    marginBottom: theme.spacing.lg,
+  },
+  hostTitle: {
+    fontSize: theme.typography.sizes.xl,
+    fontWeight: theme.typography.weights.bold,
+    color: theme.colors.primary,
+    marginTop: theme.spacing.md,
+  },
+  hostName: {
+    fontSize: theme.typography.sizes.lg,
+    color: theme.colors.text.accent,
     marginBottom: theme.spacing.md,
   },
-  roleHeader: {
+  hostDescription: {
+    fontSize: theme.typography.sizes.md,
+    color: theme.colors.text.secondary,
+    textAlign: 'center',
+    marginBottom: theme.spacing.md,
+  },
+  viewRolesButton: {
+    marginTop: theme.spacing.sm,
+  },
+  playerContainer: {
+    alignItems: 'center',
+    marginBottom: theme.spacing.lg,
+  },
+  roleInfoCard: {
+    width: '90%',
+    borderRadius: theme.borderRadius.large,
+    overflow: 'hidden',
+    borderWidth: 2,
+    ...theme.shadows.medium,
+  },
+  roleGradient: {
+    padding: theme.spacing.lg,
+    alignItems: 'center',
+  },
+  divider: {
+    height: 1,
+    width: '80%',
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    marginBottom: theme.spacing.md,
+  },
+  abilityContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: theme.spacing.sm,
   },
-  actionButton: {
-    marginTop: theme.spacing.md,
+  abilityTitle: {
+    fontSize: theme.typography.sizes.md,
+    fontWeight: theme.typography.weights.bold,
+    color: theme.colors.text.primary,
+    marginLeft: theme.spacing.xs,
   },
-  playerContainer: {
-    padding: theme.spacing.lg,
-    backgroundColor: theme.colors.card.background,
-    borderRadius: theme.borderRadius.large,
-    alignItems: 'center',
-    ...theme.shadows.medium,
-  },
-  roleCard: {
-    padding: theme.spacing.lg,
-    backgroundColor: theme.colors.card.background,
-    borderRadius: theme.borderRadius.large,
-    marginBottom: theme.spacing.lg,
-    ...theme.shadows.medium,
-  },
-  roleCardGradient: {
-    padding: theme.spacing.md,
-    borderRadius: theme.borderRadius.large,
-  },
-  instructionsCard: {
-    padding: theme.spacing.lg,
-    backgroundColor: theme.colors.card.background,
-    borderRadius: theme.borderRadius.large,
-    marginBottom: theme.spacing.lg,
-    ...theme.shadows.medium,
-  },
-  instructionsText: {
+  abilityText: {
     fontSize: theme.typography.sizes.md,
     color: theme.colors.text.secondary,
     textAlign: 'center',
-    //lineHeight: theme.typography.lineHeights.relaxed,
   },
-  continueButton: {
-    marginTop: theme.spacing.md,
+  modalOverlay: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+  },
+  modalContent: {
+    backgroundColor: theme.colors.card.background,
+    borderRadius: theme.borderRadius.large,
+    padding: theme.spacing.lg,
+    width: '100%',
+    maxHeight: '80%',
+    ...theme.shadows.large,
+  },
+  modalGradient: {
+    padding: theme.spacing.lg,
+    borderRadius: theme.borderRadius.large,
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: theme.spacing.md,
   },
   closeButton: {
-    marginTop: theme.spacing.md,
+    padding: theme.spacing.sm,
   },
   returnButton: {
-    marginTop: theme.spacing.md,
+    marginBottom: theme.spacing.md,
+  },
+  historyButton: {
+    marginBottom: theme.spacing.md,
   },
 });
 

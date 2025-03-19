@@ -18,22 +18,41 @@ import { useAuth } from '../context/AuthContext';
 import { gameService } from '../services/gameService';
 import { useError } from '../context/ErrorContext';
 
-const RoleCard = ({ role, name, description, icon }) => (
-  <View style={styles.roleCard}>
-    <LinearGradient
-      colors={theme.gradients.card}
-      style={styles.cardGradient}
-    >
-      <View style={styles.roleIconContainer}>
-        <Icon name={icon} size={28} color={theme.colors.primary} />
-      </View>
-      <View style={styles.roleContent}>
-        <Text style={styles.roleName}>{name}</Text>
-        <Text style={styles.roleDescription}>{description}</Text>
-      </View>
-    </LinearGradient>
-  </View>
-);
+const RoleCard = ({ role, name, description, icon }) => {
+  // Get role color based on role type
+  const getRoleColor = (roleType) => {
+    switch (roleType.toLowerCase()) {
+      case 'mafia':
+        return theme.colors.tertiary;
+      case 'detective':
+        return theme.colors.info;
+      case 'doctor':
+        return theme.colors.success;
+      default:
+        return theme.colors.primary;
+    }
+  };
+
+  const roleColor = getRoleColor(role);
+
+  return (
+    <View style={styles.roleCard}>
+      <LinearGradient
+        colors={[`${roleColor}40`, `${roleColor}20`]}
+        style={styles.cardGradient}
+      >
+        <View style={[styles.roleIconContainer, { backgroundColor: `${roleColor}30` }]}>
+          <Icon name={icon} size={28} color={roleColor} />
+        </View>
+        <View style={styles.roleContent}>
+          <Text style={styles.playerName}>{name}</Text>
+          <Text style={[styles.roleName, { color: roleColor }]}>{role}</Text>
+          <Text style={styles.roleDescription}>{description}</Text>
+        </View>
+      </LinearGradient>
+    </View>
+  );
+};
 
 const RoleAssignmentScreen = ({ route, navigation }) => {
   const { gameCode, isHost } = route.params || {};
@@ -53,7 +72,30 @@ const RoleAssignmentScreen = ({ route, navigation }) => {
         
         // This would be replaced with actual API call to get roles
         const gameRoles = await gameService.getGameRoles(gameCode);
-        setRoles(gameRoles);
+        
+        // Sort roles - Mafia, Detective, Doctor, then Civilian
+        const sortedRoles = [...gameRoles].sort((a, b) => {
+          const roleOrder = {
+            'Mafia': 1,
+            'Detective': 2,
+            'Doctor': 3,
+            'Civilian': 4
+          };
+          
+          // If roles have a defined order, sort by that order
+          if (roleOrder[a.role] && roleOrder[b.role]) {
+            return roleOrder[a.role] - roleOrder[b.role];
+          }
+          
+          // If only one has a defined order, put it first
+          if (roleOrder[a.role]) return -1;
+          if (roleOrder[b.role]) return 1;
+          
+          // Otherwise alphabetical sort
+          return a.role.localeCompare(b.role);
+        });
+        
+        setRoles(sortedRoles);
       } catch (error) {
         console.error('Error fetching roles:', error);
         showError('Failed to fetch role assignments');
@@ -68,9 +110,9 @@ const RoleAssignmentScreen = ({ route, navigation }) => {
   const getRoleIcon = (role) => {
     switch (role.toLowerCase()) {
       case 'mafia':
-        return 'person';
+        return 'security';
       case 'detective':
-        return 'visibility';
+        return 'search';
       case 'doctor':
         return 'healing';
       default:
@@ -95,7 +137,7 @@ const RoleAssignmentScreen = ({ route, navigation }) => {
     <RoleCard
       role={item.role}
       name={item.playerName}
-      description={`Role: ${item.role} - ${getRoleDescription(item.role)}`}
+      description={getRoleDescription(item.role)}
       icon={getRoleIcon(item.role)}
     />
   );
@@ -228,7 +270,7 @@ const styles = StyleSheet.create({
   },
   rolesContainer: {
     flex: 1,
-    backgroundColor: theme.colors.card.background,
+    backgroundColor: 'rgba(0, 0, 0, 0.3)',
     borderRadius: theme.borderRadius.large,
     padding: theme.spacing.lg,
     marginBottom: theme.spacing.lg,
@@ -250,44 +292,47 @@ const styles = StyleSheet.create({
     borderRadius: theme.borderRadius.large,
   },
   roleIconContainer: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    backgroundColor: 'rgba(108, 99, 255, 0.15)',
-    alignItems: 'center',
+    width: 50,
+    height: 50,
+    borderRadius: 25,
     justifyContent: 'center',
+    alignItems: 'center',
     marginRight: theme.spacing.md,
   },
   roleContent: {
     flex: 1,
   },
+  playerName: {
+    fontSize: theme.typography.sizes.md,
+    fontWeight: theme.typography.weights.bold,
+    color: theme.colors.text.primary,
+    marginBottom: 2,
+  },
   roleName: {
     fontSize: theme.typography.sizes.lg,
     fontWeight: theme.typography.weights.bold,
-    color: theme.colors.text.primary,
     marginBottom: theme.spacing.xs,
   },
   roleDescription: {
     fontSize: theme.typography.sizes.sm,
     color: theme.colors.text.secondary,
-   // lineHeight: theme.typography.lineHeights.relaxed,
+    marginTop: 4,
   },
   loadingText: {
-    textAlign: 'center',
-    color: theme.colors.text.secondary,
     fontSize: theme.typography.sizes.md,
+    color: theme.colors.text.secondary,
+    textAlign: 'center',
     padding: theme.spacing.xl,
   },
   emptyContainer: {
-    flex: 1,
-    alignItems: 'center',
     justifyContent: 'center',
+    alignItems: 'center',
     padding: theme.spacing.xl,
   },
   emptyText: {
-    textAlign: 'center',
-    color: theme.colors.text.secondary,
     fontSize: theme.typography.sizes.md,
+    color: theme.colors.text.secondary,
+    textAlign: 'center',
     marginTop: theme.spacing.md,
   },
   buttonContainer: {

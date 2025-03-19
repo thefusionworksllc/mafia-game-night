@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, StyleSheet, Text, FlatList, Modal, TouchableOpacity, TextInput, StatusBar, Dimensions } from 'react-native';
+import { View, StyleSheet, Text, FlatList, Modal, TouchableOpacity, TextInput, StatusBar, Dimensions, Image } from 'react-native';
 import theme from '../theme';
 import { gameService } from '../services/gameService';
 import { useAuth } from '../context/AuthContext';
@@ -11,6 +11,7 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import CustomButton from '../components/CustomButton';
 import { useError } from '../context/ErrorContext';
+import { getRandomAvatar } from '../utils/avatarUtils';
 
 const { width } = Dimensions.get('window');
 const CARD_WIDTH = width * 0.9;
@@ -134,6 +135,56 @@ const GameHistoryScreen = ({ navigation }) => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const renderPlayerItem = ({ item }) => {
+    const roleColor = getRoleColor(item.role);
+    const isCurrentUser = item.id === user?.uid;
+    const isHost = item.isHost || false;
+    
+    return (
+      <View style={[styles.playerItem, isCurrentUser && styles.currentUserItem]}>
+        <View style={styles.playerNameContainer}>
+          <Image 
+            source={getRandomAvatar()} 
+            style={styles.playerAvatar}
+          />
+          <View style={styles.playerInfo}>
+            <View style={styles.nameRow}>
+              <Text style={styles.playerName}>
+                {item.name}
+              </Text>
+              {isHost && (
+                <View style={styles.hostBadge}>
+                  <Icon name="stars" size={16} color={theme.colors.warning} />
+                  <Text style={styles.hostText}>Host</Text>
+                </View>
+              )}
+              {isCurrentUser && (
+                <View style={styles.youBadge}>
+                  <Text style={styles.youText}>You</Text>
+                </View>
+              )}
+            </View>
+            <View style={styles.roleContainer}>
+              <View style={[styles.roleTag, { backgroundColor: `${roleColor}30` }]}>
+                <Icon 
+                  name={getRoleIcon(item.role)} 
+                  size={16} 
+                  color={roleColor} 
+                  style={styles.roleIcon}
+                />
+                <Text style={[styles.roleText, { color: roleColor }]}>
+                  {item.role || 'Civilian'}
+                </Text>
+              </View>
+            </View>
+          </View>
+        </View>
+        
+        {/* ... existing code (status, etc) ... */}
+      </View>
+    );
   };
 
   const renderGameItem = ({ item }) => {
@@ -612,6 +663,96 @@ const styles = StyleSheet.create({
     padding: theme.spacing.sm,
     borderRadius: theme.borderRadius.medium,
     marginTop: theme.spacing.xs,
+  },
+  nameRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flexWrap: 'wrap',
+  },
+  hostBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: `${theme.colors.warning}30`,
+    paddingHorizontal: theme.spacing.xs,
+    paddingVertical: 2,
+    borderRadius: theme.borderRadius.small,
+    marginLeft: theme.spacing.xs,
+  },
+  youBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: `${theme.colors.primary}30`,
+    paddingHorizontal: theme.spacing.xs,
+    paddingVertical: 2,
+    borderRadius: theme.borderRadius.small,
+    marginLeft: theme.spacing.xs,
+  },
+  youText: {
+    fontSize: theme.typography.sizes.xs,
+    fontWeight: theme.typography.weights.bold,
+    color: theme.colors.primary,
+  },
+  statNote: {
+    fontSize: theme.typography.sizes.sm,
+    color: theme.colors.text.secondary,
+    fontWeight: theme.typography.weights.normal,
+  },
+  playerItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: theme.spacing.xs,
+  },
+  playerNameContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  playerAvatar: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    marginRight: theme.spacing.sm,
+  },
+  playerInfo: {
+    flexDirection: 'column',
+  },
+  playerName: {
+    fontSize: theme.typography.sizes.md,
+    fontWeight: theme.typography.weights.bold,
+    color: theme.colors.text.primary,
+  },
+  roleTag: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: theme.spacing.sm,
+    paddingVertical: theme.spacing.xs,
+    borderRadius: theme.borderRadius.small,
+  },
+  roleIcon: {
+    marginRight: theme.spacing.xs,
+  },
+  statCard: {
+    flex: 1,
+    padding: theme.spacing.md,
+    borderRadius: theme.borderRadius.medium,
+    backgroundColor: 'rgba(0, 0, 0, 0.3)',
+    alignItems: 'center',
+  },
+  statLabel: {
+    fontSize: theme.typography.sizes.sm,
+    fontWeight: theme.typography.weights.bold,
+    color: theme.colors.text.accent,
+  },
+  statValue: {
+    fontSize: theme.typography.sizes.xl,
+    fontWeight: theme.typography.weights.bold,
+    color: theme.colors.text.accent,
+  },
+  statsContainer: {
+    flexDirection: 'row',
+    marginBottom: theme.spacing.xl,
+  },
+  playersList: {
+    paddingBottom: theme.spacing.xxl,
   },
 });
 

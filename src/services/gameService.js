@@ -481,6 +481,393 @@ export const gameService = {
     const gameData = snapshot.val();
     return gameData.hostId === auth.currentUser.uid;
   },
+
+  // Add these methods to support Game Control and Game Play screens
+  
+  // Update game phase
+  updateGamePhase: async (gameCode, phase) => {
+    try {
+      const db = getDbInstance();
+      
+      if (!auth.currentUser) {
+        throw new Error('User must be authenticated');
+      }
+      
+      // Verify user is host
+      const gameRef = ref(db, `games/${gameCode}`);
+      const snapshot = await get(gameRef);
+      
+      if (!snapshot.exists()) {
+        throw new Error('Game not found');
+      }
+      
+      const gameData = snapshot.val();
+      
+      if (gameData.hostId !== auth.currentUser.uid) {
+        throw new Error('Only the host can update game phase');
+      }
+      
+      // Update game phase
+      await update(gameRef, {
+        currentPhase: phase,
+        [`phaseHistory/${phase}`]: {
+          startedAt: new Date().toISOString(),
+          phase
+        }
+      });
+      
+      return true;
+    } catch (error) {
+      console.error('Error updating game phase:', error);
+      throw new Error('Failed to update game phase');
+    }
+  },
+  
+  // For Mafia to submit votes
+  submitMafiaVote: async (gameCode, targetPlayerId) => {
+    try {
+      const db = getDbInstance();
+      
+      if (!auth.currentUser) {
+        throw new Error('User must be authenticated');
+      }
+      
+      // Verify user is in the game and is Mafia
+      const playerRef = ref(db, `games/${gameCode}/players/${auth.currentUser.uid}`);
+      const playerSnapshot = await get(playerRef);
+      
+      if (!playerSnapshot.exists()) {
+        throw new Error('You are not in this game');
+      }
+      
+      const playerData = playerSnapshot.val();
+      
+      if (playerData.role !== 'Mafia') {
+        throw new Error('Only Mafia members can submit Mafia votes');
+      }
+      
+      // Submit vote
+      await update(ref(db), {
+        [`games/${gameCode}/votes/mafia/${auth.currentUser.uid}`]: {
+          targetId: targetPlayerId,
+          votedAt: new Date().toISOString()
+        }
+      });
+      
+      return true;
+    } catch (error) {
+      console.error('Error submitting Mafia vote:', error);
+      throw new Error('Failed to submit vote');
+    }
+  },
+  
+  // For civilian to submit votes
+  submitCivilianVote: async (gameCode, targetPlayerId) => {
+    try {
+      const db = getDbInstance();
+      
+      if (!auth.currentUser) {
+        throw new Error('User must be authenticated');
+      }
+      
+      // Verify user is in the game
+      const playerRef = ref(db, `games/${gameCode}/players/${auth.currentUser.uid}`);
+      const playerSnapshot = await get(playerRef);
+      
+      if (!playerSnapshot.exists()) {
+        throw new Error('You are not in this game');
+      }
+      
+      // Submit vote
+      await update(ref(db), {
+        [`games/${gameCode}/votes/civilian/${auth.currentUser.uid}`]: {
+          targetId: targetPlayerId,
+          votedAt: new Date().toISOString()
+        }
+      });
+      
+      return true;
+    } catch (error) {
+      console.error('Error submitting civilian vote:', error);
+      throw new Error('Failed to submit vote');
+    }
+  },
+  
+  // For detective to investigate a player
+  investigatePlayer: async (gameCode, targetPlayerId) => {
+    try {
+      const db = getDbInstance();
+      
+      if (!auth.currentUser) {
+        throw new Error('User must be authenticated');
+      }
+      
+      // Verify user is in the game and is Detective
+      const playerRef = ref(db, `games/${gameCode}/players/${auth.currentUser.uid}`);
+      const playerSnapshot = await get(playerRef);
+      
+      if (!playerSnapshot.exists()) {
+        throw new Error('You are not in this game');
+      }
+      
+      const playerData = playerSnapshot.val();
+      
+      if (playerData.role !== 'Detective') {
+        throw new Error('Only Detectives can investigate players');
+      }
+      
+      // Get target player role
+      const targetPlayerRef = ref(db, `games/${gameCode}/players/${targetPlayerId}`);
+      const targetPlayerSnapshot = await get(targetPlayerRef);
+      
+      if (!targetPlayerSnapshot.exists()) {
+        throw new Error('Target player not found');
+      }
+      
+      const targetPlayerData = targetPlayerSnapshot.val();
+      const isMafia = targetPlayerData.role === 'Mafia';
+      
+      // Record investigation
+      await update(ref(db), {
+        [`games/${gameCode}/investigations/${auth.currentUser.uid}/${targetPlayerId}`]: {
+          isMafia,
+          investigatedAt: new Date().toISOString()
+        }
+      });
+      
+      return isMafia;
+    } catch (error) {
+      console.error('Error investigating player:', error);
+      throw new Error('Failed to investigate player');
+    }
+  },
+  
+  // For doctor to protect a player
+  protectPlayer: async (gameCode, targetPlayerId) => {
+    try {
+      const db = getDbInstance();
+      
+      if (!auth.currentUser) {
+        throw new Error('User must be authenticated');
+      }
+      
+      // Verify user is in the game and is Doctor
+      const playerRef = ref(db, `games/${gameCode}/players/${auth.currentUser.uid}`);
+      const playerSnapshot = await get(playerRef);
+      
+      if (!playerSnapshot.exists()) {
+        throw new Error('You are not in this game');
+      }
+      
+      const playerData = playerSnapshot.val();
+      
+      if (playerData.role !== 'Doctor') {
+        throw new Error('Only Doctors can protect players');
+      }
+      
+      // Record protection
+      await update(ref(db), {
+        [`games/${gameCode}/protections/${auth.currentUser.uid}`]: {
+          targetId: targetPlayerId,
+          protectedAt: new Date().toISOString()
+        }
+      });
+      
+      return true;
+    } catch (error) {
+      console.error('Error protecting player:', error);
+      throw new Error('Failed to protect player');
+    }
+  },
+  
+  // For host to process night phase results
+  processNightResults: async (gameCode) => {
+    try {
+      const db = getDbInstance();
+      
+      if (!auth.currentUser) {
+        throw new Error('User must be authenticated');
+      }
+      
+      // Verify user is host
+      const gameRef = ref(db, `games/${gameCode}`);
+      const snapshot = await get(gameRef);
+      
+      if (!snapshot.exists()) {
+        throw new Error('Game not found');
+      }
+      
+      const gameData = snapshot.val();
+      
+      if (gameData.hostId !== auth.currentUser.uid) {
+        throw new Error('Only the host can process night results');
+      }
+      
+      // Get mafia votes
+      const mafiaVotes = gameData.votes?.mafia || {};
+      const mafiaVotesArray = Object.values(mafiaVotes);
+      
+      // Count votes for each target
+      const voteCounts = {};
+      mafiaVotesArray.forEach(vote => {
+        voteCounts[vote.targetId] = (voteCounts[vote.targetId] || 0) + 1;
+      });
+      
+      // Find the target with the most votes
+      let mostVotes = 0;
+      let targetId = null;
+      
+      Object.keys(voteCounts).forEach(id => {
+        if (voteCounts[id] > mostVotes) {
+          mostVotes = voteCounts[id];
+          targetId = id;
+        }
+      });
+      
+      // Check if target is protected by any doctor
+      const protections = gameData.protections || {};
+      const protectedPlayers = Object.values(protections).map(p => p.targetId);
+      
+      if (targetId && !protectedPlayers.includes(targetId)) {
+        // Eliminate the player
+        await update(ref(db), {
+          [`games/${gameCode}/players/${targetId}/eliminated`]: true,
+          [`games/${gameCode}/eliminatedPlayers/${targetId}`]: {
+            eliminatedAt: new Date().toISOString(),
+            reason: 'mafia'
+          }
+        });
+        
+        return { eliminated: true, targetId };
+      }
+      
+      return { eliminated: false, targetId: null };
+    } catch (error) {
+      console.error('Error processing night results:', error);
+      throw new Error('Failed to process night results');
+    }
+  },
+  
+  // For host to process day voting results
+  processDayVotingResults: async (gameCode) => {
+    try {
+      const db = getDbInstance();
+      
+      if (!auth.currentUser) {
+        throw new Error('User must be authenticated');
+      }
+      
+      // Verify user is host
+      const gameRef = ref(db, `games/${gameCode}`);
+      const snapshot = await get(gameRef);
+      
+      if (!snapshot.exists()) {
+        throw new Error('Game not found');
+      }
+      
+      const gameData = snapshot.val();
+      
+      if (gameData.hostId !== auth.currentUser.uid) {
+        throw new Error('Only the host can process voting results');
+      }
+      
+      // Get civilian votes
+      const civilianVotes = gameData.votes?.civilian || {};
+      const civilianVotesArray = Object.values(civilianVotes);
+      
+      // Count votes for each target
+      const voteCounts = {};
+      civilianVotesArray.forEach(vote => {
+        voteCounts[vote.targetId] = (voteCounts[vote.targetId] || 0) + 1;
+      });
+      
+      // Find the target with the most votes
+      let mostVotes = 0;
+      let targetId = null;
+      
+      Object.keys(voteCounts).forEach(id => {
+        if (voteCounts[id] > mostVotes) {
+          mostVotes = voteCounts[id];
+          targetId = id;
+        }
+      });
+      
+      if (targetId) {
+        // Eliminate the player
+        await update(ref(db), {
+          [`games/${gameCode}/players/${targetId}/eliminated`]: true,
+          [`games/${gameCode}/eliminatedPlayers/${targetId}`]: {
+            eliminatedAt: new Date().toISOString(),
+            reason: 'voting'
+          }
+        });
+        
+        return { eliminated: true, targetId };
+      }
+      
+      return { eliminated: false, targetId: null };
+    } catch (error) {
+      console.error('Error processing voting results:', error);
+      throw new Error('Failed to process voting results');
+    }
+  },
+  
+  // Check if game is over (Mafia wins or Civilians win)
+  checkGameOutcome: async (gameCode) => {
+    try {
+      const db = getDbInstance();
+      const gameRef = ref(db, `games/${gameCode}`);
+      const snapshot = await get(gameRef);
+      
+      if (!snapshot.exists()) {
+        throw new Error('Game not found');
+      }
+      
+      const gameData = snapshot.val();
+      const players = Object.values(gameData.players || {}).filter(player => !player.isHost);
+      
+      // Count alive players by role
+      let aliveMafia = 0;
+      let aliveCivilians = 0;
+      
+      players.forEach(player => {
+        if (!player.eliminated) {
+          if (player.role === 'Mafia') {
+            aliveMafia++;
+          } else {
+            aliveCivilians++;
+          }
+        }
+      });
+      
+      // Check win conditions
+      if (aliveMafia === 0) {
+        // Civilians win
+        await update(gameRef, {
+          outcome: {
+            winner: 'civilians',
+            endedAt: new Date().toISOString()
+          }
+        });
+        return { isGameOver: true, winner: 'civilians' };
+      } else if (aliveMafia >= aliveCivilians) {
+        // Mafia wins
+        await update(gameRef, {
+          outcome: {
+            winner: 'mafia',
+            endedAt: new Date().toISOString()
+          }
+        });
+        return { isGameOver: true, winner: 'mafia' };
+      }
+      
+      // Game continues
+      return { isGameOver: false };
+    } catch (error) {
+      console.error('Error checking game outcome:', error);
+      throw new Error('Failed to check game outcome');
+    }
+  },
 };
 
 // Helper function to assign roles

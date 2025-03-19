@@ -201,7 +201,7 @@ const GameHistoryScreen = ({ navigation }) => {
 
             {/* Show current player's role if game is started or ended */}
             {(item.status === 'started' || item.status === 'ended') && currentPlayerRole && (
-              <View style={styles.infoRow}>
+              <View style={styles.roleInfoRow}>
                 <Icon name={getRoleIcon(currentPlayerRole)} size={18} color={getRoleColor(currentPlayerRole)} />
                 <Text style={styles.roleText}>
                   Your Role: <Text style={[styles.roleName, { color: getRoleColor(currentPlayerRole) }]}>{currentPlayerRole}</Text>
@@ -224,8 +224,12 @@ const GameHistoryScreen = ({ navigation }) => {
                 ]}>
                   {player.name || 'Unknown'}
                 </Text>
-                {/* Show role only if this is the current user OR host views ended game */}
-                {item.status === 'ended' && player.role && player.id === user.uid && (
+                {/* Show role if:
+                  1. Game is ended (show all roles to everyone) OR
+                  2. User is the host (can see all roles) OR
+                  3. The role belongs to current user
+                */}
+                {(item.status === 'ended' || item.hostId === user.uid || player.id === user.uid) && player.role && (
                   <View style={styles.roleContainer}>
                     <View style={[styles.roleIconContainer, { backgroundColor: `${getRoleColor(player.role)}40` }]}>
                       <Icon name={getRoleIcon(player.role)} size={16} color={getRoleColor(player.role)} />
@@ -240,29 +244,29 @@ const GameHistoryScreen = ({ navigation }) => {
           </View>
 
           {/* Action Buttons */}
-          {item.status !== 'ended' && (
-            <View style={styles.actionButtonsContainer}>
-              {item.hostId === user.uid && (
-                <CustomButton
-                  title="End Game"
-                  onPress={() => {
-                    setSelectedGame(item);
-                    setModalVisible(true);
-                  }}
-                  variant="outline"
-                  style={styles.actionButton}
-                  leftIcon={<Icon name="stop" size={18} color={theme.colors.error} />}
-                />
-              )}
-              
+          <View style={styles.actionButtonsContainer}>
+            {item.status !== 'ended' && item.hostId === user.uid && (
+              <CustomButton
+                title="End Game"
+                onPress={() => {
+                  setSelectedGame(item);
+                  setModalVisible(true);
+                }}
+                variant="outline"
+                style={styles.actionButton}
+                leftIcon={<Icon name="stop" size={18} color={theme.colors.error} />}
+              />
+            )}
+            
+            {item.status !== 'ended' && (
               <CustomButton
                 title="Return to Lobby"
                 onPress={() => handleRejoinGame(item.gameCode)}
-                style={styles.actionButton}
+                style={[styles.actionButton, item.hostId !== user.uid ? styles.fullWidthButton : null]}
                 leftIcon={<Icon name="meeting-room" size={18} color={theme.colors.text.primary} />}
               />
-            </View>
-          )}
+            )}
+          </View>
         </LinearGradient>
       </View>
     );
@@ -498,8 +502,8 @@ const styles = StyleSheet.create({
   },
   roleText: {
     fontSize: theme.typography.sizes.md,
-    fontWeight: theme.typography.weights.bold,
-    textAlign: 'right',
+    fontWeight: theme.typography.weights.medium,
+    marginLeft: theme.spacing.xs,
   },
   currentPlayerText: {
     color: theme.colors.text.accent,
@@ -508,10 +512,14 @@ const styles = StyleSheet.create({
   actionButtonsContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
+    marginTop: theme.spacing.md,
   },
   actionButton: {
     flex: 1,
     marginHorizontal: theme.spacing.xs,
+  },
+  fullWidthButton: {
+    marginHorizontal: 0,
   },
   errorContainer: {
     flex: 1,
@@ -588,9 +596,22 @@ const styles = StyleSheet.create({
   roleContainer: {
     flexDirection: 'row',
     alignItems: 'center',
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    borderRadius: theme.borderRadius.small,
+    paddingHorizontal: theme.spacing.sm,
+    paddingVertical: theme.spacing.xs,
   },
   roleName: {
     fontWeight: theme.typography.weights.bold,
+  },
+  roleInfoRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: theme.spacing.xs,
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    padding: theme.spacing.sm,
+    borderRadius: theme.borderRadius.medium,
+    marginTop: theme.spacing.xs,
   },
 });
 

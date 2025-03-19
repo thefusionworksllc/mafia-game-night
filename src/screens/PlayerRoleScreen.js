@@ -155,8 +155,10 @@ const PlayerRoleScreen = ({ route, navigation }) => {
   const handleContinue = () => {
     try {
       if (isHost) {
-        // Host can control game phases
-        navigation.replace('GameControl', { gameCode });
+        // Host controls game phases
+        navigation.replace('GameControl', { 
+          gameCode
+        });
       } else {
         // Regular players go to game play screen
         navigation.replace('GamePlay', { 

@@ -150,20 +150,23 @@ const HostGameScreen = ({ navigation }) => {
   const { user } = useAuth();
   const insets = useSafeAreaInsets();
   const { showError } = useError();
+  
+  // Calculate civilian count based on other roles
+  const civilianCount = totalPlayers - mafiaCount - detectiveCount - doctorCount;
 
-  // Handle total players changes
   const handleTotalPlayersChange = (value) => {
     setTotalPlayers(value);
+    // Update max mafia count (mafia should be <= 1/3 of total players)
     const newMaxMafia = Math.floor(value / 3);
     setMaxMafia(newMaxMafia);
-    // Adjust mafia count if it exceeds new maximum
+    // If current mafia count exceeds new max, adjust it
     if (mafiaCount > newMaxMafia) {
       setMafiaCount(newMaxMafia);
     }
   };
 
   const incrementTotalPlayers = () => {
-    if (totalPlayers < 12) {
+    if (totalPlayers < 15) {
       handleTotalPlayersChange(totalPlayers + 1);
     }
   };
@@ -186,7 +189,6 @@ const HostGameScreen = ({ navigation }) => {
     }
   };
 
-  // Detective count handlers
   const incrementDetective = () => {
     if (detectiveCount < 2) {
       setDetectiveCount(detectiveCount + 1);
@@ -199,7 +201,6 @@ const HostGameScreen = ({ navigation }) => {
     }
   };
 
-  // Doctor count handlers
   const incrementDoctor = () => {
     if (doctorCount < 2) {
       setDoctorCount(doctorCount + 1);
@@ -211,9 +212,6 @@ const HostGameScreen = ({ navigation }) => {
       setDoctorCount(doctorCount - 1);
     }
   };
-
-  // Calculate remaining civilians
-  const remainingCivilians = totalPlayers - mafiaCount - detectiveCount - doctorCount;
 
   const handleHostGame = async () => {
     if (!user) {
@@ -229,15 +227,18 @@ const HostGameScreen = ({ navigation }) => {
       return;
     }
 
-    // Validate player count
     if (totalPlayers < 4) {
-      showError('You need at least 4 participants (including you as host) to start a game');
+      showError('You need at least 4 players to start a game');
       return;
     }
 
-    // Check if mafia count is valid (between 1 and totalPlayers/3)
     if (mafiaCount < 1 || mafiaCount > Math.floor(totalPlayers / 3)) {
       showError(`Mafia count should be between 1 and ${Math.floor(totalPlayers / 3)}`);
+      return;
+    }
+
+    if (civilianCount < 1) {
+      showError('You need at least one civilian in the game');
       return;
     }
 
@@ -252,7 +253,6 @@ const HostGameScreen = ({ navigation }) => {
       
       setGameCode(gameCode);
       showError('Game created successfully! Share the code with your friends.', 'success');
-      // Navigate to game lobby
       navigation.navigate('GameLobby', {
         gameCode,
         totalPlayers,
@@ -292,29 +292,21 @@ const HostGameScreen = ({ navigation }) => {
               <View style={styles.hostInfoContainer}>
                 <Icon name="stars" size={24} color={theme.colors.primary} />
                 <Text style={styles.hostInfoText}>
-                  You will be the host of this game (not counted as a player for role assignments)
+                  You will be the host of this game (not counted in player count)
                 </Text>
               </View>
               
               {/* Total Players Control */}
               <AnimatedControl
-                label="Total Participants"
+                label="Total Players"
                 value={totalPlayers}
                 minValue={4}
-                maxValue={12}
+                maxValue={15}
                 onIncrement={incrementTotalPlayers}
                 onDecrement={decrementTotalPlayers}
                 icon="group"
-                description="Number of participants including you as host and players (4-12)"
+                description="Number of players excluding you as host (4-15)"
               />
-              
-              {/* Actual Players Count */}
-              <View style={styles.playerCountInfo}>
-                <Icon name="people" size={20} color={theme.colors.info} />
-                <Text style={styles.playerCountText}>
-                  Players receiving roles: {totalPlayers - 1} ({totalPlayers} total participants - 1 host)
-                </Text>
-              </View>
               
               {/* Role Distribution */}
               <View style={styles.rolesContainer}>
@@ -327,7 +319,7 @@ const HostGameScreen = ({ navigation }) => {
                     onIncrement={incrementMafia}
                     onDecrement={decrementMafia}
                     icon="security"
-                    description={`Mafia players (1-${Math.max(1, Math.floor(totalPlayers / 3))})`}
+                    description=""
                   />
                   
                   <AnimatedControl
@@ -338,7 +330,7 @@ const HostGameScreen = ({ navigation }) => {
                     onIncrement={incrementDetective}
                     onDecrement={decrementDetective}
                     icon="visibility"
-                    description="Detectives can investigate players (0-2)"
+                    description=""
                   />
                   
                   <AnimatedControl
@@ -349,14 +341,32 @@ const HostGameScreen = ({ navigation }) => {
                     onIncrement={incrementDoctor}
                     onDecrement={decrementDoctor}
                     icon="healing"
-                    description="Doctors can save players (0-2)"
+                    description=""
                   />
+
+                  <View style={styles.nonEditableControl}>
+                    <View style={styles.controlHeader}>
+                      <View style={styles.controlIconContainer}>
+                        <Icon name="people" size={24} color={theme.colors.primary} />
+                      </View>
+                      <View style={styles.controlLabelContainer}>
+                        <Text style={styles.controlLabel}>Civilian Count</Text>
+                        <Text style={styles.controlDescription}>
+                          Automatically calculated based on other roles
+                        </Text>
+                      </View>
+                    </View>
+                    
+                    <View style={styles.civilianValueContainer}>
+                      <Text style={styles.civilianValue}>{civilianCount}</Text>
+                    </View>
+                  </View>
                 </View>
               </View>
               
               {/* Role Summary */}
               <View style={styles.roleSummary}>
-                <Text style={styles.roleSummaryTitle}>Role Summary</Text>
+                <Text style={styles.roleSummaryTitle}>Role Summary Review</Text>
                 <View style={styles.roleSummaryCards}>
                   <View style={styles.roleCard}>
                     <LinearGradient
@@ -419,15 +429,15 @@ const HostGameScreen = ({ navigation }) => {
                       </View>
                       <Text style={styles.roleName}>Civilian</Text>
                       <View style={styles.roleCountContainer}>
-                        <Text style={[styles.roleCount, { color: theme.colors.primary }]}>{totalPlayers - mafiaCount - detectiveCount - doctorCount}</Text>
+                        <Text style={[styles.roleCount, { color: theme.colors.primary }]}>{civilianCount}</Text>
                       </View>
                     </LinearGradient>
                   </View>
                 </View>
                 
-                {remainingCivilians < 1 && (
+                {civilianCount < 0 && (
                   <Text style={styles.errorText}>
-                    Not enough players for selected roles
+                    Too many special roles selected! Reduce some role counts.
                   </Text>
                 )}
               </View>
@@ -439,7 +449,7 @@ const HostGameScreen = ({ navigation }) => {
                 title="HOST GAME"
                 onPress={handleHostGame}
                 loading={loading}
-                disabled={loading || remainingCivilians < 1}
+                disabled={loading || civilianCount < 0}
                 leftIcon={<Icon name="play-arrow" size={20} color={theme.colors.text.primary} />}
                 fullWidth
               />
@@ -514,12 +524,12 @@ const styles = StyleSheet.create({
     borderRadius: theme.borderRadius.medium,
     alignItems: 'center',
     justifyContent: 'center',
-    height: 100,
+    height: 80,
   },
   roleIconContainer: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+    width: 32,
+    height: 32,
+    borderRadius: 16,
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: theme.spacing.xs,
@@ -646,16 +656,24 @@ const styles = StyleSheet.create({
     fontSize: theme.typography.sizes.sm,
     color: theme.colors.text.secondary,
   },
-  playerCountInfo: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: theme.spacing.md,
-    paddingHorizontal: theme.spacing.md,
+  nonEditableControl: {
+    marginBottom: theme.spacing.lg,
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    borderRadius: theme.borderRadius.medium,
+    padding: theme.spacing.md,
+    ...theme.shadows.small,
   },
-  playerCountText: {
-    marginLeft: theme.spacing.sm,
-    fontSize: theme.typography.sizes.sm,
-    color: theme.colors.info,
+  civilianValueContainer: {
+    backgroundColor: 'rgba(0, 0, 0, 0.2)',
+    borderRadius: theme.borderRadius.medium,
+    paddingVertical: theme.spacing.sm,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  civilianValue: {
+    fontSize: theme.typography.sizes.xl,
+    fontWeight: theme.typography.weights.bold,
+    color: theme.colors.primary,
   },
 });
 

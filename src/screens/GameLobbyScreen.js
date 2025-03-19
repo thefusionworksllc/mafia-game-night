@@ -36,9 +36,19 @@ const GameLobbyScreen = ({ route, navigation }) => {
 
   // Get the required number of players for this game (excluding host)
   const requiredPlayers = useMemo(() => {
-    // totalPlayers includes the host in the setting, so we subtract 1
-    return totalPlayers - 1;
+    // totalPlayers should already exclude the host
+    return totalPlayers;
   }, [totalPlayers]);
+
+  // Get the civilian count
+  const civilianCount = useMemo(() => {
+    return requiredPlayers - mafiaCount - detectiveCount - doctorCount;
+  }, [requiredPlayers, mafiaCount, detectiveCount, doctorCount]);
+
+  // Get the host player
+  const hostPlayer = useMemo(() => {
+    return players.find(player => player.isHost);
+  }, [players]);
 
   // Add back button handler to navigate to Game History
   useEffect(() => {
@@ -61,7 +71,7 @@ const GameLobbyScreen = ({ route, navigation }) => {
     const unsubscribe = gameService.subscribeToGame(gameCode, (data) => {
       if (!data) {
         showError('Game Ended', 'warning');
-        navigation.replace('GameHistory');
+        navigation.replace('Home');
         return;
       }
 
@@ -74,7 +84,7 @@ const GameLobbyScreen = ({ route, navigation }) => {
           ? 'Game has ended due to timeout (2 hours limit)'
           : 'Game has been ended by the host';
         showError(message, 'info');
-        navigation.replace('GameHistory');
+        navigation.replace('Home');
         return;
       }
 
@@ -132,10 +142,21 @@ const GameLobbyScreen = ({ route, navigation }) => {
     try {
       await gameService.leaveGame(gameCode);
       showError('You have left the game', 'info');
-      navigation.navigate('GameHistory');
+      navigation.navigate('Home');
     } catch (error) {
       showError(error.message || 'Failed to leave the game');
     }
+  };
+
+  const confirmEndGame = () => {
+    Alert.alert(
+      "End Game",
+      "Are you sure you want to end this game? All players will be disconnected.",
+      [
+        { text: "Cancel", style: "cancel" },
+        { text: "End Game", onPress: handleEndGame, style: "destructive" }
+      ]
+    );
   };
 
   const handleEndGame = async () => {
@@ -143,7 +164,7 @@ const GameLobbyScreen = ({ route, navigation }) => {
     try {
       await gameService.endGame(gameCode);
       showError('Game ended successfully', 'success');
-      navigation.replace('GameHistory');
+      navigation.replace('Home');
     } catch (error) {
       console.error('Error ending game:', error);
       showError(error.message || 'Failed to end game', 'error');
@@ -161,19 +182,10 @@ const GameLobbyScreen = ({ route, navigation }) => {
     }
   };
 
-  // Sort players to show host at the top
-  const sortedPlayers = useMemo(() => {
-    return [...players].sort((a, b) => {
-      if (a.isHost) return -1;
-      if (b.isHost) return 1;
-      return 0;
-    });
-  }, [players]);
-
   const renderPlayer = ({ item }) => (
-    <View style={[styles.playerItem, item.isHost && styles.hostPlayerItem]}>
-      <Text style={[styles.playerName, item.isHost && styles.hostName]}>
-        {item.name} {item.isHost ? '(Host)' : ''}
+    <View style={styles.playerItem}>
+      <Text style={styles.playerName}>
+        {item.name}
       </Text>
     </View>
   );
@@ -195,6 +207,16 @@ const GameLobbyScreen = ({ route, navigation }) => {
               <Icon name="content-copy" size={18} color={theme.colors.text.accent} style={styles.copyIcon} />
             </TouchableOpacity>
           </View>
+
+          {/* Host Information */}
+          {hostPlayer && (
+            <View style={styles.hostInfoContainer}>
+              <Icon name="stars" size={24} color={theme.colors.primary} />
+              <Text style={styles.hostInfoText}>
+                Host: <Text style={styles.hostName}>{hostPlayer.name}</Text>
+              </Text>
+            </View>
+          )}
 
           <View style={styles.infoContainer}>
             <View style={styles.infoItem}>
@@ -223,19 +245,43 @@ const GameLobbyScreen = ({ route, navigation }) => {
             </View>
           </View>
 
+          {/* Second row of info items for Civilian count */}
+          <View style={styles.civilianInfoContainer}>
+            <View style={styles.infoItem}>
+              <Icon name="person" size={24} color={theme.colors.accent} />
+              <Text style={styles.infoText}>
+                Civilian: {civilianCount}
+              </Text>
+            </View>
+          </View>
+
           <View style={styles.playersSection}>
-            <Text style={styles.sectionTitle}>Participants</Text>
+            <Text style={styles.sectionTitle}>Players</Text>
             <FlatList
-              data={sortedPlayers}
+              data={actualPlayers}
               keyExtractor={(item) => item.id}
               renderItem={renderPlayer}
               contentContainerStyle={styles.playersList}
+              ListEmptyComponent={
+                <Text style={styles.emptyText}>No players have joined yet</Text>
+              }
             />
           </View>
 
           <View style={styles.buttonContainer}>
             {isHost ? (
               <>
+                <View style={styles.playerCountContainer}>
+                  <Icon name="people" size={24} color={theme.colors.primary} />
+                  <Text style={styles.playerCountText}>
+                    Players: {actualPlayers.length}/{requiredPlayers}
+                  </Text>
+                  <Text style={styles.waitingText}>
+                    {actualPlayers.length < requiredPlayers
+                      ? `Waiting for ${requiredPlayers - actualPlayers.length} more player(s)...` 
+                      : 'All players have joined! You can start the game.'}
+                  </Text>
+                </View>
                 <CustomButton
                   title="START GAME"
                   onPress={handleStartGame}
@@ -244,14 +290,9 @@ const GameLobbyScreen = ({ route, navigation }) => {
                   leftIcon={<Icon name="play-arrow" size={20} color={theme.colors.text.primary} />}
                   fullWidth
                 />
-                <Text style={styles.waitingText}>
-                  {actualPlayers.length < requiredPlayers
-                    ? `Waiting for ${requiredPlayers - actualPlayers.length} more player(s)...` 
-                    : 'All players have joined! You can start the game.'}
-                </Text>
                 <CustomButton
                   title="END GAME"
-                  onPress={handleEndGame}
+                  onPress={confirmEndGame}
                   variant="outline"
                   style={styles.endGameButton}
                   leftIcon={<Icon name="cancel" size={20} color={theme.colors.error} />}
@@ -268,11 +309,17 @@ const GameLobbyScreen = ({ route, navigation }) => {
               </>
             ) : (
               <>
-                <Text style={styles.waitingText}>
-                  {actualPlayers.length < requiredPlayers
-                    ? `Waiting for ${requiredPlayers - actualPlayers.length} more player(s)...` 
-                    : 'All players have joined! Waiting for host to start the game.'}
-                </Text>
+                <View style={styles.playerCountContainer}>
+                  <Icon name="people" size={24} color={theme.colors.primary} />
+                  <Text style={styles.playerCountText}>
+                    Players: {actualPlayers.length}/{requiredPlayers}
+                  </Text>
+                  <Text style={styles.waitingText}>
+                    {actualPlayers.length < requiredPlayers
+                      ? `Waiting for ${requiredPlayers - actualPlayers.length} more player(s)...` 
+                      : 'All players have joined! Waiting for host to start the game.'}
+                  </Text>
+                </View>
                 <CustomButton
                   title="LEAVE GAME"
                   onPress={handleLeaveGame}
@@ -411,6 +458,7 @@ const styles = StyleSheet.create({
     color: theme.colors.text.secondary,
     fontSize: theme.typography.sizes.md,
     padding: theme.spacing.md,
+    fontStyle: 'italic',
   },
   leaveGameText: {
     color: theme.colors.error,
@@ -470,6 +518,39 @@ const styles = StyleSheet.create({
   },
   backButton: {
     marginTop: theme.spacing.md,
+  },
+  hostInfoContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(187, 134, 252, 0.1)',
+    borderRadius: theme.borderRadius.medium,
+    padding: theme.spacing.md,
+    marginBottom: theme.spacing.md,
+  },
+  hostInfoText: {
+    flex: 1,
+    marginLeft: theme.spacing.sm,
+    fontSize: theme.typography.sizes.md,
+    color: theme.colors.text.secondary,
+  },
+  civilianInfoContainer: {
+    flexDirection: 'row',
+    justifyContent: 'flex-start',
+    marginBottom: theme.spacing.md,
+  },
+  playerCountContainer: {
+    flexDirection: 'column',
+    alignItems: 'center',
+    marginBottom: theme.spacing.md,
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    borderRadius: theme.borderRadius.medium,
+    padding: theme.spacing.md,
+  },
+  playerCountText: {
+    fontSize: theme.typography.sizes.lg,
+    fontWeight: theme.typography.weights.bold,
+    color: theme.colors.text.accent,
+    marginVertical: theme.spacing.sm,
   },
 });
 

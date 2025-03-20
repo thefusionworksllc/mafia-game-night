@@ -13,11 +13,8 @@
     },
     "production": {
       "autoIncrement": true
-    },
-    "web": {
-      "command": "npx expo export",
-      "output": "web-build"
     }
+   
   },
   "submit": {
     "production": {}

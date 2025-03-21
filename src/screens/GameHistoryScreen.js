@@ -120,17 +120,56 @@ const GameHistoryScreen = ({ navigation }) => {
   const handleRejoinGame = async (gameCode) => {
     setLoading(true);
     try {
+      // First check if game exists
       const gameExists = await gameService.checkGameExists(gameCode);
       if (!gameExists) {
         showError('This game is no longer active');
         return;
       }
       
-      navigation.navigate('GameLobby', { 
-        gameCode,
-        isHost: false,
-      });
+      // Get game data
+      const gameData = await gameService.getGameData(gameCode);
+      
+      // Check if user is in the game
+      if (!gameData.players || !gameData.players[user.uid]) {
+        showError('You are not a participant in this game');
+        return;
+      }
+      
+      // Check if user is the host
+      const isUserHost = gameData.hostId === user.uid;
+      
+      // Get game settings
+      const settings = gameData.settings || {};
+      
+      if (gameData.status === 'waiting') {
+        // Game is in lobby
+        navigation.navigate('GameLobby', {
+          gameCode,
+          isHost: isUserHost,
+          totalPlayers: settings.totalPlayers || 0,
+          mafiaCount: settings.mafiaCount || 0,
+          detectiveCount: settings.detectiveCount || 0,
+          doctorCount: settings.doctorCount || 0
+        });
+      } else if (gameData.status === 'started') {
+        if (isUserHost) {
+          // Host should go to GameControl
+          navigation.navigate('GameControl', { gameCode });
+        } else {
+          // Player should go to GamePlay
+          const currentPlayer = gameData.players[user.uid];
+          const role = currentPlayer?.role || 'civilian';
+          navigation.navigate('GamePlay', { 
+            gameCode,
+            role 
+          });
+        }
+      } else {
+        showError('This game has ended');
+      }
     } catch (error) {
+      console.error('Error rejoining game:', error);
       showError(error.message || 'Failed to rejoin game');
     } finally {
       setLoading(false);
@@ -294,27 +333,54 @@ const GameHistoryScreen = ({ navigation }) => {
             ))}
           </View>
 
-          {/* Action Buttons */}
-          <View style={styles.actionButtonsContainer}>
-            {item.status !== 'ended' && item.hostId === user.uid && (
+          {/* Buttons */}
+          <View style={styles.buttonsContainer}>
+            {item.status !== 'ended' && (
               <CustomButton
-                title="End Game"
-                onPress={() => {
-                  setSelectedGame(item);
-                  setModalVisible(true);
-                }}
-                variant="outline"
+                title={item.status === 'waiting' ? 'JOIN LOBBY' : 'REJOIN GAME'}
+                onPress={() => handleRejoinGame(item.gameCode)}
+                leftIcon={<Icon name={item.status === 'waiting' ? 'group' : 'play-arrow'} size={16} color={theme.colors.text.primary} />}
                 style={styles.actionButton}
-                leftIcon={<Icon name="stop" size={18} color={theme.colors.error} />}
+                size="small"
               />
             )}
             
-            {item.status !== 'ended' && (
+            {item.status === 'started' && item.hostId === user.uid && (
               <CustomButton
-                title="Return to Lobby"
-                onPress={() => handleRejoinGame(item.gameCode)}
-                style={[styles.actionButton, item.hostId !== user.uid ? styles.fullWidthButton : null]}
-                leftIcon={<Icon name="meeting-room" size={18} color={theme.colors.text.primary} />}
+                title="GAME CONTROL"
+                onPress={() => navigation.navigate('GameControl', { gameCode: item.gameCode })}
+                leftIcon={<Icon name="settings" size={16} color={theme.colors.text.primary} />}
+                style={styles.actionButton}
+                size="small"
+              />
+            )}
+            
+            {item.status === 'started' && item.players && item.players[user.uid] && !item.players[user.uid].isHost && (
+              <CustomButton
+                title="VIEW ROLE"
+                onPress={() => navigation.navigate('PlayerRole', { 
+                  gameCode: item.gameCode, 
+                  role: item.players[user.uid]?.role || 'civilian',
+                  isHost: false
+                })}
+                leftIcon={<Icon name="visibility" size={16} color={theme.colors.text.primary} />}
+                style={styles.actionButton}
+                size="small"
+              />
+            )}
+            
+            {item.hostId === user.uid && item.status !== 'ended' && (
+              <CustomButton
+                title="END GAME"
+                onPress={() => {
+                  setSelectedGame(item);
+                  setNewStatus('ended');
+                  setModalVisible(true);
+                }}
+                variant="outline"
+                leftIcon={<Icon name="stop" size={16} color={theme.colors.error} />}
+                style={[styles.actionButton, { borderColor: theme.colors.error }]}
+                size="small"
               />
             )}
           </View>
@@ -753,6 +819,16 @@ const styles = StyleSheet.create({
   },
   playersList: {
     paddingBottom: theme.spacing.xxl,
+  },
+  buttonsContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: theme.spacing.sm,
+    marginTop: theme.spacing.md,
+  },
+  actionButton: {
+    marginRight: theme.spacing.sm,
+    marginBottom: theme.spacing.sm,
   },
 });
 

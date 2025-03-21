@@ -125,20 +125,15 @@ const PlayerRoleScreen = ({ route, navigation }) => {
 
   const handleViewAllRoles = async () => {
     try {
-      const gameData = await gameService.getGameData(gameCode);
-      const players = Object.values(gameData.players).filter(player => !player.isHost);
-      const grouped = players.reduce((acc, player) => {
-        if (!acc[player.role]) {
-          acc[player.role] = [];
-        }
-        acc[player.role].push(player);
-        return acc;
-      }, {});
-      setGroupedPlayers(grouped);
-      setModalVisible(true);
+      // Navigate to the RoleAssignmentScreen instead of showing modal
+      navigation.navigate('RoleAssignment', {
+        gameCode,
+        isHost: true,
+        fromPlayerRole: true // Flag to indicate we came from PlayerRoleScreen
+      });
     } catch (error) {
-      console.error('Error fetching roles:', error);
-      Alert.alert('Error', 'Failed to fetch player roles. Please try again.');
+      console.error('Error navigating to roles screen:', error);
+      showError('Failed to navigate to role assignment screen. Please try again.');
     }
   };
 
@@ -348,7 +343,7 @@ const PlayerRoleScreen = ({ route, navigation }) => {
               fullWidth
               style={styles.actionButton}
             />
-            
+            {/*
             <CustomButton
               title="RETURN TO LOBBY"
               onPress={handleReturnToLobby}
@@ -357,6 +352,7 @@ const PlayerRoleScreen = ({ route, navigation }) => {
               fullWidth
               style={styles.actionButton}
             />
+          
             
             <CustomButton
               title="BACK TO HISTORY"
@@ -366,7 +362,7 @@ const PlayerRoleScreen = ({ route, navigation }) => {
               fullWidth
               style={styles.historyButton}
             />
-            
+              */}
             {isHost && (
               <CustomButton
                 title="END GAME"

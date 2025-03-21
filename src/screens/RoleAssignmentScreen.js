@@ -55,7 +55,7 @@ const RoleCard = ({ role, name, description, icon }) => {
 };
 
 const RoleAssignmentScreen = ({ route, navigation }) => {
-  const { gameCode, isHost } = route.params || {};
+  const { gameCode, isHost, fromPlayerRole } = route.params || {};
   const [roles, setRoles] = useState([]);
   const [loading, setLoading] = useState(true);
   const { user } = useAuth();
@@ -181,28 +181,44 @@ const RoleAssignmentScreen = ({ route, navigation }) => {
     }
   };
 
+  const handleBackToPlayerRole = () => {
+    navigation.navigate('PlayerRole', {
+      gameCode,
+      isHost: true,
+      role: 'host'
+    });
+  };
+
   return (
-    <View style={styles.container}>
+    <View style={theme.commonStyles.container}>
       <StatusBar translucent backgroundColor="transparent" barStyle="light-content" />
       <ImageBackground
         source={require('../../assets/background.png')}
-        style={styles.backgroundImage}
+        style={theme.commonStyles.backgroundImage}
         resizeMode="cover"
       >
         <LinearGradient
           colors={theme.gradients.background}
           style={[
-            styles.gradientContainer,
+            theme.commonStyles.gradientContainer,
             { paddingTop: insets.top }
           ]}
         >
-          <View style={styles.content}>
-            <Text style={styles.title}>Role Assignment</Text>
-            <Text style={styles.subtitle}>
-              {isHost 
-                ? 'As the host, you can see all player roles' 
-                : 'Your role and abilities for this game'}
-            </Text>
+          <View style={theme.commonStyles.content}>
+            <View style={styles.header}>
+              <Text style={styles.title}>
+                {fromPlayerRole ? 'All Player Roles' : 'Assigned Roles'}
+              </Text>
+              {fromPlayerRole && (
+                <CustomButton
+                  title="BACK TO ROLE"
+                  onPress={handleBackToPlayerRole}
+                  leftIcon={<Icon name="arrow-back" size={20} color={theme.colors.text.primary} />}
+                  style={styles.backButton}
+                  size="small"
+                />
+              )}
+            </View>
 
             <View style={styles.rolesContainer}>
               {loading ? (
@@ -223,22 +239,34 @@ const RoleAssignmentScreen = ({ route, navigation }) => {
             </View>
 
             <View style={styles.buttonContainer}>
-              <CustomButton
-                title="CONTINUE TO GAME"
-                onPress={handleContinue}
-                disabled={loading || roles.length === 0}
-                leftIcon={<Icon name="play-arrow" size={20} color={theme.colors.text.primary} />}
-                fullWidth
-              />
-              
-              <CustomButton
-                title="RETURN TO LOBBY"
-                onPress={handleReturnToLobby}
-                variant="outline"
-                style={styles.backButton}
-                leftIcon={<Icon name="meeting-room" size={20} color={theme.colors.text.accent} />}
-                fullWidth
-              />
+              {!fromPlayerRole ? (
+                <>
+                  <CustomButton
+                    title="CONTINUE TO GAME"
+                    onPress={handleContinue}
+                    loading={loading}
+                    leftIcon={<Icon name="play-arrow" size={20} color="#fff" />}
+                    fullWidth
+                    style={styles.button}
+                  />
+                  <CustomButton
+                    title="RETURN TO LOBBY"
+                    onPress={handleReturnToLobby}
+                    leftIcon={<Icon name="arrow-back" size={20} color={theme.colors.text.accent} />}
+                    variant="outline"
+                    fullWidth
+                    style={styles.button}
+                  />
+                </>
+              ) : (
+                <CustomButton
+                  title="BACK TO ROLE"
+                  onPress={handleBackToPlayerRole}
+                  leftIcon={<Icon name="arrow-back" size={20} color="#fff" />}
+                  fullWidth
+                  style={styles.button}
+                />
+              )}
             </View>
           </View>
         </LinearGradient>
@@ -352,6 +380,16 @@ const styles = StyleSheet.create({
     marginTop: theme.spacing.lg,
   },
   backButton: {
+    marginLeft: theme.spacing.md,
+  },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: theme.spacing.lg,
+    paddingHorizontal: theme.spacing.horizontalPadding,
+  },
+  button: {
     marginTop: theme.spacing.md,
   },
 });

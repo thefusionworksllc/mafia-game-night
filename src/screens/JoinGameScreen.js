@@ -10,6 +10,7 @@ import {
   Dimensions,
   Animated,
   ScrollView,
+  TouchableOpacity,
 } from 'react-native';
 import { Input } from 'react-native-elements';
 import theme from '../theme';
@@ -184,6 +185,12 @@ const JoinGameScreen = ({ navigation }) => {
                     <Text style={styles.userInfoText}>
                       You need to be logged in to join a game
                     </Text>
+                    <TouchableOpacity 
+                      onPress={() => navigation.navigate('Login')}
+                      style={styles.loginLink}
+                    >
+                      <Text style={styles.loginLinkText}>Click here to login</Text>
+                    </TouchableOpacity>
                   </View>
                 )}
 
@@ -332,6 +339,15 @@ const styles = StyleSheet.create({
     fontSize: theme.typography.sizes.md,
     color: theme.colors.text.secondary,
     marginLeft: theme.spacing.sm,
+  },
+  loginLink: {
+    marginTop: theme.spacing.xs,
+    alignSelf: 'center',
+  },
+  loginLinkText: {
+    color: theme.colors.primary,
+    fontWeight: theme.typography.weights.bold,
+    textDecorationLine: 'underline',
   },
 });
 

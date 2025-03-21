@@ -247,9 +247,13 @@ const GameControlScreen = ({ route, navigation }) => {
           onPress: async () => {
             try {
               setLoading(true);
-              await gameService.endGame(gameCode);
+              const result = await gameService.endGame(gameCode);
+              console.log("End game result:", result);
               showError('Game ended successfully', 'success');
-              navigation.replace('Home');
+              
+              setTimeout(() => {
+                navigation.replace('Home');
+              }, 500);
             } catch (error) {
               console.error('Error ending game:', error);
               showError(error.message || 'Failed to end game');
@@ -283,6 +287,39 @@ const GameControlScreen = ({ route, navigation }) => {
     navigation.replace('PlayerRole', {
       gameCode,
       isHost: true
+    });
+  };
+
+  // Add this function to get role color
+  const getRoleColor = (role) => {
+    const normalizedRole = role?.toLowerCase();
+    switch(normalizedRole) {
+      case 'mafia':
+        return theme.colors.error;
+      case 'detective':
+        return theme.colors.info;
+      case 'doctor':
+        return theme.colors.success;
+      case 'civilian':
+        return theme.colors.accent;
+      default:
+        return theme.colors.text.secondary;
+    }
+  };
+
+  // Add this function to sort players by role
+  const getSortedPlayers = () => {
+    const roleOrder = {
+      'mafia': 1,
+      'doctor': 2,
+      'detective': 3,
+      'civilian': 4
+    };
+
+    return [...players].sort((a, b) => {
+      const roleA = a.role?.toLowerCase() || 'civilian';
+      const roleB = b.role?.toLowerCase() || 'civilian';
+      return (roleOrder[roleA] || 5) - (roleOrder[roleB] || 5);
     });
   };
 
@@ -461,14 +498,19 @@ const GameControlScreen = ({ route, navigation }) => {
           <View style={styles.playersSection}>
             <Text style={styles.sectionTitle}>Players</Text>
             <View style={styles.playersListContainer}>
-              {players.map(player => (
+              {getSortedPlayers().map(player => (
                 <View key={player.id} style={[
                   styles.playerItem,
+                  { backgroundColor: `${getRoleColor(player.role)}20` },
                   eliminatedPlayers.includes(player.id) && styles.eliminatedPlayer
                 ]}>
                   <View style={styles.playerInfo}>
                     <Text style={styles.playerName}>{player.name}</Text>
-                    <Text style={styles.playerRole}>{player.role}</Text>
+                    <View style={[styles.roleBadge, { backgroundColor: `${getRoleColor(player.role)}40` }]}>
+                      <Text style={[styles.playerRole, { color: getRoleColor(player.role) }]}>
+                        {player.role?.charAt(0).toUpperCase() + player.role?.slice(1) || 'Civilian'}
+                      </Text>
+                    </View>
                   </View>
                   
                   {/* Status indication */}
@@ -663,9 +705,16 @@ const styles = StyleSheet.create({
     fontWeight: theme.typography.weights.bold,
     color: theme.colors.text.primary,
   },
+  roleBadge: {
+    paddingHorizontal: theme.spacing.sm,
+    paddingVertical: theme.spacing.xs,
+    borderRadius: theme.borderRadius.small,
+    alignSelf: 'flex-start',
+    marginTop: theme.spacing.xs,
+  },
   playerRole: {
     fontSize: theme.typography.sizes.sm,
-    color: theme.colors.text.secondary,
+    fontWeight: theme.typography.weights.bold,
   },
   playerStatus: {
     paddingHorizontal: theme.spacing.sm,

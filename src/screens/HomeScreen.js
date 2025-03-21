@@ -1,5 +1,5 @@
 // src/screens/home/HomeScreen.js
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { 
   View, 
   StyleSheet, 
@@ -20,6 +20,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import CustomButton from '../components/CustomButton';
 import ModernBackground from '../components/ModernBackground';
 import { useError } from '../context/ErrorContext';
+import { gameService } from '../services/gameService';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
@@ -27,6 +28,8 @@ const HomeScreen = ({ navigation, route }) => {
   const { user, signOut } = useAuth();
   const insets = useSafeAreaInsets();
   const { showError } = useError();
+  const [activeGame, setActiveGame] = useState(null);
+  const [loadingGame, setLoadingGame] = useState(true);
 
   // Check if user is null and handle accordingly
   const isLoggedIn = !!user;
@@ -40,12 +43,80 @@ const HomeScreen = ({ navigation, route }) => {
     }
   }, [route.params?.showSuccess, route.params?.successMessage]);
 
+  // Check for active games
+  useEffect(() => {
+    const checkActiveGames = async () => {
+      if (!user) {
+        setLoadingGame(false);
+        return;
+      }
+      
+      try {
+        setLoadingGame(true);
+        const game = await gameService.getUserActiveGame(user.uid);
+        setActiveGame(game);
+      } catch (error) {
+        console.error('Error checking active games:', error);
+      } finally {
+        setLoadingGame(false);
+      }
+    };
+    
+    checkActiveGames();
+  }, [user]);
+
   const handleSignOut = async () => {
     try {
       await signOut();
     } catch (error) {
       console.error('Error signing out:', error);
       Alert.alert('Error', 'Failed to sign out. Please try again.');
+    }
+  };
+
+  // Function to navigate to the appropriate screen based on game status
+  const handleContinueGame = async () => {
+    if (!activeGame) return;
+    
+    try {
+      setLoadingGame(true);
+      const gameData = await gameService.getGameData(activeGame.gameCode);
+      const isUserHost = await gameService.isGameHost(activeGame.gameCode);
+      
+      // Get game settings
+      const settings = gameData?.settings || {};
+      
+      if (gameData.status === 'waiting') {
+        // Game is in lobby
+        navigation.navigate('GameLobby', {
+          gameCode: activeGame.gameCode,
+          isHost: isUserHost,
+          totalPlayers: settings.totalPlayers || 0,
+          mafiaCount: settings.mafiaCount || 0,
+          detectiveCount: settings.detectiveCount || 0,
+          doctorCount: settings.doctorCount || 0
+        });
+      } else if (gameData.status === 'started') {
+        if (isUserHost) {
+          // Host should go to GameControl
+          navigation.navigate('GameControl', { 
+            gameCode: activeGame.gameCode 
+          });
+        } else {
+          // Player should go to GamePlay
+          const currentPlayer = gameData.players[user.uid];
+          const role = currentPlayer?.role || 'civilian';
+          navigation.navigate('GamePlay', { 
+            gameCode: activeGame.gameCode,
+            role: role
+          });
+        }
+      }
+    } catch (error) {
+      console.error('Error continuing game:', error);
+      showError('Failed to continue game: ' + error.message);
+    } finally {
+      setLoadingGame(false);
     }
   };
 
@@ -173,6 +244,44 @@ const HomeScreen = ({ navigation, route }) => {
               </TouchableOpacity>
             </View>
           </View>
+
+          {/* Active Game Section - Only shown when there's an active game */}
+          {isLoggedIn && activeGame && (
+            <View style={styles.activeGameSection}>
+              <Text style={styles.sectionTitle}>Active Game</Text>
+              <TouchableOpacity 
+                style={styles.activeGameCard}
+                onPress={handleContinueGame}
+                activeOpacity={0.7}
+                disabled={loadingGame}
+              >
+                <LinearGradient
+                  colors={theme.gradients.accent}
+                  style={styles.activeGameGradient}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 1 }}
+                >
+                  <View style={styles.activeGameInfo}>
+                    <Icon name="videogame-asset" size={24} color={theme.colors.text.primary} />
+                    <View style={styles.activeGameTextContainer}>
+                      <Text style={styles.activeGameTitle}>Game Code: {activeGame.gameCode}</Text>
+                      <Text style={styles.activeGameStatus}>
+                        {activeGame.status === 'waiting' ? 'Lobby' : 'In Progress'}
+                      </Text>
+                    </View>
+                  </View>
+                  <CustomButton
+                    title="CONTINUE GAME"
+                    onPress={handleContinueGame}
+                    loading={loadingGame}
+                    size="small"
+                    style={styles.continueGameButton}
+                    leftIcon={<Icon name="play-arrow" size={16} color={theme.colors.text.primary} />}
+                  />
+                </LinearGradient>
+              </TouchableOpacity>
+            </View>
+          )}
 
           {/* Tutorial Section */}
           <View style={styles.tutorialSection}>
@@ -385,6 +494,41 @@ const styles = StyleSheet.create({
     fontWeight: theme.typography.weights.bold,
     color: theme.colors.text.primary,
     marginLeft: theme.spacing.md,
+  },
+  activeGameSection: {
+    marginBottom: theme.spacing.lg,
+  },
+  activeGameCard: {
+    borderRadius: theme.borderRadius.large,
+    overflow: 'hidden',
+    marginTop: theme.spacing.sm,
+    ...theme.shadows.medium,
+  },
+  activeGameGradient: {
+    padding: theme.spacing.lg,
+    borderRadius: theme.borderRadius.large,
+  },
+  activeGameInfo: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: theme.spacing.md,
+  },
+  activeGameTextContainer: {
+    marginLeft: theme.spacing.md,
+    flex: 1,
+  },
+  activeGameTitle: {
+    fontSize: theme.typography.sizes.md,
+    fontWeight: theme.typography.weights.bold,
+    color: theme.colors.text.primary,
+  },
+  activeGameStatus: {
+    fontSize: theme.typography.sizes.sm,
+    color: theme.colors.text.primary,
+    opacity: 0.8,
+  },
+  continueGameButton: {
+    alignSelf: 'flex-start',
   },
 });
 

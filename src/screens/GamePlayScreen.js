@@ -49,73 +49,78 @@ const GamePlayScreen = ({ route, navigation }) => {
   const phaseAnimation = useState(new Animated.Value(0))[0];
   const pulseAnimation = useState(new Animated.Value(1))[0];
 
+  // Add isHost state
+  const [isHost, setIsHost] = useState(false);
+
   // Convert role to lowercase for matching
   const normalizedRole = role ? role.toLowerCase() : 'civilian';
 
   useEffect(() => {
     const unsubscribe = gameService.subscribeToGame(gameCode, (data) => {
       if (!data) {
-        showError('Game not found or ended', 'warning');
+        showError('Game not found or has ended');
         navigation.replace('Home');
         return;
       }
 
       setGameData(data);
-      if (data.players) {
-        const playersList = Object.values(data.players).filter(player => !player.isHost);
-        setPlayers(playersList);
-      }
 
-      // Set game phase from data if available
+      // Check if user is host
+      setIsHost(data.hostId === user.uid);
+
+      // Extract players list (excluding host)
+      const playersList = Object.values(data.players).filter(player => !player.isHost);
+      setPlayers(playersList);
+
+      // Get current phase
       if (data.currentPhase) {
-        const phaseHasChanged = data.currentPhase !== currentPhase;
         setCurrentPhase(data.currentPhase);
         
-        if (phaseHasChanged) {
-          animatePhaseChange();
-          // Reset selections when phase changes
-          setSelectedPlayer(null);
-          
-          // Show phase change notification
-          showError(`Phase changed to: ${data.currentPhase}`, 'info');
+        // Handle phase timer if available
+        if (data.currentPhaseEndTime) {
+          const endTime = new Date(data.currentPhaseEndTime).getTime();
+          const now = new Date().getTime();
+          const remaining = Math.max(0, Math.floor((endTime - now) / 1000));
+          setPhaseTimer(remaining);
         }
       }
 
-      // Set phase timer if available
-      if (data.phaseTimer) {
-        setPhaseTimer(data.phaseTimer);
-      }
-
-      // Check if player has been eliminated
-      const currentPlayerData = data.players?.[user.uid];
-      if (currentPlayerData && currentPlayerData.eliminated && !eliminated) {
+      // Check if player is eliminated
+      const currentPlayer = data.players[user.uid];
+      if (currentPlayer && currentPlayer.eliminated) {
         setEliminated(true);
-        showError('You have been eliminated!', 'warning');
       }
 
-      // Get voting results if available
+      // Get voting data if available
       if (data.votes) {
-        if (normalizedRole === 'mafia') {
-          setMafiaVotes(data.votes.mafia || {});
+        // Handle mafia votes
+        if (data.votes.mafia) {
+          setMafiaVotes(data.votes.mafia);
         }
-        setCivilianVotes(data.votes.civilian || {});
+        
+        // Handle civilian votes
+        if (data.votes.civilian) {
+          setCivilianVotes(data.votes.civilian);
+        }
       }
-
-      // Get investigation results for detective
-      if (normalizedRole === 'detective' && data.investigations) {
-        setInvestigationResults(data.investigations[user.uid] || {});
+      
+      // Get investigation results if available (for detective)
+      if (data.investigationResults && data.investigationResults[user.uid]) {
+        setInvestigationResults(data.investigationResults[user.uid]);
       }
-
-      // Get protection info for doctor
-      if (normalizedRole === 'doctor' && data.protections) {
-        setProtectedPlayer(data.protections[user.uid]);
+      
+      // Get protected player info if available (for doctor)
+      if (data.protectedPlayers && role.toLowerCase() === 'doctor') {
+        setProtectedPlayer(data.protectedPlayers[user.uid]);
       }
 
       setLoading(false);
     });
 
-    return () => unsubscribe();
-  }, [gameCode, navigation, showError, normalizedRole, user.uid]);
+    return () => {
+      unsubscribe();
+    };
+  }, [gameCode, user.uid, role, navigation, showError]);
 
   // Start pulse animation for player actions
   useEffect(() => {
@@ -364,6 +369,33 @@ const GamePlayScreen = ({ route, navigation }) => {
     }
   };
 
+  // Add the handleEndGame function
+  const handleEndGame = async () => {
+    try {
+      setLoading(true);
+      await gameService.endGame(gameCode);
+      showError('Game ended successfully', 'success');
+      navigation.replace('Home');
+    } catch (error) {
+      console.error('Error ending game:', error);
+      showError(error.message || 'Failed to end game');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Add a confirmEndGame function that shows an alert before ending the game
+  const confirmEndGame = () => {
+    Alert.alert(
+      "End Game",
+      "Are you sure you want to end this game? All players will be disconnected.",
+      [
+        { text: "Cancel", style: "cancel" },
+        { text: "End Game", onPress: handleEndGame, style: "destructive" }
+      ]
+    );
+  };
+
   if (loading) {
     return (
       <View style={[theme.commonStyles.container, styles.centerContainer]}>
@@ -558,6 +590,18 @@ const GamePlayScreen = ({ route, navigation }) => {
               style={styles.historyButton}
             />
           </View>
+
+          {/* End Game Button */}
+          {isHost && (
+            <CustomButton
+              title="END GAME"
+              onPress={confirmEndGame}
+              variant="outline"
+              style={styles.endGameButton}
+              leftIcon={<Icon name="stop" size={20} color={theme.colors.error} />}
+              fullWidth
+            />
+          )}
         </ScrollView>
       </ModernBackground>
       <BottomNavigation navigation={navigation} activeScreen="Home" />
@@ -762,6 +806,11 @@ const styles = StyleSheet.create({
   },
   historyButton: {
     marginBottom: theme.spacing.md,
+  },
+  endGameButton: {
+    marginTop: theme.spacing.md,
+    borderColor: theme.colors.error,
+    marginBottom: theme.spacing.lg,
   },
 });
 

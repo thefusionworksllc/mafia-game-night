@@ -117,20 +117,33 @@ const MoreModal = ({ visible, onClose, navigation, isLoggedIn }) => {
 };
 
 const BottomNavigation = ({ navigation, activeScreen }) => {
-  const [moreModalVisible, setMoreModalVisible] = useState(false);
-  const { user } = useAuth();
+  const { user, signOut } = useAuth();
   const isLoggedIn = !!user;
   const insets = useSafeAreaInsets();
   
   const handleNavigation = useCallback((screen, params) => {
-    if (screen === 'GameHistory' && !isLoggedIn) {
-      navigation.navigate(screen, params);
-    } else if ((screen === 'HostGame' || screen === 'JoinGame') && !isLoggedIn) {
-      navigation.navigate(screen, params);
+    navigation.navigate(screen, params);
+  }, [navigation]);
+
+  const handleProfileAction = () => {
+    if (isLoggedIn) {
+      navigation.navigate('Settings');
     } else {
-      navigation.navigate(screen, params);
+      navigation.navigate('Login');
     }
-  }, [navigation, isLoggedIn]);
+  };
+
+  const handleSignOut = async () => {
+    try {
+      console.log("Attempting to sign out...");
+      await signOut();
+      console.log("Sign out successful.");
+      navigation.navigate('Home');
+    } catch (error) {
+      console.error("Sign out error:", error);
+      Alert.alert('Error', 'Failed to sign out. Please try again.');
+    }
+  };
 
   return (
     <View style={[
@@ -174,22 +187,21 @@ const BottomNavigation = ({ navigation, activeScreen }) => {
             isActive={activeScreen === 'GameHistory'}
           />
           <BottomNavButton
-            title="More"
-            icon="more-horiz"
-            onPress={() => setMoreModalVisible(true)}
-            disabled={activeScreen === 'Settings' || activeScreen === 'GameTutorial'}
-            isActive={moreModalVisible}
+            title="Tutorial"
+            icon="help-outline"
+            onPress={() => handleNavigation('GameTutorial')}
+            disabled={activeScreen === 'GameTutorial'}
+            isActive={activeScreen === 'GameTutorial'}
+          />
+          <BottomNavButton
+            title={isLoggedIn ? "Settings" : "Login"}
+            icon={isLoggedIn ? "settings" : "login"}
+            onPress={handleProfileAction}
+            disabled={activeScreen === 'Settings' || activeScreen === 'Login'}
+            isActive={activeScreen === 'Settings' || activeScreen === 'Login'}
           />
         </View>
       </LinearGradient>
-
-      <MoreModal
-        visible={moreModalVisible}
-        onClose={() => setMoreModalVisible(false)}
-        navigation={navigation}
-        activeScreen={activeScreen}
-        isLoggedIn={isLoggedIn}
-      />
     </View>
   );
 };

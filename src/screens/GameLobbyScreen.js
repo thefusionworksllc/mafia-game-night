@@ -148,10 +148,10 @@ const GameLobbyScreen = ({ route, navigation }) => {
     }
   };
 
-  const confirmEndGame = () => {
+  const handleEndGameConfirmation = () => {
     Alert.alert(
       "End Game",
-      "Are you sure you want to end this game? All players will be disconnected.",
+      "Are you sure you want to end the game? This action cannot be undone.",
       [
         { text: "Cancel", style: "cancel" },
         { text: "End Game", onPress: handleEndGame, style: "destructive" }
@@ -162,12 +162,18 @@ const GameLobbyScreen = ({ route, navigation }) => {
   const handleEndGame = async () => {
     setLoading(true);
     try {
-      await gameService.endGame(gameCode);
+      console.log('Attempting to end game with code:', gameCode);
+      const result = await gameService.endGame(gameCode);
+      console.log('End game result:', result);
       showError('Game ended successfully', 'success');
-      navigation.replace('Home');
+      
+      // Add slight delay before navigation to ensure UI updates
+      setTimeout(() => {
+        navigation.replace('Home');
+      }, 500);
     } catch (error) {
       console.error('Error ending game:', error);
-      showError(error.message || 'Failed to end game', 'error');
+      showError(`Failed to end game: ${error.message}`, 'error');
     } finally {
       setLoading(false);
     }
@@ -308,7 +314,7 @@ const GameLobbyScreen = ({ route, navigation }) => {
                 
                 <CustomButton
                   title="END GAME"
-                  onPress={confirmEndGame}
+                  onPress={handleEndGameConfirmation}
                   variant="outline"
                   style={styles.actionButton}
                   leftIcon={<Icon name="close" size={20} color={theme.colors.error} />}

@@ -868,6 +868,54 @@ export const gameService = {
       throw new Error('Failed to check game outcome');
     }
   },
+
+  // Get user's active game
+  getUserActiveGame: async (userId) => {
+    if (!userId) return null;
+    
+    try {
+      const db = getDbInstance();
+      // Get all games
+      const gamesRef = ref(db, 'games');
+      const snapshot = await get(gamesRef);
+      
+      if (!snapshot.exists()) {
+        return null;
+      }
+      
+      const games = snapshot.val();
+      let activeGame = null;
+      let latestTimestamp = 0;
+      
+      // Check each game to see if user is a player or host
+      Object.entries(games).forEach(([gameCode, game]) => {
+        // Skip ended games
+        if (game.status === 'ended') return;
+        
+        // Check if user is in this game (either as host or player)
+        const isInGame = game.players && game.players[userId];
+        
+        if (isInGame) {
+          const gameTimestamp = new Date(game.createdAt).getTime();
+          // Keep the most recent game
+          if (gameTimestamp > latestTimestamp) {
+            latestTimestamp = gameTimestamp;
+            activeGame = {
+              gameCode,
+              status: game.status,
+              isHost: game.hostId === userId,
+              createdAt: game.createdAt
+            };
+          }
+        }
+      });
+      
+      return activeGame;
+    } catch (error) {
+      console.error('Error getting user active game:', error);
+      return null;
+    }
+  },
 };
 
 // Helper function to assign roles

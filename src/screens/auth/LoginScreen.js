@@ -194,10 +194,7 @@ const styles = StyleSheet.create({
     fontSize: theme.typography.sizes.xl,
     fontWeight: theme.typography.weights.bold,
     color: theme.colors.text.accent,
-    // Text shadow for better readability
-    textShadowColor: 'rgba(0, 0, 0, 0.75)',
-    textShadowOffset: { width: 0, height: 1 },
-    textShadowRadius: 4,
+    textShadow: '0px 1px 4px rgba(0, 0, 0, 0.75)',
   },
   card: {
     backgroundColor: theme.colors.card.background,

@@ -87,21 +87,17 @@ const PlayerRoleScreen = ({ route, navigation }) => {
 
   // Function to get role color based on role name
   const getRoleColor = (role) => {
-    const normalizedRole = role?.toLowerCase();
-    if (roleData[normalizedRole]) {
-      return roleData[normalizedRole].color;
-    }
-    switch(normalizedRole) {
+    switch (role.toLowerCase()) {
       case 'mafia':
-        return theme.colors.tertiary;
+        return theme.colors.mafia|| theme.colors.primary;
       case 'detective':
-        return theme.colors.info;
+        return theme.colors.detective|| theme.colors.primary;
       case 'doctor':
-        return theme.colors.success;
+        return theme.colors.doctor|| theme.colors.primary;
       case 'civilian':
-        return theme.colors.primary;
+        return theme.colors.civilian || theme.colors.primary;
       default:
-        return theme.colors.text.secondary;
+        return theme.colors.primary;
     }
   };
 
@@ -565,11 +561,16 @@ const styles = StyleSheet.create({
     marginBottom: theme.spacing.lg,
   },
   roleInfoCard: {
-    width: '90%',
-    borderRadius: theme.borderRadius.large,
+    width: '100%',
+    borderRadius: theme.borderRadius.lg,
     overflow: 'hidden',
     borderWidth: 2,
-    ...theme.shadows.medium,
+    marginVertical: theme.spacing.md,
+    elevation: 5,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
   },
   roleGradient: {
     padding: theme.spacing.lg,

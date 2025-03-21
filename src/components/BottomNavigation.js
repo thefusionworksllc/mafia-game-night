@@ -35,6 +35,8 @@ const BottomNavButton = React.memo(({ title, icon, onPress, disabled, isActive }
 const MoreModal = ({ visible, onClose, navigation, isLoggedIn }) => {
   const { signOut } = useAuth();
   const insets = useSafeAreaInsets();
+  const [confirmationVisible, setConfirmationVisible] = useState(false);
+  const [confirmationData, setConfirmationData] = useState(null);
 
   const handleSignOut = async () => {
     try {
@@ -45,7 +47,17 @@ const MoreModal = ({ visible, onClose, navigation, isLoggedIn }) => {
       navigation.navigate('Home');
     } catch (error) {
       console.error("Sign out error:", error);
-      Alert.alert('Error', 'Failed to sign out. Please try again.');
+      if (Platform.OS === 'web') {
+        setConfirmationData({
+          title: 'Error',
+          message: 'Failed to sign out. Please try again.',
+          onConfirm: () => setConfirmationVisible(false),
+          confirmText: 'OK'
+        });
+        setConfirmationVisible(true);
+      } else {
+        Alert.alert('Error', 'Failed to sign out. Please try again.');
+      }
     }
   };
 
@@ -112,6 +124,35 @@ const MoreModal = ({ visible, onClose, navigation, isLoggedIn }) => {
           )}
         </View>
       </TouchableOpacity>
+      
+      {/* Confirmation Modal for Web */}
+      {confirmationVisible && confirmationData && (
+        <View style={styles.confirmationOverlay}>
+          <View style={styles.confirmationContainer}>
+            <Text style={styles.confirmationTitle}>{confirmationData.title}</Text>
+            <Text style={styles.confirmationText}>{confirmationData.message}</Text>
+            <View style={styles.confirmationButtons}>
+              {confirmationData.onCancel && (
+                <TouchableOpacity 
+                  style={[styles.confirmationButton, styles.cancelButton]} 
+                  onPress={confirmationData.onCancel}
+                >
+                  <Text style={styles.cancelButtonText}>Cancel</Text>
+                </TouchableOpacity>
+              )}
+              <TouchableOpacity 
+                style={[
+                  styles.confirmationButton, 
+                  confirmationData.onCancel ? styles.confirmButton : styles.singleButton
+                ]} 
+                onPress={confirmationData.onConfirm}
+              >
+                <Text style={styles.confirmButtonText}>{confirmationData.confirmText || 'OK'}</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      )}
     </Modal>
   );
 };
@@ -121,10 +162,32 @@ const BottomNavigation = ({ navigation, activeScreen }) => {
   const isLoggedIn = !!user;
   const insets = useSafeAreaInsets();
   const [moreModalVisible, setMoreModalVisible] = useState(false);
+  const [confirmationVisible, setConfirmationVisible] = useState(false);
+  const [confirmationData, setConfirmationData] = useState(null);
   
   const handleNavigation = useCallback((screen, params) => {
     navigation.navigate(screen, params);
   }, [navigation]);
+
+  const handleSignOut = async () => {
+    try {
+      await user.signOut();
+    } catch (error) {
+      console.error('Error signing out:', error);
+      if (Platform.OS === 'web') {
+        setConfirmationData({
+          title: 'Error',
+          message: 'Failed to sign out. Please try again.',
+          onCancel: null,
+          onConfirm: () => setConfirmationVisible(false),
+          confirmText: 'OK'
+        });
+        setConfirmationVisible(true);
+      } else {
+        Alert.alert('Error', 'Failed to sign out. Please try again.');
+      }
+    }
+  };
 
   return (
     <View style={[
@@ -281,6 +344,72 @@ const styles = StyleSheet.create({
     fontSize: theme.typography.sizes.md,
     marginLeft: theme.spacing.md,
     fontWeight: theme.typography.weights.medium,
+  },
+  confirmationOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(0, 0, 0, 0.7)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 1000,
+  },
+  confirmationContainer: {
+    backgroundColor: theme.colors?.background?.secondary || '#343544',
+    borderRadius: theme.borderRadius?.lg || 16,
+    padding: theme.spacing?.lg || 24,
+    width: '80%',
+    maxWidth: 400,
+    elevation: 5,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+  },
+  confirmationTitle: {
+    fontSize: theme.fontSizes?.lg || 16,
+    fontWeight: 'bold',
+    color: theme.colors?.text?.primary || '#FFFFFF',
+    marginBottom: theme.spacing?.md || 16,
+    textAlign: 'center',
+  },
+  confirmationText: {
+    fontSize: theme.fontSizes?.md || 14,
+    color: theme.colors?.text?.secondary || '#CCCCCC',
+    marginBottom: theme.spacing?.lg || 24,
+    textAlign: 'center',
+  },
+  confirmationButtons: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  confirmationButton: {
+    paddingVertical: theme.spacing?.sm || 8,
+    paddingHorizontal: theme.spacing?.md || 16,
+    borderRadius: theme.borderRadius?.md || 8,
+    flex: 1,
+    marginHorizontal: theme.spacing?.xs || 4,
+    alignItems: 'center',
+  },
+  singleButton: {
+    backgroundColor: theme.colors?.primary || '#BB86FC',
+    marginHorizontal: 0,
+  },
+  cancelButton: {
+    backgroundColor: theme.colors?.background?.tertiary || '#2A2A3A',
+  },
+  cancelButtonText: {
+    color: theme.colors?.text?.primary || '#FFFFFF',
+    fontWeight: 'bold',
+  },
+  confirmButton: {
+    backgroundColor: theme.colors?.primary || '#BB86FC',
+  },
+  confirmButtonText: {
+    color: theme.colors?.text?.primary || '#FFFFFF',
+    fontWeight: 'bold',
   },
 });
 

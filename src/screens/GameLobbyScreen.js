@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { 
   View, 
   StyleSheet, 
@@ -8,7 +8,8 @@ import {
   StatusBar,
   TouchableOpacity,
   BackHandler,
-  ScrollView
+  ScrollView,
+  Platform
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import theme from '../theme'; 
@@ -29,6 +30,8 @@ const GameLobbyScreen = ({ route, navigation }) => {
   const { user } = useAuth();
   const insets = useSafeAreaInsets();
   const { showError } = useError();
+  const [confirmationVisible, setConfirmationVisible] = useState(false);
+  const [playerToRemove, setPlayerToRemove] = useState(null);
 
   // Get actual players (excluding host)
   const actualPlayers = useMemo(() => {
@@ -149,30 +152,57 @@ const GameLobbyScreen = ({ route, navigation }) => {
     }
   };
 
-  const handleRemovePlayer = (playerId, playerName) => {
-    Alert.alert(
-      "Remove Player",
-      `Are you sure you want to remove ${playerName} from the game?`,
-      [
-        { text: "Cancel", style: "cancel" },
-        { 
-          text: "Remove", 
-          style: "destructive",
-          onPress: async () => {
-            try {
-              setLoading(true);
-              await gameService.removePlayerFromGame(gameCode, playerId);
-              showError(`${playerName} has been removed from the game`, 'success');
-            } catch (error) {
-              console.error('Error removing player:', error);
-              showError(error.message || 'Failed to remove player');
-            } finally {
-              setLoading(false);
-            }
-          }
-        }
-      ]
-    );
+  const handleRemovePlayer = (player) => {
+    setPlayerToRemove(player);
+    setConfirmationVisible(true);
+  };
+
+  const confirmRemovePlayer = async () => {
+    if (!playerToRemove) return;
+    
+    try {
+      setLoading(true);
+      await gameService.removePlayerFromGame(gameCode, playerToRemove.id);
+      // Remove player from local state
+      setPlayers(prevPlayers => prevPlayers.filter(p => p.id !== playerToRemove.id));
+      setConfirmationVisible(false);
+      setPlayerToRemove(null);
+    } catch (error) {
+      console.error('Error removing player:', error);
+      showError('Failed to remove player: ' + error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const cancelRemovePlayer = () => {
+    setConfirmationVisible(false);
+    setPlayerToRemove(null);
+  };
+
+  // Replace Alert.alert with this function that uses our state management
+  const handleRemovePlayerConfirmation = (player) => {
+    if (Platform.OS === 'web') {
+      // Direct confirmation for web since Alert.alert doesn't work well
+      handleRemovePlayer(player);
+    } else {
+      // Use Alert for native platforms
+      Alert.alert(
+        'Remove Player',
+        `Are you sure you want to remove ${player.name} from the game?`,
+        [
+          {
+            text: 'Cancel',
+            style: 'cancel',
+          },
+          {
+            text: 'Remove',
+            style: 'destructive',
+            onPress: () => handleRemovePlayer(player),
+          },
+        ]
+      );
+    }
   };
 
   const handleEndGameConfirmation = () => {
@@ -242,7 +272,7 @@ const GameLobbyScreen = ({ route, navigation }) => {
       {isHost && !item.isHost && (
         <TouchableOpacity 
           style={styles.removePlayerButton}
-          onPress={() => handleRemovePlayer(item.id, item.name)}
+          onPress={() => handleRemovePlayerConfirmation(item)}
         >
           <Icon name="person-remove" size={20} color={theme.colors.error} />
         </TouchableOpacity>
@@ -412,6 +442,32 @@ const GameLobbyScreen = ({ route, navigation }) => {
               </>
             )}
           </View>
+
+          {/* Confirmation Modal for Web */}
+          {confirmationVisible && playerToRemove && (
+            <View style={styles.confirmationOverlay}>
+              <View style={styles.confirmationModal}>
+                <Text style={styles.confirmationTitle}>Remove Player</Text>
+                <Text style={styles.confirmationText}>
+                  Are you sure you want to remove {playerToRemove.name} from the game?
+                </Text>
+                <View style={styles.confirmationButtons}>
+                  <TouchableOpacity 
+                    style={[styles.confirmationButton, styles.cancelButton]} 
+                    onPress={cancelRemovePlayer}
+                  >
+                    <Text style={styles.cancelButtonText}>Cancel</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity 
+                    style={[styles.confirmationButton, styles.removeButton]} 
+                    onPress={confirmRemovePlayer}
+                  >
+                    <Text style={styles.removeButtonText}>Remove</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            </View>
+          )}
         </ScrollView>
       </ModernBackground>
       <BottomNavigation navigation={navigation} activeScreen="Home" />
@@ -665,6 +721,71 @@ const styles = StyleSheet.create({
   },
   actionButton: {
     marginTop: theme.spacing.md,
+  },
+  confirmationOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(0, 0, 0, 0.7)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 1000,
+  },
+  confirmationModal: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
+  confirmationContainer: {
+    backgroundColor: theme.colors?.background?.secondary || '#343544',
+    borderRadius: theme.borderRadius?.lg || 16,
+    padding: theme.spacing?.lg || 24,
+    width: '80%',
+    maxWidth: 400,
+    elevation: 5,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+  },
+  confirmationTitle: {
+    fontSize: theme.fontSizes?.lg || 16,
+    fontWeight: 'bold',
+    color: theme.colors?.text?.primary || '#FFFFFF',
+    marginBottom: theme.spacing?.md || 16,
+    textAlign: 'center',
+  },
+  confirmationText: {
+    fontSize: theme.fontSizes?.md || 14,
+    color: theme.colors?.text?.secondary || '#CCCCCC',
+    marginBottom: theme.spacing?.lg || 24,
+    textAlign: 'center',
+  },
+  confirmationButtons: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  confirmationButton: {
+    paddingVertical: theme.spacing.sm,
+    paddingHorizontal: theme.spacing.md,
+    borderRadius: theme.borderRadius.md,
+    flex: 1,
+    marginHorizontal: theme.spacing.xs,
+    alignItems: 'center',
+  },
+  cancelButton: {
+    backgroundColor: theme.colors.background.tertiary,
+  },
+  cancelButtonText: {
+    color: theme.colors.text.primary,
+    fontWeight: 'bold',
+  },
+  removeButtonText: {
+    color: theme.colors.text.primary,
+    fontWeight: 'bold',
   },
 });
 

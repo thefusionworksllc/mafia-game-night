@@ -198,76 +198,81 @@ const RoleAssignmentScreen = ({ route, navigation }) => {
         resizeMode="cover"
       >
         <LinearGradient
-          colors={theme.gradients.background}
+          colors={[
+            'rgba(20, 20, 35, 0.9)', 
+            'rgba(15, 15, 30, 0.95)'
+          ]}
           style={[
-            theme.commonStyles.gradientContainer,
-            { paddingTop: insets.top }
+            styles.container,
+            {
+              paddingTop: insets.top + 10,
+              paddingBottom: insets.bottom + 10,
+              paddingLeft: insets.left + 10,
+              paddingRight: insets.right + 10,
+            }
           ]}
         >
-          <View style={theme.commonStyles.content}>
-            <View style={styles.header}>
-              <Text style={styles.title}>
-                {fromPlayerRole ? 'All Player Roles' : 'Assigned Roles'}
+          <View style={styles.header}>
+            <Text style={styles.title}>
+              {fromPlayerRole ? "All Player Roles" : "Assigned Roles"}
+            </Text>
+            {fromPlayerRole && (
+              <CustomButton
+                title="BACK TO ROLE"
+                onPress={handleBackToPlayerRole}
+                variant="outline"
+                size="small"
+                leftIcon={<Icon name="arrow-back" size={16} color={theme.colors.text.accent} />}
+                style={styles.backButton}
+              />
+            )}
+          </View>
+
+          <View style={styles.rolesContainer}>
+            {loading ? (
+              <Text style={styles.loadingText}>Loading roles...</Text>
+            ) : roles.length > 0 ? (
+              <FlatList
+                data={roles}
+                renderItem={renderRoleItem}
+                keyExtractor={(item, index) => `${item.playerId || item.playerName}-${index}`}
+                contentContainerStyle={styles.rolesList}
+              />
+            ) : (
+              <Text style={styles.emptyText}>
+                No roles assigned yet. This could be because there aren't enough players or the game hasn't started.
               </Text>
-              {fromPlayerRole && (
-                <CustomButton
-                  title="BACK TO ROLE"
-                  onPress={handleBackToPlayerRole}
-                  leftIcon={<Icon name="arrow-back" size={20} color={theme.colors.text.primary} />}
-                  style={styles.backButton}
-                  size="small"
-                />
-              )}
-            </View>
+            )}
+          </View>
 
-            <View style={styles.rolesContainer}>
-              {loading ? (
-                <Text style={styles.loadingText}>Loading roles...</Text>
-              ) : roles.length > 0 ? (
-                <FlatList
-                  data={roles}
-                  renderItem={renderRoleItem}
-                  keyExtractor={(item, index) => `role-${index}`}
-                  contentContainerStyle={styles.rolesList}
-                />
-              ) : (
-                <View style={styles.emptyContainer}>
-                  <Icon name="error-outline" size={48} color={theme.colors.text.secondary} />
-                  <Text style={styles.emptyText}>No role assignments found</Text>
-                </View>
-              )}
-            </View>
-
-            <View style={styles.buttonContainer}>
-              {!fromPlayerRole ? (
-                <>
-                  <CustomButton
-                    title="CONTINUE TO GAME"
-                    onPress={handleContinue}
-                    loading={loading}
-                    leftIcon={<Icon name="play-arrow" size={20} color="#fff" />}
-                    fullWidth
-                    style={styles.button}
-                  />
-                  <CustomButton
-                    title="RETURN TO LOBBY"
-                    onPress={handleReturnToLobby}
-                    leftIcon={<Icon name="arrow-back" size={20} color={theme.colors.text.accent} />}
-                    variant="outline"
-                    fullWidth
-                    style={styles.button}
-                  />
-                </>
-              ) : (
+          <View style={styles.buttonContainer}>
+            {fromPlayerRole ? (
+              <CustomButton
+                title="BACK TO ROLE"
+                onPress={handleBackToPlayerRole}
+                leftIcon={<Icon name="arrow-back" size={20} color={theme.colors.text.accent} />}
+                variant="outline"
+                fullWidth
+              />
+            ) : (
+              <>
                 <CustomButton
-                  title="BACK TO ROLE"
-                  onPress={handleBackToPlayerRole}
-                  leftIcon={<Icon name="arrow-back" size={20} color="#fff" />}
+                  title={isHost ? "CONTINUE TO GAME CONTROL" : "CONTINUE TO GAME"}
+                  onPress={handleContinue}
+                  leftIcon={<Icon name="arrow-forward" size={20} color={theme.colors.text.primary} />}
                   fullWidth
-                  style={styles.button}
+                  style={styles.continueButton}
                 />
-              )}
-            </View>
+                <CustomButton
+                  title="RETURN TO LOBBY"
+                  onPress={handleReturnToLobby}
+                  variant="outline"
+                  leftIcon={<Icon name="people" size={20} color={theme.colors.text.accent} />}
+                  fullWidth
+                  style={styles.returnButton}
+                />
+              </>
+            )}
           </View>
         </LinearGradient>
       </ImageBackground>
@@ -389,7 +394,10 @@ const styles = StyleSheet.create({
     marginBottom: theme.spacing.lg,
     paddingHorizontal: theme.spacing.horizontalPadding,
   },
-  button: {
+  continueButton: {
+    marginTop: theme.spacing.md,
+  },
+  returnButton: {
     marginTop: theme.spacing.md,
   },
 });

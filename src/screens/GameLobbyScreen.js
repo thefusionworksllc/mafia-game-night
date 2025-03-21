@@ -7,7 +7,8 @@ import {
   FlatList,
   StatusBar,
   TouchableOpacity,
-  BackHandler
+  BackHandler,
+  ScrollView
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import theme from '../theme'; 
@@ -210,7 +211,11 @@ const GameLobbyScreen = ({ route, navigation }) => {
     <View style={theme.commonStyles.container}>
       <StatusBar translucent backgroundColor="transparent" barStyle="light-content" />
       <ModernBackground>
-        <View style={styles.content}>
+        <ScrollView 
+          style={theme.commonStyles.scrollContainer}
+          contentContainerStyle={theme.commonStyles.scrollContentContainer}
+          showsVerticalScrollIndicator={false}
+        >
           <View style={styles.header}>
             <Text style={styles.title}>Game Lobby</Text>
             <TouchableOpacity 
@@ -361,7 +366,7 @@ const GameLobbyScreen = ({ route, navigation }) => {
               </>
             )}
           </View>
-        </View>
+        </ScrollView>
       </ModernBackground>
       <BottomNavigation navigation={navigation} activeScreen="Home" />
     </View>

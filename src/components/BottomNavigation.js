@@ -18,7 +18,7 @@ const BottomNavButton = React.memo(({ title, icon, onPress, disabled, isActive }
     <View style={[styles.iconContainer, isActive && styles.activeIconContainer]}>
       <Icon 
         name={icon} 
-        size={24} 
+        size={28} 
         color={isActive ? theme.colors.primary : (disabled ? theme.colors.text.disabled : theme.colors.text.secondary)} 
       />
     </View>
@@ -117,33 +117,14 @@ const MoreModal = ({ visible, onClose, navigation, isLoggedIn }) => {
 };
 
 const BottomNavigation = ({ navigation, activeScreen }) => {
-  const { user, signOut } = useAuth();
+  const { user } = useAuth();
   const isLoggedIn = !!user;
   const insets = useSafeAreaInsets();
+  const [moreModalVisible, setMoreModalVisible] = useState(false);
   
   const handleNavigation = useCallback((screen, params) => {
     navigation.navigate(screen, params);
   }, [navigation]);
-
-  const handleProfileAction = () => {
-    if (isLoggedIn) {
-      navigation.navigate('Settings');
-    } else {
-      navigation.navigate('Login');
-    }
-  };
-
-  const handleSignOut = async () => {
-    try {
-      console.log("Attempting to sign out...");
-      await signOut();
-      console.log("Sign out successful.");
-      navigation.navigate('Home');
-    } catch (error) {
-      console.error("Sign out error:", error);
-      Alert.alert('Error', 'Failed to sign out. Please try again.');
-    }
-  };
 
   return (
     <View style={[
@@ -167,7 +148,7 @@ const BottomNavigation = ({ navigation, activeScreen }) => {
           />
           <BottomNavButton
             title="Host"
-            icon="add-circle-outline"
+            icon="add-circle"
             onPress={() => handleNavigation('HostGame')}
             disabled={activeScreen === 'HostGame'}
             isActive={activeScreen === 'HostGame'}
@@ -187,21 +168,20 @@ const BottomNavigation = ({ navigation, activeScreen }) => {
             isActive={activeScreen === 'GameHistory'}
           />
           <BottomNavButton
-            title="Tutorial"
-            icon="help-outline"
-            onPress={() => handleNavigation('GameTutorial')}
-            disabled={activeScreen === 'GameTutorial'}
-            isActive={activeScreen === 'GameTutorial'}
-          />
-          <BottomNavButton
-            title={isLoggedIn ? "Settings" : "Login"}
-            icon={isLoggedIn ? "settings" : "login"}
-            onPress={handleProfileAction}
-            disabled={activeScreen === 'Settings' || activeScreen === 'Login'}
-            isActive={activeScreen === 'Settings' || activeScreen === 'Login'}
+            title="Settings"
+            icon="more-horiz"
+            onPress={() => setMoreModalVisible(true)}
+            isActive={activeScreen === 'Settings' || activeScreen === 'Login' || activeScreen === 'GameTutorial'}
           />
         </View>
       </LinearGradient>
+      
+      <MoreModal
+        visible={moreModalVisible}
+        onClose={() => setMoreModalVisible(false)}
+        navigation={navigation}
+        isLoggedIn={isLoggedIn}
+      />
     </View>
   );
 };
@@ -235,16 +215,16 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     padding: theme.spacing.xs,
-    minWidth: SCREEN_WIDTH / 6,
+    minWidth: SCREEN_WIDTH / 7,
     maxWidth: SCREEN_WIDTH / 5,
   },
   activeButton: {
-    transform: [{ translateY: -5 }],
+    transform: [{ translateY: -8 }],
   },
   iconContainer: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+    width: 44,
+    height: 44,
+    borderRadius: 22,
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 2,

@@ -183,11 +183,21 @@ const HomeScreen = ({ navigation, route }) => {
           {/* Welcome Section */}
           <View style={styles.welcomeSection}>
             <Text style={styles.welcomeText}>Welcome to</Text>
-            <View style={styles.appTitleContainer}>
-              <Icon name="security" size={40} color={theme.colors.warning } />
-              <Text style={styles.appTitle}>Mafia</Text>
-            </View>
-            <Text style={styles.appSubTitle} >The Game Night</Text>
+            <LinearGradient
+              colors={['rgba(138, 43, 226, 0.8)', 'rgba(75, 0, 130, 0.9)']}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={styles.titleGradientContainer}
+            >
+              <View style={styles.appTitleContainer}>
+                <Icon name="security" size={48} color={theme.colors.warning} />
+                <Text style={styles.appTitle}>MAFIA</Text>
+              </View>
+              <View style={styles.subtitleContainer}>
+                <Text style={styles.appSubTitle}>THE GAME NIGHT</Text>
+                <View style={styles.subtitleUnderline} />
+              </View>
+            </LinearGradient>
             {isLoggedIn ? (
               <View style={styles.userInfoContainer}>
                 <Icon name="account-circle" size={20} color={theme.colors.primary} />
@@ -357,27 +367,45 @@ const styles = StyleSheet.create({
     fontSize: theme.typography.sizes.lg,
     color: theme.colors.text.secondary,
     fontWeight: theme.typography.weights.medium,
+    marginBottom: theme.spacing.xs,
+  },
+  titleGradientContainer: {
+    borderRadius: 15,
+    padding: 15,
+    marginBottom: theme.spacing.md,
+    ...theme.shadows.medium,
   },
   appTitleContainer: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'center',
   },
   appTitle: {
-    fontSize: theme.typography.sizes.display,
-    fontWeight: theme.typography.weights.bold,
-    color: theme.colors.text.primary,
-    marginBottom: theme.spacing.sm,
+    fontSize: 48,
+    fontWeight: '900',
+    color: '#FFFFFF',
     marginLeft: theme.spacing.md,
-    // Text shadow for better readability
+    letterSpacing: 3,
+    // Text shadow for 3D effect
     textShadowColor: 'rgba(0, 0, 0, 0.75)',
-    textShadowOffset: { width: 0, height: 1 },
-    textShadowRadius: 4,
+    textShadowOffset: { width: 2, height: 2 },
+    textShadowRadius: 5,
+  },
+  subtitleContainer: {
+    alignItems: 'center',
+    marginTop: 5,
   },
   appSubTitle: {
-    fontSize: theme.typography.sizes.lg,
-    marginBottom: theme.spacing.sm,
-    fontWeight: theme.typography.weights.bold,
-    color: theme.colors.text.accent,
+    fontSize: theme.typography.sizes.md,
+    fontWeight: '700',
+    color: theme.colors.text.secondary,
+    letterSpacing: 4,
+  },
+  subtitleUnderline: {
+    height: 2,
+    width: '80%',
+    backgroundColor: 'rgba(255, 255, 255, 0.5)',
+    marginTop: 5,
   },
   userInfoContainer: {
     flexDirection: 'row',

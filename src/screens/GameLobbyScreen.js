@@ -149,6 +149,32 @@ const GameLobbyScreen = ({ route, navigation }) => {
     }
   };
 
+  const handleRemovePlayer = (playerId, playerName) => {
+    Alert.alert(
+      "Remove Player",
+      `Are you sure you want to remove ${playerName} from the game?`,
+      [
+        { text: "Cancel", style: "cancel" },
+        { 
+          text: "Remove", 
+          style: "destructive",
+          onPress: async () => {
+            try {
+              setLoading(true);
+              await gameService.removePlayerFromGame(gameCode, playerId);
+              showError(`${playerName} has been removed from the game`, 'success');
+            } catch (error) {
+              console.error('Error removing player:', error);
+              showError(error.message || 'Failed to remove player');
+            } finally {
+              setLoading(false);
+            }
+          }
+        }
+      ]
+    );
+  };
+
   const handleEndGameConfirmation = () => {
     Alert.alert(
       "End Game",
@@ -200,11 +226,28 @@ const GameLobbyScreen = ({ route, navigation }) => {
   };
 
   const renderPlayer = ({ item }) => (
-    <View style={styles.playerItem}>
-      <Text style={styles.playerName}>
-        {item.name}
-      </Text>
-    </View>
+    <LinearGradient
+      colors={['rgba(45, 45, 65, 0.5)', 'rgba(35, 35, 55, 0.7)']}
+      start={{ x: 0, y: 0 }}
+      end={{ x: 1, y: 1 }}
+      style={styles.playerItem}
+    >
+      <View style={styles.playerContent}>
+        <View style={styles.playerAvatarContainer}>
+          <Icon name="person" size={24} color={theme.colors.primary} style={styles.playerAvatar} />
+        </View>
+        <Text style={styles.playerName}>{item.name}</Text>
+      </View>
+      
+      {isHost && !item.isHost && (
+        <TouchableOpacity 
+          style={styles.removePlayerButton}
+          onPress={() => handleRemovePlayer(item.id, item.name)}
+        >
+          <Icon name="person-remove" size={20} color={theme.colors.error} />
+        </TouchableOpacity>
+      )}
+    </LinearGradient>
   );
 
   return (
@@ -270,15 +313,18 @@ const GameLobbyScreen = ({ route, navigation }) => {
 
           <View style={styles.playersSection}>
             <Text style={styles.sectionTitle}>Players</Text>
-            <FlatList
-              data={actualPlayers}
-              keyExtractor={(item) => item.id}
-              renderItem={renderPlayer}
-              contentContainerStyle={styles.playersList}
-              ListEmptyComponent={
-                <Text style={styles.emptyText}>No players have joined yet</Text>
-              }
-            />
+            <View style={styles.playersList}>
+              <FlatList
+                data={actualPlayers}
+                keyExtractor={(item) => item.id}
+                renderItem={renderPlayer}
+                showsVerticalScrollIndicator={false}
+                contentContainerStyle={styles.playersListContent}
+                ListEmptyComponent={
+                  <Text style={styles.emptyText}>No players have joined yet</Text>
+                }
+              />
+            </View>
           </View>
 
           <View style={styles.buttonContainer}>
@@ -441,23 +487,61 @@ const styles = StyleSheet.create({
     ...theme.shadows.medium,
   },
   playersList: {
-    maxHeight: 200,
+    borderRadius: theme.borderRadius.large,
+    overflow: 'hidden',
+    backgroundColor: 'rgba(0, 0, 0, 0.2)',
+    marginBottom: theme.spacing.md,
+    maxHeight: 250,
+  },
+  playersListContent: {
+    padding: theme.spacing.sm,
   },
   playerItem: {
-    padding: theme.spacing.md,
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-    borderRadius: theme.borderRadius.medium,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
     marginBottom: theme.spacing.sm,
+    borderRadius: theme.borderRadius.medium,
+    padding: theme.spacing.md,
     borderWidth: 1,
-    borderColor: theme.colors.text.secondary + '40',
+    borderColor: 'rgba(255, 255, 255, 0.1)',
+    ...theme.shadows.small,
+  },
+  playerContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+  },
+  playerAvatarContainer: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'rgba(187, 134, 252, 0.2)',
+    marginRight: theme.spacing.md,
+  },
+  playerAvatar: {
+    textShadowColor: theme.colors.primary,
+    textShadowOffset: { width: 0, height: 0 },
+    textShadowRadius: 4,
+  },
+  playerName: {
+    fontSize: theme.typography.sizes.md,
+    fontWeight: theme.typography.weights.medium,
+    color: theme.colors.text.primary,
+  },
+  removePlayerButton: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'rgba(255, 55, 55, 0.1)',
   },
   hostPlayerItem: {
     backgroundColor: 'rgba(187, 134, 252, 0.2)',
     borderColor: theme.colors.primary + '60',
-  },
-  playerName: {
-    fontSize: theme.typography.sizes.md,
-    color: theme.colors.text.primary,
   },
   hostName: {
     color: theme.colors.primary,

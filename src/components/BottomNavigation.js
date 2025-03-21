@@ -18,7 +18,7 @@ const BottomNavButton = React.memo(({ title, icon, onPress, disabled, isActive }
     <View style={[styles.iconContainer, isActive && styles.activeIconContainer]}>
       <Icon 
         name={icon} 
-        size={28} 
+        size={32} 
         color={isActive ? theme.colors.primary : (disabled ? theme.colors.text.disabled : theme.colors.text.secondary)} 
       />
     </View>
@@ -236,7 +236,7 @@ const styles = StyleSheet.create({
   },
   navButtonText: {
     color: theme.colors.text.secondary,
-    fontSize: theme.typography.sizes.xs,
+    fontSize: theme.typography.sizes.sm,
     marginTop: 2,
     textAlign: 'center',
     fontWeight: theme.typography.weights.medium,

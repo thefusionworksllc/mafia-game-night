@@ -470,16 +470,74 @@ export const gameService = {
 
   // Check if a user is the host of a game
   isGameHost: async (gameCode) => {
-    const db = getDbInstance();
-    const gameRef = ref(db, `games/${gameCode}`);
-    const snapshot = await get(gameRef);
-    
-    if (!snapshot.exists()) {
-      return false;
+    if (!auth.currentUser) {
+      throw new Error('User must be authenticated to check host status');
     }
+
+    const db = getDbInstance();
+    const userId = auth.currentUser.uid;
+    const gameRef = ref(db, `games/${gameCode}`);
     
-    const gameData = snapshot.val();
-    return gameData.hostId === auth.currentUser.uid;
+    try {
+      const snapshot = await get(gameRef);
+      if (!snapshot.exists()) {
+        throw new Error('Game not found');
+      }
+      
+      const gameData = snapshot.val();
+      const player = gameData.players[userId];
+      
+      return player && player.isHost;
+    } catch (error) {
+      console.error('Error checking host status:', error);
+      throw new Error('Failed to check host status');
+    }
+  },
+
+  // Remove a player from a game (host only)
+  removePlayerFromGame: async (gameCode, playerId) => {
+    if (!auth.currentUser) {
+      throw new Error('User must be authenticated to remove a player');
+    }
+
+    const db = getDbInstance();
+    const hostId = auth.currentUser.uid;
+    const gameRef = ref(db, `games/${gameCode}`);
+    
+    try {
+      // Check if current user is the host
+      const snapshot = await get(gameRef);
+      if (!snapshot.exists()) {
+        throw new Error('Game not found');
+      }
+      
+      const gameData = snapshot.val();
+      const hostPlayer = gameData.players[hostId];
+      
+      if (!hostPlayer || !hostPlayer.isHost) {
+        throw new Error('Only the host can remove players');
+      }
+
+      // Check if the player to remove exists
+      if (!gameData.players[playerId]) {
+        throw new Error('Player not found in the game');
+      }
+
+      // Check if the game has already started
+      if (gameData.status === 'started') {
+        throw new Error('Cannot remove players after the game has started');
+      }
+
+      // Remove the player
+      const playerRef = ref(db, `games/${gameCode}/players/${playerId}`);
+      await remove(playerRef);
+      
+      // Update player count in game settings if needed
+      return true;
+    } catch (error) {
+      console.error('Error removing player:', error);
+      throw error;
+    }
   },
 
   // Add these methods to support Game Control and Game Play screens

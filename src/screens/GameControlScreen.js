@@ -295,13 +295,13 @@ const GameControlScreen = ({ route, navigation }) => {
     const normalizedRole = role?.toLowerCase();
     switch(normalizedRole) {
       case 'mafia':
-        return theme.colors.error;
+        return theme.colors.tertiary;
       case 'detective':
         return theme.colors.info;
       case 'doctor':
         return theme.colors.success;
       case 'civilian':
-        return theme.colors.accent;
+        return theme.colors.primary;
       default:
         return theme.colors.text.secondary;
     }
@@ -495,21 +495,37 @@ const GameControlScreen = ({ route, navigation }) => {
           </View>
 
           {/* Players List */}
-          <View style={styles.playersSection}>
+          <View style={styles.section}>
             <Text style={styles.sectionTitle}>Players</Text>
             <View style={styles.playersListContainer}>
               {getSortedPlayers().map(player => (
-                <View key={player.id} style={[
-                  styles.playerItem,
-                  { backgroundColor: `${getRoleColor(player.role)}20` },
-                  eliminatedPlayers.includes(player.id) && styles.eliminatedPlayer
-                ]}>
+                <LinearGradient
+                  key={player.id}
+                  colors={[`${getRoleColor(player.role)}10`, `${getRoleColor(player.role)}30`]}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 1 }}
+                  style={[
+                    styles.playerItem,
+                    eliminatedPlayers.includes(player.id) && styles.eliminatedPlayer
+                  ]}
+                >
                   <View style={styles.playerInfo}>
-                    <Text style={styles.playerName}>{player.name}</Text>
-                    <View style={[styles.roleBadge, { backgroundColor: `${getRoleColor(player.role)}40` }]}>
-                      <Text style={[styles.playerRole, { color: getRoleColor(player.role) }]}>
-                        {player.role?.charAt(0).toUpperCase() + player.role?.slice(1) || 'Civilian'}
-                      </Text>
+                    <View style={[styles.playerIconContainer, { backgroundColor: `${getRoleColor(player.role)}40` }]}>
+                      <Icon 
+                        name={player.role?.toLowerCase() === 'mafia' ? 'security' : 
+                             player.role?.toLowerCase() === 'detective' ? 'visibility' :
+                             player.role?.toLowerCase() === 'doctor' ? 'healing' : 'person'} 
+                        size={20} 
+                        color={getRoleColor(player.role)} 
+                      />
+                    </View>
+                    <View style={styles.playerTextContainer}>
+                      <Text style={styles.playerName}>{player.name}</Text>
+                      <View style={[styles.roleBadge, { backgroundColor: `${getRoleColor(player.role)}40` }]}>
+                        <Text style={[styles.playerRole, { color: getRoleColor(player.role) }]}>
+                          {player.role?.charAt(0).toUpperCase() + player.role?.slice(1) || 'Civilian'}
+                        </Text>
+                      </View>
                     </View>
                   </View>
                   
@@ -524,7 +540,7 @@ const GameControlScreen = ({ route, navigation }) => {
                       {eliminatedPlayers.includes(player.id) ? 'Eliminated' : 'Active'}
                     </Text>
                   </View>
-                </View>
+                </LinearGradient>
               ))}
             </View>
           </View>
@@ -678,69 +694,6 @@ const styles = StyleSheet.create({
     color: theme.colors.text.primary,
     marginTop: theme.spacing.sm,
   },
-  playersSection: {
-    marginBottom: theme.spacing.lg,
-  },
-  playersListContainer: {
-    marginBottom: theme.spacing.md,
-  },
-  playerItem: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: theme.spacing.md,
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-    borderRadius: theme.borderRadius.medium,
-    marginBottom: theme.spacing.sm,
-  },
-  eliminatedPlayer: {
-    opacity: 0.6,
-    backgroundColor: 'rgba(255, 0, 0, 0.1)',
-  },
-  playerInfo: {
-    flex: 1,
-  },
-  playerName: {
-    fontSize: theme.typography.sizes.md,
-    fontWeight: theme.typography.weights.bold,
-    color: theme.colors.text.primary,
-  },
-  roleBadge: {
-    paddingHorizontal: theme.spacing.sm,
-    paddingVertical: theme.spacing.xs,
-    borderRadius: theme.borderRadius.small,
-    alignSelf: 'flex-start',
-    marginTop: theme.spacing.xs,
-  },
-  playerRole: {
-    fontSize: theme.typography.sizes.sm,
-    fontWeight: theme.typography.weights.bold,
-  },
-  playerStatus: {
-    paddingHorizontal: theme.spacing.sm,
-    paddingVertical: theme.spacing.xs,
-    borderRadius: theme.borderRadius.small,
-  },
-  playerActive: {
-    backgroundColor: 'rgba(0, 255, 0, 0.2)',
-  },
-  playerEliminated: {
-    backgroundColor: 'rgba(255, 0, 0, 0.2)',
-  },
-  playerStatusText: {
-    fontSize: theme.typography.sizes.xs,
-    fontWeight: theme.typography.weights.bold,
-  },
-  actionButtons: {
-    marginTop: theme.spacing.md,
-    marginBottom: theme.spacing.xxl,
-  },
-  returnButton: {
-    marginBottom: theme.spacing.md,
-  },
-  endGameButton: {
-    borderColor: theme.colors.error,
-  },
   section: {
     marginBottom: theme.spacing.lg,
   },
@@ -751,6 +704,82 @@ const styles = StyleSheet.create({
   navigationButton: {
     flex: 1,
     marginRight: theme.spacing.md,
+  },
+  playersListContainer: {
+    marginTop: theme.spacing.sm,
+  },
+  playerItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    borderRadius: theme.borderRadius.medium,
+    padding: theme.spacing.md,
+    marginBottom: theme.spacing.sm,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.1)',
+    ...theme.shadows.small,
+  },
+  playerInfo: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+  },
+  playerIconContainer: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: theme.spacing.md,
+  },
+  playerTextContainer: {
+    flex: 1,
+  },
+  playerName: {
+    fontSize: theme.typography.sizes.md,
+    fontWeight: theme.typography.weights.semibold,
+    color: theme.colors.text.primary,
+    marginBottom: 4,
+  },
+  roleBadge: {
+    alignSelf: 'flex-start',
+    paddingHorizontal: theme.spacing.sm,
+    paddingVertical: 2,
+    borderRadius: theme.borderRadius.small,
+  },
+  playerRole: {
+    fontSize: theme.typography.sizes.xs,
+    fontWeight: theme.typography.weights.bold,
+  },
+  playerStatus: {
+    paddingHorizontal: theme.spacing.sm,
+    paddingVertical: 4,
+    borderRadius: theme.borderRadius.small,
+  },
+  playerActive: {
+    backgroundColor: 'rgba(46, 204, 113, 0.2)',
+  },
+  playerEliminated: {
+    backgroundColor: 'rgba(231, 76, 60, 0.2)',
+  },
+  playerStatusText: {
+    fontSize: theme.typography.sizes.xs,
+    fontWeight: theme.typography.weights.medium,
+    color: theme.colors.text.secondary,
+  },
+  eliminatedPlayer: {
+    opacity: 0.7,
+    borderColor: 'rgba(231, 76, 60, 0.3)',
+  },
+  actionButtons: {
+    marginTop: theme.spacing.md,
+    marginBottom: theme.spacing.xxl,
+  },
+  returnButton: {
+    marginBottom: theme.spacing.md,
+  },
+  endGameButton: {
+    borderColor: theme.colors.error,
   },
 });
 

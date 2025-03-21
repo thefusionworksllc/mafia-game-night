@@ -144,11 +144,15 @@ const PlayerRoleScreen = ({ route, navigation }) => {
 
   const handleEndGame = async () => {
     try {
+      setLoading(true);
       await gameService.endGame(gameCode);
+      showError('Game ended successfully', 'success');
       navigation.replace('Home');
     } catch (error) {
       console.error('Error ending game:', error);
-      Alert.alert('Error', error.message || 'Failed to end game');
+      showError(error.message || 'Failed to end game');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -200,7 +204,7 @@ const PlayerRoleScreen = ({ route, navigation }) => {
     return (
       <View style={styles.roleSection}>
         <LinearGradient
-          colors={theme.gradients.card}
+          colors={['rgba(35, 35, 60, 0.75)', 'rgba(25, 25, 45, 0.85)']}
           style={styles.roleSectionGradient}
         >
           <View style={styles.roleTitleContainer}>
@@ -225,6 +229,13 @@ const PlayerRoleScreen = ({ route, navigation }) => {
         </LinearGradient>
       </View>
     );
+  };
+
+  const handleContinueToGame = () => {
+    navigation.navigate('GamePlay', { 
+      gameCode,
+      role: normalizedRole
+    });
   };
 
   return (
@@ -301,7 +312,7 @@ const PlayerRoleScreen = ({ route, navigation }) => {
             <View style={styles.modalOverlay}>
               <View style={styles.modalContent}>
                 <LinearGradient
-                  colors={theme.gradients.modalBackground}
+                  colors={['rgba(35, 35, 60, 0.95)', 'rgba(25, 25, 45, 0.98)']}
                   style={styles.modalGradient}
                 >
                   <View style={styles.modalHeader}>
@@ -331,12 +342,20 @@ const PlayerRoleScreen = ({ route, navigation }) => {
           
           <View style={styles.buttonContainer}>
             <CustomButton
+              title="CONTINUE TO GAME"
+              onPress={handleContinueToGame}
+              leftIcon={<Icon name="play-arrow" size={20} color={theme.colors.text.primary} />}
+              fullWidth
+              style={styles.actionButton}
+            />
+            
+            <CustomButton
               title="RETURN TO LOBBY"
               onPress={handleReturnToLobby}
-              leftIcon={<Icon name="arrow-back" size={20} color={theme.colors.text.accent} />}
               variant="outline"
+              leftIcon={<Icon name="meeting-room" size={20} color={theme.colors.text.accent} />}
               fullWidth
-              style={styles.returnButton}
+              style={styles.actionButton}
             />
             
             <CustomButton
@@ -608,7 +627,7 @@ const styles = StyleSheet.create({
   closeButton: {
     padding: theme.spacing.sm,
   },
-  returnButton: {
+  actionButton: {
     marginBottom: theme.spacing.md,
   },
   historyButton: {

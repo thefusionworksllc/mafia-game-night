@@ -134,15 +134,23 @@ const GameControlScreen = ({ route, navigation }) => {
   }, [timer, timerActive, timerAnimation]);
 
   const handleStartPhase = (phase) => {
+    setLoading(true);
     setCurrentPhase(phase);
     animatePhaseChange();
     setTimer(getPhaseTime(phase));
     setTimerActive(true);
 
     // Update game phase in database
-    gameService.updateGamePhase(gameCode, phase).catch(error => {
-      showError(error.message || 'Failed to update game phase');
-    });
+    gameService.updateGamePhase(gameCode, phase)
+      .then(() => {
+        showError(`Started ${phase} phase successfully`, 'success');
+      })
+      .catch(error => {
+        showError(error.message || 'Failed to update game phase');
+      })
+      .finally(() => {
+        setLoading(false);
+      });
   };
 
   const handlePhaseComplete = () => {
@@ -238,11 +246,15 @@ const GameControlScreen = ({ route, navigation }) => {
           style: "destructive",
           onPress: async () => {
             try {
+              setLoading(true);
               await gameService.endGame(gameCode);
               showError('Game ended successfully', 'success');
-              navigation.replace('GameHistory');
+              navigation.replace('Home');
             } catch (error) {
+              console.error('Error ending game:', error);
               showError(error.message || 'Failed to end game');
+            } finally {
+              setLoading(false);
             }
           }
         }
@@ -265,6 +277,13 @@ const GameControlScreen = ({ route, navigation }) => {
     } catch (error) {
       showError(error.message || 'Failed to return to lobby');
     }
+  };
+
+  const handleViewPlayerRole = () => {
+    navigation.replace('PlayerRole', {
+      gameCode,
+      isHost: true
+    });
   };
 
   if (loading) {
@@ -487,6 +506,25 @@ const GameControlScreen = ({ route, navigation }) => {
               style={styles.endGameButton}
             />
           </View>
+
+          {/* Game Navigation */}
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Game Navigation</Text>
+            <View style={styles.buttonGroup}>
+              <CustomButton
+                title="VIEW YOUR ROLE"
+                onPress={handleViewPlayerRole}
+                leftIcon={<Icon name="person" size={20} color={theme.colors.text.primary} />}
+                style={styles.navigationButton}
+              />
+              <CustomButton
+                title="RETURN TO LOBBY"
+                onPress={handleReturnToLobby}
+                leftIcon={<Icon name="meeting-room" size={20} color={theme.colors.text.primary} />}
+                style={styles.navigationButton}
+              />
+            </View>
+          </View>
         </ScrollView>
       </ModernBackground>
       <BottomNavigation navigation={navigation} activeScreen="Home" />
@@ -653,6 +691,17 @@ const styles = StyleSheet.create({
   },
   endGameButton: {
     borderColor: theme.colors.error,
+  },
+  section: {
+    marginBottom: theme.spacing.lg,
+  },
+  buttonGroup: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  navigationButton: {
+    flex: 1,
+    marginRight: theme.spacing.md,
   },
 });
 

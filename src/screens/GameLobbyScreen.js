@@ -182,6 +182,16 @@ const GameLobbyScreen = ({ route, navigation }) => {
     }
   };
 
+  // Add a new function to check if the game is in progress
+  const isGameInProgress = () => {
+    return gameData && gameData.status === 'started';
+  };
+
+  // Add a function to navigate to the GameControl screen for hosts
+  const handleGoToGameControl = () => {
+    navigation.navigate('GameControl', { gameCode });
+  };
+
   const renderPlayer = ({ item }) => (
     <View style={styles.playerItem}>
       <Text style={styles.playerName}>
@@ -220,12 +230,6 @@ const GameLobbyScreen = ({ route, navigation }) => {
 
           <View style={styles.infoContainer}>
             <View style={styles.infoItem}>
-              <Icon name="people" size={24} color={theme.colors.primary} />
-              <Text style={styles.infoText}>
-                Players: {actualPlayers.length}/{requiredPlayers}
-              </Text>
-            </View>
-            <View style={styles.infoItem}>
               <Icon name="security" size={24} color={theme.colors.tertiary} />
               <Text style={styles.infoText}>
                 Mafia: {mafiaCount}
@@ -243,17 +247,15 @@ const GameLobbyScreen = ({ route, navigation }) => {
                 Doctor: {doctorCount}
               </Text>
             </View>
-          </View>
-
-          {/* Second row of info items for Civilian count */}
-          <View style={styles.civilianInfoContainer}>
             <View style={styles.infoItem}>
-              <Icon name="person" size={24} color={theme.colors.accent} />
+              <Icon name="person" size={24} color={theme.colors.primary} />
               <Text style={styles.infoText}>
                 Civilian: {civilianCount}
               </Text>
             </View>
           </View>
+
+         
 
           <View style={styles.playersSection}>
             <Text style={styles.sectionTitle}>Players</Text>
@@ -282,20 +284,34 @@ const GameLobbyScreen = ({ route, navigation }) => {
                       : 'All players have joined! You can start the game.'}
                   </Text>
                 </View>
-                <CustomButton
-                  title="START GAME"
-                  onPress={handleStartGame}
-                  loading={loading}
-                  disabled={actualPlayers.length < requiredPlayers || loading}
-                  leftIcon={<Icon name="play-arrow" size={20} color={theme.colors.text.primary} />}
-                  fullWidth
-                />
+                
+                {isGameInProgress() ? (
+                  <CustomButton
+                    title="RETURN TO GAME CONTROL"
+                    onPress={handleGoToGameControl}
+                    leftIcon={<Icon name="sports-esports" size={20} color={theme.colors.text.primary} />}
+                    loading={loading}
+                    style={styles.actionButton}
+                    fullWidth
+                  />
+                ) : (
+                  <CustomButton
+                    title="START GAME"
+                    onPress={handleStartGame}
+                    leftIcon={<Icon name="play-arrow" size={20} color={theme.colors.text.primary} />}
+                    loading={loading}
+                    disabled={actualPlayers.length < requiredPlayers}
+                    style={styles.actionButton}
+                    fullWidth
+                  />
+                )}
+                
                 <CustomButton
                   title="END GAME"
                   onPress={confirmEndGame}
                   variant="outline"
-                  style={styles.endGameButton}
-                  leftIcon={<Icon name="cancel" size={20} color={theme.colors.error} />}
+                  style={styles.actionButton}
+                  leftIcon={<Icon name="close" size={20} color={theme.colors.error} />}
                   fullWidth
                 />
                 <CustomButton
@@ -551,6 +567,9 @@ const styles = StyleSheet.create({
     fontWeight: theme.typography.weights.bold,
     color: theme.colors.text.accent,
     marginVertical: theme.spacing.sm,
+  },
+  actionButton: {
+    marginTop: theme.spacing.md,
   },
 });
 

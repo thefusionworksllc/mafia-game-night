@@ -24,7 +24,9 @@ import { StatusBar } from 'expo-status-bar';
 import { AuthProvider } from './src/context/AuthContext';
 import {  ImageBackground} from 'react-native';
 import theme from './src/theme'; // Import the theme
-import { ErrorProvider } from './src/context/ErrorContext';
+import { ErrorProvider } from './src/context/ErrorContext'; 
+import GamePlayScreen from './src/screens/GamePlayScreen';
+import GameControlScreen from './src/screens/GameControlScreen';  
 
 const Stack = createNativeStackNavigator();
 
@@ -53,7 +55,9 @@ export default function App() {
             <Stack.Screen name="HostGame" component={HostGameScreen} />
             <Stack.Screen name="JoinGame" component={JoinGameScreen} />
             <Stack.Screen name="GameTutorial" component={GameTutorialScreen} /> 
-            <Stack.Screen name="PlayerRole" component={PlayerRole} />
+            <Stack.Screen name="PlayerRole" component={PlayerRole} /> 
+            <Stack.Screen name="GamePlay" component={GamePlayScreen} />
+            <Stack.Screen name="GameControl" component={GameControlScreen} />
           </Stack.Navigator>
         </NavigationContainer>
       </ErrorProvider>

@@ -67,12 +67,18 @@ const GamePlayScreen = ({ route, navigation }) => {
       }
 
       // Set game phase from data if available
-      if (data.currentPhase !== currentPhase && data.currentPhase) {
+      if (data.currentPhase) {
+        const phaseHasChanged = data.currentPhase !== currentPhase;
         setCurrentPhase(data.currentPhase);
-        animatePhaseChange();
         
-        // Reset selections when phase changes
-        setSelectedPlayer(null);
+        if (phaseHasChanged) {
+          animatePhaseChange();
+          // Reset selections when phase changes
+          setSelectedPlayer(null);
+          
+          // Show phase change notification
+          showError(`Phase changed to: ${data.currentPhase}`, 'info');
+        }
       }
 
       // Set phase timer if available
@@ -82,8 +88,9 @@ const GamePlayScreen = ({ route, navigation }) => {
 
       // Check if player has been eliminated
       const currentPlayerData = data.players?.[user.uid];
-      if (currentPlayerData && currentPlayerData.eliminated) {
+      if (currentPlayerData && currentPlayerData.eliminated && !eliminated) {
         setEliminated(true);
+        showError('You have been eliminated!', 'warning');
       }
 
       // Get voting results if available
@@ -108,7 +115,7 @@ const GamePlayScreen = ({ route, navigation }) => {
     });
 
     return () => unsubscribe();
-  }, [gameCode, navigation, showError, currentPhase, normalizedRole, user.uid]);
+  }, [gameCode, navigation, showError, normalizedRole, user.uid]);
 
   // Start pulse animation for player actions
   useEffect(() => {
@@ -337,18 +344,23 @@ const GamePlayScreen = ({ route, navigation }) => {
 
   const handleReturnToLobby = async () => {
     try {
-      const isHost = await gameService.isGameHost(gameCode);
+      // Check if user is the host
+      const isUserHost = await gameService.isGameHost(gameCode);
+      
+      // Fetch game settings
+      const gameData = await gameService.getGameData(gameCode);
+      const settings = gameData?.settings || {};
       
       navigation.replace('GameLobby', {
         gameCode,
-        isHost,
-        totalPlayers: gameData?.settings?.totalPlayers || 5,
-        mafiaCount: gameData?.settings?.mafiaCount || 1,
-        detectiveCount: gameData?.settings?.detectiveCount || 1,
-        doctorCount: gameData?.settings?.doctorCount || 1
+        isHost: isUserHost,
+        totalPlayers: settings.totalPlayers || 0,
+        mafiaCount: settings.mafiaCount || 0, 
+        detectiveCount: settings.detectiveCount || 0,
+        doctorCount: settings.doctorCount || 0
       });
     } catch (error) {
-      showError(error.message || 'Failed to return to lobby');
+      showError('Failed to return to lobby: ' + (error.message || 'Unknown error'));
     }
   };
 

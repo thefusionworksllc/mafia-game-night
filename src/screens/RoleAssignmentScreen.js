@@ -143,7 +143,20 @@ const RoleAssignmentScreen = ({ route, navigation }) => {
   );
 
   const handleContinue = () => {
-    navigation.navigate('GamePlay', { gameCode });
+    // If the user is the host, they should go to GameControl
+    if (isHost) {
+      navigation.navigate('GameControl', { gameCode });
+      return;
+    }
+    
+    // Find current user's role in the roles array
+    const currentUserRole = roles.find(r => r.playerId === user.uid)?.role || 'civilian';
+    
+    // Navigate to GamePlay with both gameCode and role
+    navigation.navigate('GamePlay', { 
+      gameCode, 
+      role: currentUserRole 
+    });
   };
 
   const handleReturnToLobby = async () => {

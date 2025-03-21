@@ -64,17 +64,26 @@ const JoinGameScreen = ({ navigation }) => {
       return;
     }
 
-    if (gameCode.length !== 6) {
-      showError('Please enter a valid 6-digit game code');
+    if (!gameCode || gameCode.length !== 6) {
+      showError('Please enter a valid 6-character game code', 'warning');
       return;
     }
 
     setLoading(true);
     try {
       await gameService.joinGame(gameCode);
+      
+      // Fetch game data to get player counts
+      const gameData = await gameService.getGameData(gameCode);
+      const settings = gameData?.settings || {};
+      
       navigation.navigate('GameLobby', {
         gameCode: gameCode.toUpperCase(),
         isHost: false,
+        totalPlayers: settings.totalPlayers || 0,
+        mafiaCount: settings.mafiaCount || 0,
+        detectiveCount: settings.detectiveCount || 0,
+        doctorCount: settings.doctorCount || 0
       });
     } catch (error) {
       showError(error.message || 'Failed to join game');

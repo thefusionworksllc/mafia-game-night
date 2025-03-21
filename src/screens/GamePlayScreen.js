@@ -24,10 +24,10 @@ import { useError } from '../context/ErrorContext';
 
 // Role images for players
 const roleImages = {
-  civilian: require('../../assets/civilian.png'),
-  mafia: require('../../assets/mafia.png'),
-  detective: require('../../assets/detective.png'),
-  doctor: require('../../assets/doctor.png'),
+  civilian: require('../../assets/roles/civilian.png'),
+  mafia: require('../../assets/roles/mafia.png'),
+  detective: require('../../assets/roles/detective.png'),
+  doctor: require('../../assets/roles/doctor.png'),
 };
 
 const GamePlayScreen = ({ route, navigation }) => {

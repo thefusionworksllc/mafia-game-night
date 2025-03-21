@@ -516,7 +516,7 @@ const styles = StyleSheet.create({
     marginBottom: theme.spacing.lg,
     backgroundColor: 'rgba(30, 30, 50, 0.5)',
     borderRadius: theme.borderRadius.large,
-    padding: theme.spacing.lg,
+    padding: theme.spacing.sm,
     borderWidth: 1,
     borderColor: 'rgba(108, 99, 255, 0.2)',
   },

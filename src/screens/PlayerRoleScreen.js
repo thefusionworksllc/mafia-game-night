@@ -23,10 +23,10 @@ import ModernBackground from '../components/ModernBackground';
 import { useError } from '../context/ErrorContext';
 
 const roleImages = {
-  civilian: require('../../assets/civilian.png'),
-  mafia: require('../../assets/mafia.png'),
-  detective: require('../../assets/detective.png'),
-  doctor: require('../../assets/doctor.png'),
+  civilian: require('../../assets/roles/civilian.png'),
+  mafia: require('../../assets/roles/mafia.png'),
+  detective: require('../../assets/roles/detective.png'),
+  doctor: require('../../assets/roles/doctor.png'),
 };
 
 const roleIcons = {
@@ -89,11 +89,11 @@ const PlayerRoleScreen = ({ route, navigation }) => {
   const getRoleColor = (role) => {
     switch (role.toLowerCase()) {
       case 'mafia':
-        return theme.colors.mafia
+        return theme.colors.mafia|| theme.colors.error
       case 'detective':
-        return theme.colors.detective;
+        return theme.colors.detective|| theme.colors.info;
       case 'doctor':
-        return theme.colors.doctor;
+        return theme.colors.doctor|| theme.colors.success;
       case 'civilian':
         return theme.colors.civilian || theme.colors.primary;
       default:

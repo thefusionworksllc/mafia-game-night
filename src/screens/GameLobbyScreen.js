@@ -92,8 +92,10 @@ const GameLobbyScreen = ({ route, navigation }) => {
         return;
       }
 
-      // Check if game has started
-      if (data.status === 'started') {
+      // Check if game has started - only auto-navigate on initial game start
+      // Don't auto-navigate if the host is already in the middle of a game and just visiting the lobby
+      if (data.status === 'started' && !data.gameStartedAt) {
+        // This is a fresh game start
         if (isHost) {
           navigation.replace('PlayerRole', {
             isHost: true,
@@ -245,14 +247,18 @@ const GameLobbyScreen = ({ route, navigation }) => {
     }
   };
 
-  // Add a new function to check if the game is in progress
+  // Update the isGameInProgress function to be more reliable
   const isGameInProgress = () => {
     return gameData && gameData.status === 'started';
   };
 
-  // Add a function to navigate to the GameControl screen for hosts
+  // Update the function to navigate to the GameControl screen
   const handleGoToGameControl = () => {
-    navigation.navigate('GameControl', { gameCode });
+    if (isGameInProgress()) {
+      navigation.navigate('GameControl', { gameCode });
+    } else {
+      showError('The game is not currently in progress', 'warning');
+    }
   };
 
   const renderPlayer = ({ item }) => (
@@ -303,7 +309,7 @@ const GameLobbyScreen = ({ route, navigation }) => {
           {/* Host Information */}
           {hostPlayer && (
             <View style={styles.hostInfoContainer}>
-              <Icon name="stars" size={24} color={theme.colors.primary} />
+              <Icon name="stars" size={30} color={theme.colors.primary} />
               <Text style={styles.hostInfoText}>
                 Host: <Text style={styles.hostName}>{hostPlayer.name}</Text>
               </Text>
@@ -344,7 +350,7 @@ const GameLobbyScreen = ({ route, navigation }) => {
                 data={actualPlayers}
                 keyExtractor={(item) => item.id}
                 renderItem={renderPlayer}
-                showsVerticalScrollIndicator={false}
+                showsVerticalScrollIndicator={true}
                 contentContainerStyle={styles.playersListContent}
                 ListEmptyComponent={
                   <Text style={styles.emptyText}>No players have joined yet</Text>
@@ -410,7 +416,6 @@ const GameLobbyScreen = ({ route, navigation }) => {
             ) : (
               <>
                 <View style={styles.playerCountContainer}>
-                  <Icon name="people" size={24} color={theme.colors.primary} />
                   <Text style={styles.playerCountText}>
                     Players: {actualPlayers.length}/{requiredPlayers}
                   </Text>
@@ -545,7 +550,8 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     backgroundColor: 'rgba(0, 0, 0, 0.2)',
     marginBottom: theme.spacing.md,
-    height: 150,
+    height: 180,
+
   },
   playersListContent: {
     padding: theme.spacing.sm,
@@ -720,7 +726,7 @@ const styles = StyleSheet.create({
     fontSize: theme.typography.sizes.lg,
     fontWeight: theme.typography.weights.bold,
     color: theme.colors.text.accent,
-    marginVertical: theme.spacing.sm,
+    marginVertical: theme.spacing.xs,
   },
   actionButton: {
     marginTop: theme.spacing.md,
@@ -794,7 +800,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'center',
     gap: theme.spacing.md,
-    marginTop: theme.spacing.md,
+    marginTop: theme.spacing.xs,
   },
 });
 

@@ -184,10 +184,10 @@ const HomeScreen = ({ navigation, route }) => {
           <View style={styles.welcomeSection}>
             <Text style={styles.welcomeText}>Welcome to</Text>
             <View style={styles.appTitleContainer}>
-              <Icon name="security" size={30} color={theme.colors.warning } />
+              <Icon name="security" size={40} color={theme.colors.warning } />
               <Text style={styles.appTitle}>Mafia</Text>
             </View>
-            <Text style={styles.welcomeText} >The Game Night</Text>
+            <Text style={styles.appSubTitle} >The Game Night</Text>
             {isLoggedIn ? (
               <View style={styles.userInfoContainer}>
                 <Icon name="account-circle" size={20} color={theme.colors.primary} />
@@ -245,41 +245,45 @@ const HomeScreen = ({ navigation, route }) => {
             </View>
           </View>
 
-          {/* Active Game Section - Only shown when there's an active game */}
+          {/* Active Game Section - Improved and shown when there's an active game */}
           {isLoggedIn && activeGame && (
             <View style={styles.activeGameSection}>
-              <Text style={styles.sectionTitle}>Active Game</Text>
-              <TouchableOpacity 
-                style={styles.activeGameCard}
-                onPress={handleContinueGame}
-                activeOpacity={0.7}
-                disabled={loadingGame}
+              <LinearGradient
+                colors={['rgba(158, 42, 155, 0.2)', 'rgba(108, 42, 205, 0.3)']}
+                style={styles.activeGameGradient}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
               >
-                <LinearGradient
-                  colors={theme.gradients.accent}
-                  style={styles.activeGameGradient}
-                  start={{ x: 0, y: 0 }}
-                  end={{ x: 1, y: 1 }}
-                >
-                  <View style={styles.activeGameInfo}>
-                    <Icon name="videogame-asset" size={24} color={theme.colors.text.primary} />
-                    <View style={styles.activeGameTextContainer}>
-                      <Text style={styles.activeGameTitle}>Game Code: {activeGame.gameCode}</Text>
-                      <Text style={styles.activeGameStatus}>
-                        {activeGame.status === 'waiting' ? 'Lobby' : 'In Progress'}
-                      </Text>
-                    </View>
+                <View style={styles.activeGameHeader}>
+                  <Icon name="videogame-asset" size={28} color={theme.colors.warning} />
+                  <Text style={styles.activeGameTitle}>Active Game</Text>
+                </View>
+                
+                <View style={styles.activeGameDetails}>
+                  <View style={styles.gameCodeContainer}>
+                    <Text style={styles.gameCodeLabel}>Game Code:</Text>
+                    <Text style={styles.gameCode}>{activeGame.gameCode}</Text>
                   </View>
-                  <CustomButton
-                    title="CONTINUE GAME"
-                    onPress={handleContinueGame}
-                    loading={loadingGame}
-                    size="small"
-                    style={styles.continueGameButton}
-                    leftIcon={<Icon name="play-arrow" size={16} color={theme.colors.text.primary} />}
-                  />
-                </LinearGradient>
-              </TouchableOpacity>
+                  
+                  <View style={styles.gameStatusContainer}>
+                    <Text style={styles.gameStatusLabel}>Status:</Text>
+                    <Text style={[
+                      styles.gameStatus,
+                      activeGame.status === 'waiting' ? styles.statusWaiting : styles.statusStarted
+                    ]}>
+                      {activeGame.status === 'waiting' ? 'Lobby' : 'In Progress'}
+                    </Text>
+                  </View>
+                </View>
+                
+                <CustomButton
+                  title={`CONTINUE ${activeGame.status === 'waiting' ? 'TO LOBBY' : 'GAME'}`}
+                  onPress={handleContinueGame}
+                  loading={loadingGame}
+                  leftIcon={<Icon name="play-arrow" size={20} color={theme.colors.text.primary} />}
+                  style={styles.continueGameButton}
+                />
+              </LinearGradient>
             </View>
           )}
 
@@ -363,10 +367,17 @@ const styles = StyleSheet.create({
     fontWeight: theme.typography.weights.bold,
     color: theme.colors.text.primary,
     marginBottom: theme.spacing.sm,
+    marginLeft: theme.spacing.md,
     // Text shadow for better readability
     textShadowColor: 'rgba(0, 0, 0, 0.75)',
     textShadowOffset: { width: 0, height: 1 },
     textShadowRadius: 4,
+  },
+  appSubTitle: {
+    fontSize: theme.typography.sizes.lg,
+    marginBottom: theme.spacing.sm,
+    fontWeight: theme.typography.weights.bold,
+    color: theme.colors.text.accent,
   },
   userInfoContainer: {
     flexDirection: 'row',
@@ -495,40 +506,70 @@ const styles = StyleSheet.create({
     color: theme.colors.text.primary,
     marginLeft: theme.spacing.md,
   },
+  // Active Game Section
   activeGameSection: {
-    marginBottom: theme.spacing.lg,
-  },
-  activeGameCard: {
+    marginBottom: theme.spacing.xl,
     borderRadius: theme.borderRadius.large,
     overflow: 'hidden',
-    marginTop: theme.spacing.sm,
     ...theme.shadows.medium,
   },
   activeGameGradient: {
     padding: theme.spacing.lg,
     borderRadius: theme.borderRadius.large,
   },
-  activeGameInfo: {
+  activeGameHeader: {
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: theme.spacing.md,
   },
-  activeGameTextContainer: {
-    marginLeft: theme.spacing.md,
-    flex: 1,
-  },
   activeGameTitle: {
+    fontSize: theme.typography.sizes.lg,
+    fontWeight: theme.typography.weights.bold,
+    color: theme.colors.warning,
+    marginLeft: theme.spacing.sm,
+  },
+  activeGameDetails: {
+    backgroundColor: 'rgba(0, 0, 0, 0.2)',
+    borderRadius: theme.borderRadius.medium,
+    padding: theme.spacing.md,
+    marginBottom: theme.spacing.md,
+  },
+  gameCodeContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: theme.spacing.sm,
+  },
+  gameCodeLabel: {
+    fontSize: theme.typography.sizes.md,
+    color: theme.colors.text.secondary,
+    marginRight: theme.spacing.sm,
+  },
+  gameCode: {
     fontSize: theme.typography.sizes.md,
     fontWeight: theme.typography.weights.bold,
-    color: theme.colors.text.primary,
+    color: theme.colors.primary,
   },
-  activeGameStatus: {
-    fontSize: theme.typography.sizes.sm,
-    color: theme.colors.text.primary,
-    opacity: 0.8,
+  gameStatusContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  gameStatusLabel: {
+    fontSize: theme.typography.sizes.md,
+    color: theme.colors.text.secondary,
+    marginRight: theme.spacing.sm,
+  },
+  gameStatus: {
+    fontSize: theme.typography.sizes.md,
+    fontWeight: theme.typography.weights.bold,
+  },
+  statusWaiting: {
+    color: theme.colors.warning,
+  },
+  statusStarted: {
+    color: theme.colors.success,
   },
   continueGameButton: {
-    alignSelf: 'flex-start',
+    marginTop: theme.spacing.sm,
   },
 });
 

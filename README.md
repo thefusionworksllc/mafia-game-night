@@ -1,81 +1,148 @@
 # Mafia Game Night
 
-## Overview
-Mafia Game Night is a multiplayer game application that allows players to engage in the classic Mafia game. Players can join games, host games, and learn about different roles and strategies. The app provides a user-friendly interface with various screens for gameplay, tutorials, and statistics.
+![Mafia Game Night Logo](assets/mafia-logo.png)
 
-## Table of Contents
-- [Features](#features)
-- [Technologies Used](#technologies-used)
-- [Installation](#installation)
-- [Usage](#usage)
-- [Screens](#screens)
-- [Contributing](#contributing)
-- [License](#license)
+A modern cross-platform application for playing the classic social deduction game Mafia with friends. Built with React Native + Expo and Firebase, this app provides a seamless experience for hosting and participating in Mafia games.
 
 ## Features
-- User authentication (sign up, login, sign out)
-- Host and join games
-- View game phases and roles
-- Game statistics tracking
-- Responsive design for mobile devices
-- Intuitive navigation
 
-## Technologies Used
-- **React Native**: For building the mobile application.
-- **Expo**: For easier development and deployment of the React Native app.
-- **Firebase**: For user authentication and data management.
-- **React Navigation**: For handling navigation between screens.
-- **React Native Elements**: For UI components.
-- **Linear Gradient**: For background gradients.
-- **React Native Vector Icons**: For icons throughout the app.
+### Core Functionality
+- **Host Games**: Create custom game rooms with adjustable role distributions
+- **Join Games**: Enter 6-digit game codes to join existing games
+- **Role Assignment**: Automatic role distribution with special abilities
+- **Game Flow Management**: Day/Night phase transitions with role-specific actions
+- **Game History**: Track past games and results
+- **Active Game Tracking**: Easily rejoin active games from home screen
+
+### User Experience
+- **Modern UI**: Clean, intuitive interface with visual feedback
+- **Real-time Updates**: Synchronized game state across all players
+- **Cross-platform**: Available on iOS, Android and Web
+- **Offline Support**: Basic functionality available without internet
+- **Authentication**: User accounts with profile customization
+
+### Game Roles
+- **Mafia**: Work together to eliminate civilians
+- **Detective**: Investigate players to find the Mafia
+- **Doctor**: Protect players from elimination
+- **Civilian**: Vote to identify and eliminate Mafia members
+
+## Screenshots
+
+<div style="display: flex; flex-wrap: wrap; justify-content: space-between;">
+  <img src="screenshots/home-screen.png" width="200" alt="Home Screen">
+  <img src="screenshots/lobby-screen.png" width="200" alt="Game Lobby">
+  <img src="screenshots/role-screen.png" width="200" alt="Role Assignment">
+  <img src="screenshots/gameplay-screen.png" width="200" alt="Gameplay">
+</div>
+
+## Navigation Structure
+
+- **Home**: Main landing page with options to host or join games
+- **Create Game**: Configure and host a new game
+- **Join Game**: Enter a code to join an existing game
+- **Game Lobby**: Wait for players and view game settings
+- **Role Assignment**: View assigned roles with descriptions
+- **Game Play**: Participate in day/night phases with role actions
+- **Game Control**: (Host only) Manage game phases and player eliminations
+- **Game History**: View past games and outcomes
+- **Settings**: Configure app preferences and account settings
 
 ## Installation
-To set up the project locally, follow these steps:
 
-1. **Clone the repository**:
-   ```bash
-   git clone https://github.com/yourusername/mafia-game-night.git
-   cd mafia-game-night
-   ```
+### Prerequisites
+- Node.js (v14 or newer)
+- npm or yarn
+- Expo CLI (`npm install -g expo-cli`)
 
-2. **Install dependencies**:
-   ```bash
-   npm install
-   ```
+### Setup
+1. Clone the repository:
+```bash
+git clone https://github.com/yourusername/mafia-game-night.git
+cd mafia-game-night
+```
 
-3. **Start the development server**:
-   ```bash
-   expo start
-   ```
+2. Install dependencies:
+```bash
+npm install
+# or
+yarn install
+```
 
-4. **Run on a physical device or emulator**:
-   - Scan the QR code with the Expo Go app or run on an Android/iOS emulator.
+3. Create a `.env` file in the root directory with your Firebase configuration:
+```
+API_KEY=your_api_key
+AUTH_DOMAIN=your_project.firebaseapp.com
+DATABASE_URL=https://your_project.firebaseio.com
+PROJECT_ID=your_project_id
+STORAGE_BUCKET=your_project.appspot.com
+MESSAGING_SENDER_ID=your_messaging_sender_id
+APP_ID=your_app_id
+```
 
-## Usage
-- **Sign Up / Login**: Users can create an account or log in to access the game features.
-- **Host a Game**: Users can create a new game session and invite others to join.
-- **Join a Game**: Users can enter a game code to join an existing game.
-- **Game Phases**: Users can learn about the different phases of the game (Day and Night).
-- **Roles and Abilities**: Users can view the roles available in the game and their abilities.
-- **Winning Strategies**: Users can access tips and strategies to improve their gameplay.
-- **Game Statistics**: Users can view their game statistics, including games played, won, and roles played.
+4. Start the development server:
+```bash
+npm start
+# or
+yarn start
+```
 
-## Screens
-- **Home Screen**: Displays options to log in or sign up.
-- **Game Lobby Screen**: Shows the list of players and game options.
-- **Game Phases Screen**: Describes the different phases of the game.
-- **Roles and Abilities Screen**: Details the different roles in the game.
-- **Winning Strategies Screen**: Provides strategies for winning as different roles.
-- **Game Stats Screen**: Displays user statistics and performance.
+5. Follow the instructions in the terminal to open the app on your device or emulator.
+
+## Usage Guide
+
+### Hosting a Game
+1. From the Home screen, tap "Host Game"
+2. Configure game settings:
+   - Set total player count (4-15)
+   - Adjust role distribution (Mafia, Detective, Doctor)
+   - At least one Civilian role is required
+3. Tap "Create Game" to generate a unique game code
+4. Share the code with players who want to join
+5. When all players have joined, tap "Start Game"
+
+### Joining a Game
+1. From the Home screen, tap "Join Game"
+2. Enter the 6-digit game code provided by the host
+3. Tap "Join Game" to enter the game lobby
+4. Wait for the host to start the game
+
+### Playing the Game
+1. When the game starts, you'll be assigned a role
+2. Follow the on-screen instructions for your role
+3. The game alternates between Day and Night phases:
+   - **Day Phase**: All players discuss and vote to eliminate a suspected Mafia member
+   - **Night Phase**: Special roles perform their actions (Mafia eliminates, Detective investigates, Doctor protects)
+4. The game continues until either all Mafia members are eliminated (Civilians win) or Mafia members equal or outnumber Civilians (Mafia wins)
+
+## Technology Stack
+
+- **Frontend**: React Native, Expo, React Navigation
+- **State Management**: React Context API
+- **Backend**: Firebase (Authentication, Realtime Database)
+- **UI Components**: Custom components with React Native Elements
+- **Deployment**: Expo EAS, Firebase Hosting (web)
 
 ## Contributing
-Contributions are welcome! If you have suggestions for improvements or new features, please fork the repository and submit a pull request.
 
-1. Fork the repository.
-2. Create a new branch (`git checkout -b feature/YourFeature`).
-3. Make your changes and commit them (`git commit -m 'Add some feature'`).
-4. Push to the branch (`git push origin feature/YourFeature`).
-5. Open a pull request.
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add some amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
 
 ## License
-This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
+
+This project is licensed under the MIT License - see the LICENSE file for details.
+
+## Acknowledgments
+
+- Inspiration from the classic Mafia/Werewolf party game
+- All contributors who have helped shape this project
+- The React Native and Expo community for their excellent documentation and support
+
+---
+
+Built with ❤️ by [Your Name/Team]

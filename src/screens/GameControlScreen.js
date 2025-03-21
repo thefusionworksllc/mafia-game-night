@@ -588,7 +588,7 @@ const GameControlScreen = ({ route, navigation }) => {
             <Text style={styles.sectionTitle}>Game Navigation</Text>
             <View style={styles.buttonGroup}>
               <CustomButton
-                title="VIEW PLAYERS ROLE"
+                title="VIEW ALL ROLES"
                 onPress={handleViewPlayerRole}
                 leftIcon={<Icon name="person" size={20} color={theme.colors.text.primary} />}
                 style={styles.navigationButton}

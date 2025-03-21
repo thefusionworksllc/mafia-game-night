@@ -89,11 +89,11 @@ const PlayerRoleScreen = ({ route, navigation }) => {
   const getRoleColor = (role) => {
     switch (role.toLowerCase()) {
       case 'mafia':
-        return theme.colors.mafia|| theme.colors.primary;
+        return theme.colors.mafia
       case 'detective':
-        return theme.colors.detective|| theme.colors.primary;
+        return theme.colors.detective;
       case 'doctor':
-        return theme.colors.doctor|| theme.colors.primary;
+        return theme.colors.doctor;
       case 'civilian':
         return theme.colors.civilian || theme.colors.primary;
       default:

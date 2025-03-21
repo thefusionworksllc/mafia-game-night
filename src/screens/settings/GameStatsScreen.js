@@ -123,11 +123,6 @@ const GameStatsScreen = ({ navigation }) => {
                   <Text style={styles.overviewLabel}>Games Played</Text>
                   <Text style={styles.overviewValue}>{stats?.gamesPlayed || 0}</Text>
                 </View>
-                <View style={styles.divider} />
-                <View style={styles.overviewItem}>
-                  <Text style={styles.overviewLabel}>Win Rate</Text>
-                  <Text style={styles.overviewValue}>{winRate}%</Text>
-                </View>
               </LinearGradient>
             </View>
           </View>
@@ -162,12 +157,6 @@ const GameStatsScreen = ({ navigation }) => {
           
           <Text style={styles.sectionTitle}>Performance</Text>
           <View style={styles.statsGrid}>
-            <StatCard
-              title="Games Won"
-              value={stats?.gamesWon || 0}
-              icon="emoji-events"
-              color={theme.colors.warning}
-            />
             <StatCard
               title="Games Hosted"
               value={stats?.gamesHosted || 0}

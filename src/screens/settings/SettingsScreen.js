@@ -29,10 +29,10 @@ const SettingsScreen = ({ navigation }) => {
       onPress: () => navigation.navigate('GameStats'),
     },
     {
-      title: 'Change Avatar',
-      icon: 'photo-camera',
-      description: 'Select a new profile picture',
-      onPress: () => navigation.navigate('ChangeAvatar'),
+      title: 'Game Tutorial',
+      icon: 'help-outline',
+      description: 'Learn how to play the game',
+      onPress: () => navigation.navigate('GameTutorial'),
     },
   ];
 
@@ -84,25 +84,16 @@ const SettingsScreen = ({ navigation }) => {
           <View style={styles.container}>
             <View style={styles.profileSection}>
               <View style={styles.avatarContainer}>
-                {user?.photoURL ? (
-                  <Image
-                    source={{ uri: user.photoURL }}
-                    style={styles.avatar}
-                  />
-                ) : (
-                  <LinearGradient
-                    colors={theme.gradients.accent}
-                    style={styles.defaultAvatar}
-                    start={{ x: 0, y: 0 }}
-                    end={{ x: 1, y: 1 }}
-                  >
-                    <Icon 
-                      name="person" 
-                      size={50} 
-                      color={theme.colors.text.primary} 
-                    />
-                  </LinearGradient>
-                )}
+                <LinearGradient
+                  colors={theme.gradients.accent}
+                  style={styles.defaultAvatar}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 1 }}
+                >
+                  <Text style={styles.avatarLetter}>
+                    {user?.displayName ? user.displayName.charAt(0).toUpperCase() : 'U'}
+                  </Text>
+                </LinearGradient>
               </View>
               <Text style={styles.displayName}>{user?.displayName || 'User'}</Text>
               <Text style={styles.email}>{user?.email || 'No email provided'}</Text>
@@ -223,6 +214,11 @@ const styles = StyleSheet.create({
   },
   signOutButton: {
     borderColor: theme.colors.error,
+  },
+  avatarLetter: {
+    fontSize: 60,
+    fontWeight: 'bold',
+    color: theme.colors.text.primary,
   },
 });
 

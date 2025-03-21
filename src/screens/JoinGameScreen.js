@@ -173,8 +173,8 @@ const JoinGameScreen = ({ navigation }) => {
                       color: theme.colors.text.primary,
                       fontSize: theme.typography.sizes.xl,
                       fontWeight: theme.typography.weights.bold,
-                      textAlign: 'center',
-                      letterSpacing: 8,
+                      textAlign: 'left',
+                      letterSpacing: 5,
                     }}
                     inputContainerStyle={{
                       borderBottomColor: theme.colors.primary,

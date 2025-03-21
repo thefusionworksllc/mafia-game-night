@@ -266,7 +266,10 @@ const GameLobbyScreen = ({ route, navigation }) => {
         <View style={styles.playerAvatarContainer}>
           <Icon name="person" size={24} color={theme.colors.primary} style={styles.playerAvatar} />
         </View>
-        <Text style={styles.playerName}>{item.name}</Text>
+        <Text style={styles.playerName}>
+          {item.name} 
+          {item.id === user.uid && <Text style={styles.youLabel}> (You)</Text>}
+        </Text>
       </View>
       
       {isHost && !item.isHost && (
@@ -284,11 +287,7 @@ const GameLobbyScreen = ({ route, navigation }) => {
     <View style={theme.commonStyles.container}>
       <StatusBar translucent backgroundColor="transparent" barStyle="light-content" />
       <ModernBackground>
-        <ScrollView 
-          style={theme.commonStyles.scrollContainer}
-          contentContainerStyle={theme.commonStyles.scrollContentContainer}
-          showsVerticalScrollIndicator={false}
-        >
+        <View style={[theme.commonStyles.scrollContainer, {flex: 1, paddingBottom: 70}]}>
           <View style={styles.header}>
             <Text style={styles.title}>Game Lobby</Text>
             <TouchableOpacity 
@@ -298,7 +297,6 @@ const GameLobbyScreen = ({ route, navigation }) => {
             >
               <Text style={styles.gameCodeLabel}>Game Code:</Text>
               <Text style={styles.gameCode}>{gameCode}</Text>
-              <Icon name="content-copy" size={18} color={theme.colors.text.accent} style={styles.copyIcon} />
             </TouchableOpacity>
           </View>
 
@@ -339,8 +337,6 @@ const GameLobbyScreen = ({ route, navigation }) => {
             </View>
           </View>
 
-         
-
           <View style={styles.playersSection}>
             <Text style={styles.sectionTitle}>Players</Text>
             <View style={styles.playersList}>
@@ -361,7 +357,6 @@ const GameLobbyScreen = ({ route, navigation }) => {
             {isHost ? (
               <>
                 <View style={styles.playerCountContainer}>
-                  <Icon name="people" size={24} color={theme.colors.primary} />
                   <Text style={styles.playerCountText}>
                     Players: {actualPlayers.length}/{requiredPlayers}
                   </Text>
@@ -393,22 +388,24 @@ const GameLobbyScreen = ({ route, navigation }) => {
                   />
                 )}
                 
-                <CustomButton
-                  title="END GAME"
-                  onPress={handleEndGameConfirmation}
-                  variant="outline"
-                  style={styles.actionButton}
-                  leftIcon={<Icon name="close" size={20} color={theme.colors.error} />}
-                  fullWidth
-                />
-                <CustomButton
-                  title="RETURN TO HISTORY"
-                  onPress={() => navigation.navigate('GameHistory')}
-                  variant="outline"
-                  style={styles.backButton}
-                  leftIcon={<Icon name="history" size={20} color={theme.colors.text.accent} />}
-                  fullWidth
-                />
+                <View style={styles.rowButtonContainer}>
+                  <CustomButton
+                    title="END GAME"
+                    onPress={handleEndGameConfirmation}
+                    variant="outline"
+                    style={styles.actionButton}
+                    leftIcon={<Icon name="close" size={20} color={theme.colors.error} />}
+                    fullWidth   
+                  />
+                  <CustomButton
+                    title="BACK TO HOME"
+                    onPress={() => navigation.navigate('Home')}
+                    variant="outline"
+                    style={styles.backButton}
+                    leftIcon={<Icon name="home" size={20} color={theme.colors.text.accent} />}
+                    fullWidth
+                  />
+                </View>
               </>
             ) : (
               <>
@@ -423,52 +420,54 @@ const GameLobbyScreen = ({ route, navigation }) => {
                       : 'All players have joined! Waiting for host to start the game.'}
                   </Text>
                 </View>
-                <CustomButton
-                  title="LEAVE GAME"
-                  onPress={handleLeaveGame}
-                  variant="outline"
-                  style={styles.leaveButton}
-                  leftIcon={<Icon name="exit-to-app" size={20} color={theme.colors.error} />}
-                  fullWidth
-                />
-                <CustomButton
-                  title="RETURN TO HISTORY"
-                  onPress={() => navigation.navigate('GameHistory')}
-                  variant="outline"
-                  style={styles.backButton}
-                  leftIcon={<Icon name="history" size={20} color={theme.colors.text.accent} />}
-                  fullWidth
-                />
+                <View style={styles.rowButtonContainer}>
+                  <CustomButton
+                    title="LEAVE GAME"
+                    onPress={handleLeaveGame}
+                    variant="outline"
+                    style={styles.leaveButton}
+                    leftIcon={<Icon name="exit-to-app" size={20} color={theme.colors.error} />}
+                    fullWidth
+                  />
+                  <CustomButton
+                    title="BACK TO HOME"
+                    onPress={() => navigation.navigate('Home')}
+                    variant="outline"
+                    style={styles.backButton}
+                    leftIcon={<Icon name="home" size={20} color={theme.colors.text.accent} />}
+                    fullWidth
+                  />
+                </View>
               </>
             )}
           </View>
+        </View>
 
-          {/* Confirmation Modal for Web */}
-          {confirmationVisible && playerToRemove && (
-            <View style={styles.confirmationOverlay}>
-              <View style={styles.confirmationModal}>
-                <Text style={styles.confirmationTitle}>Remove Player</Text>
-                <Text style={styles.confirmationText}>
-                  Are you sure you want to remove {playerToRemove.name} from the game?
-                </Text>
-                <View style={styles.confirmationButtons}>
-                  <TouchableOpacity 
-                    style={[styles.confirmationButton, styles.cancelButton]} 
-                    onPress={cancelRemovePlayer}
-                  >
-                    <Text style={styles.cancelButtonText}>Cancel</Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity 
-                    style={[styles.confirmationButton, styles.removeButton]} 
-                    onPress={confirmRemovePlayer}
-                  >
-                    <Text style={styles.removeButtonText}>Remove</Text>
-                  </TouchableOpacity>
-                </View>
+        {/* Confirmation Modal for Web */}
+        {confirmationVisible && playerToRemove && (
+          <View style={styles.confirmationOverlay}>
+            <View style={styles.confirmationModal}>
+              <Text style={styles.confirmationTitle}>Remove Player</Text>
+              <Text style={styles.confirmationText}>
+                Are you sure you want to remove {playerToRemove.name} from the game?
+              </Text>
+              <View style={styles.confirmationButtons}>
+                <TouchableOpacity 
+                  style={[styles.confirmationButton, styles.cancelButton]} 
+                  onPress={cancelRemovePlayer}
+                >
+                  <Text style={styles.cancelButtonText}>Cancel</Text>
+                </TouchableOpacity>
+                <TouchableOpacity 
+                  style={[styles.confirmationButton, styles.removeButton]} 
+                  onPress={confirmRemovePlayer}
+                >
+                  <Text style={styles.removeButtonText}>Remove</Text>
+                </TouchableOpacity>
               </View>
             </View>
-          )}
-        </ScrollView>
+          </View>
+        )}
       </ModernBackground>
       <BottomNavigation navigation={navigation} activeScreen="Home" />
     </View>
@@ -497,7 +496,7 @@ const styles = StyleSheet.create({
     fontWeight: theme.typography.weights.bold,
     color: theme.colors.text.accent,
     textAlign: 'center',
-    marginVertical: theme.spacing.lg,
+    marginVertical: theme.spacing.sm,
     // Text shadow for better readability
     textShadowColor: 'rgba(0, 0, 0, 0.75)',
     textShadowOffset: { width: 0, height: 1 },
@@ -539,7 +538,6 @@ const styles = StyleSheet.create({
     backgroundColor: theme.colors.card.background,
     borderRadius: theme.borderRadius.large,
     padding: theme.spacing.lg,
-    marginVertical: theme.spacing.md,
     ...theme.shadows.medium,
   },
   playersList: {
@@ -547,7 +545,7 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     backgroundColor: 'rgba(0, 0, 0, 0.2)',
     marginBottom: theme.spacing.md,
-    maxHeight: 250,
+    height: 150,
   },
   playersListContent: {
     padding: theme.spacing.sm,
@@ -587,6 +585,11 @@ const styles = StyleSheet.create({
     fontWeight: theme.typography.weights.medium,
     color: theme.colors.text.primary,
   },
+  youLabel: {
+    color: theme.colors.primary,
+    fontWeight: theme.typography.weights.bold,
+    fontStyle: 'italic',
+  },
   removePlayerButton: {
     width: 36,
     height: 36,
@@ -604,7 +607,7 @@ const styles = StyleSheet.create({
     fontWeight: theme.typography.weights.bold,
   },
   buttonContainer: {
-    marginTop: theme.spacing.lg,
+    marginTop: theme.spacing.xs,
   },
   leaveButton: {
     marginTop: theme.spacing.md,
@@ -612,13 +615,13 @@ const styles = StyleSheet.create({
   },
   waitingContainer: {
     alignItems: 'center',
-    marginTop: theme.spacing.xl,
+    marginTop: theme.spacing.sm,
   },
   waitingText: {
     textAlign: 'center',
     color: theme.colors.text.accent,
     fontSize: theme.typography.sizes.md,
-    marginBottom: theme.spacing.lg,
+    marginBottom: theme.spacing.sm,
   },
   emptyText: {
     textAlign: 'center',
@@ -632,7 +635,7 @@ const styles = StyleSheet.create({
   },
   header: {
     alignItems: 'center',
-    marginBottom: theme.spacing.md,
+    marginBottom: theme.spacing.sm,
   },
   gameCodeContainer: {
     alignItems: 'center',
@@ -650,14 +653,14 @@ const styles = StyleSheet.create({
     color: theme.colors.primary,
     backgroundColor: 'rgba(187, 134, 252, 0.2)',
     paddingVertical: theme.spacing.sm,
-    paddingHorizontal: theme.spacing.lg,
+    paddingHorizontal: theme.spacing.md,
     borderRadius: theme.borderRadius.medium,
     overflow: 'hidden',
   },
   infoContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: theme.spacing.md,
+    marginBottom: theme.spacing.sm,
   },
   infoItem: {
     alignItems: 'center',
@@ -691,8 +694,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: 'rgba(187, 134, 252, 0.1)',
     borderRadius: theme.borderRadius.medium,
-    padding: theme.spacing.md,
-    marginBottom: theme.spacing.md,
+    padding: theme.spacing.sm,
+    marginBottom: theme.spacing.xs,
   },
   hostInfoText: {
     flex: 1,
@@ -708,10 +711,10 @@ const styles = StyleSheet.create({
   playerCountContainer: {
     flexDirection: 'column',
     alignItems: 'center',
-    marginBottom: theme.spacing.md,
+    marginBottom: theme.spacing.xs,
     backgroundColor: 'rgba(255, 255, 255, 0.05)',
     borderRadius: theme.borderRadius.medium,
-    padding: theme.spacing.md,
+    padding: theme.spacing.xs,
   },
   playerCountText: {
     fontSize: theme.typography.sizes.lg,
@@ -786,6 +789,12 @@ const styles = StyleSheet.create({
   removeButtonText: {
     color: theme.colors.text.primary,
     fontWeight: 'bold',
+  },
+  rowButtonContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    gap: theme.spacing.md,
+    marginTop: theme.spacing.md,
   },
 });
 

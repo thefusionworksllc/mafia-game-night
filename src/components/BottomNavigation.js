@@ -257,10 +257,11 @@ const styles = StyleSheet.create({
     right: 0,
     zIndex: 1000,
     elevation: 8,
+    height: 'auto',
     ...theme.shadows.large,
   },
   bottomNavGradient: {
-    paddingTop: theme.spacing.md,
+    paddingTop: theme.spacing.sm,
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
     borderWidth: 1,
@@ -272,7 +273,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-around',
     alignItems: 'center',
     paddingHorizontal: theme.spacing.sm,
-    paddingBottom: Platform.OS === 'ios' ? 0 : 8,
+    paddingBottom: Platform.OS === 'ios' ? 0 : 4,
   },
   navButton: {
     alignItems: 'center',
@@ -282,12 +283,12 @@ const styles = StyleSheet.create({
     maxWidth: SCREEN_WIDTH / 5,
   },
   activeButton: {
-    transform: [{ translateY: -8 }],
+    transform: [{ translateY: -4 }],
   },
   iconContainer: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 2,

@@ -325,8 +325,7 @@ const HostGameScreen = ({ navigation }) => {
                 description="Number of players excluding you as host (4-15)"
               />
               
-              {/* Role Distribution */}
-              <View style={styles.rolesContainer}>
+             
                 <View style={styles.roleControls}>
                   <AnimatedControl
                     label="Mafia Count"
@@ -336,7 +335,6 @@ const HostGameScreen = ({ navigation }) => {
                     onIncrement={incrementMafia}
                     onDecrement={decrementMafia}
                     icon="security"
-                    description=""
                   />
                   
                   <AnimatedControl
@@ -347,7 +345,6 @@ const HostGameScreen = ({ navigation }) => {
                     onIncrement={incrementDetective}
                     onDecrement={decrementDetective}
                     icon="visibility"
-                    description=""
                   />
                   
                   <AnimatedControl
@@ -358,7 +355,6 @@ const HostGameScreen = ({ navigation }) => {
                     onIncrement={incrementDoctor}
                     onDecrement={decrementDoctor}
                     icon="healing"
-                    description=""
                   />
 
                   <View style={styles.nonEditableControl}>
@@ -379,7 +375,7 @@ const HostGameScreen = ({ navigation }) => {
                     </View>
                   </View>
                 </View>
-              </View>
+              
               
               {/* Role Summary */}
               <View style={styles.roleSummary}>
@@ -517,29 +513,45 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   section: {
-    marginBottom: theme.spacing.md,
+    marginBottom: theme.spacing.lg,
+    backgroundColor: 'rgba(30, 30, 50, 0.5)',
+    borderRadius: theme.borderRadius.large,
+    padding: theme.spacing.lg,
+    borderWidth: 1,
+    borderColor: 'rgba(108, 99, 255, 0.2)',
   },
   sectionTitle: {
     fontSize: theme.typography.sizes.lg,
     fontWeight: theme.typography.weights.bold,
     color: theme.colors.text.accent,
-    marginBottom: theme.spacing.xs,
+    marginBottom: theme.spacing.md,
+    textAlign: 'center',
+    textTransform: 'uppercase',
+    letterSpacing: 1,
   },
   roleDistributionTitle: {
     fontSize: theme.typography.sizes.lg,
     fontWeight: theme.typography.weights.bold,
     color: theme.colors.text.accent,
     marginBottom: theme.spacing.md,
+    textAlign: 'center',
+    textTransform: 'uppercase',
+    letterSpacing: 1,
   },
   rolesContainer: {
     marginBottom: theme.spacing.md,
+    backgroundColor: 'rgba(40, 40, 60, 0.5)',
+    borderRadius: theme.borderRadius.large,
+    padding: theme.spacing.md,
+    borderWidth: 1,
+    borderColor: 'rgba(108, 99, 255, 0.1)',
   },
   roleControls: {
     flexDirection: 'column',
     width: '100%',
   },
   roleSummary: {
-    marginBottom: theme.spacing.lg,
+    marginBottom: theme.spacing.xs,
   },
   roleSummaryTitle: {
     fontSize: theme.typography.sizes.xl,
@@ -607,9 +619,11 @@ const styles = StyleSheet.create({
   },
   controlContainer: {
     marginBottom: theme.spacing.lg,
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    backgroundColor: 'rgba(50, 50, 70, 0.5)',
     borderRadius: theme.borderRadius.medium,
     padding: theme.spacing.md,
+    borderWidth: 1,
+    borderColor: 'rgba(108, 99, 255, 0.1)',
     ...theme.shadows.small,
   },
   controlHeader: {
@@ -625,6 +639,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: theme.spacing.md,
+    ...theme.shadows.small,
   },
   controlLabelContainer: {
     flex: 1,
@@ -648,23 +663,29 @@ const styles = StyleSheet.create({
     width: 48,
     height: 48,
     borderRadius: 24,
-    backgroundColor: 'rgba(0, 0, 0, 0.2)',
+    backgroundColor: 'rgba(108, 99, 255, 0.1)',
     alignItems: 'center',
     justifyContent: 'center',
     ...theme.shadows.small,
+    borderWidth: 1,
+    borderColor: 'rgba(108, 99, 255, 0.3)',
   },
   controlButtonDisabled: {
     opacity: 0.5,
     backgroundColor: 'rgba(0, 0, 0, 0.1)',
+    borderColor: 'rgba(108, 99, 255, 0.1)',
   },
   controlValueContainer: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.2)',
+    backgroundColor: 'rgba(108, 99, 255, 0.1)',
     borderRadius: theme.borderRadius.medium,
     paddingVertical: theme.spacing.sm,
     marginHorizontal: theme.spacing.md,
     alignItems: 'center',
     justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: 'rgba(108, 99, 255, 0.2)',
+    ...theme.shadows.small,
   },
   controlValue: {
     fontSize: theme.typography.sizes.xl,
@@ -699,17 +720,22 @@ const styles = StyleSheet.create({
   },
   nonEditableControl: {
     marginBottom: theme.spacing.lg,
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    backgroundColor: 'rgba(50, 50, 70, 0.5)',
     borderRadius: theme.borderRadius.medium,
     padding: theme.spacing.md,
+    borderWidth: 1,
+    borderColor: 'rgba(108, 99, 255, 0.1)',
     ...theme.shadows.small,
   },
   civilianValueContainer: {
-    backgroundColor: 'rgba(0, 0, 0, 0.2)',
+    backgroundColor: 'rgba(108, 99, 255, 0.1)',
     borderRadius: theme.borderRadius.medium,
     paddingVertical: theme.spacing.sm,
     alignItems: 'center',
     justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: 'rgba(108, 99, 255, 0.2)',
+    ...theme.shadows.small,
   },
   civilianValue: {
     fontSize: theme.typography.sizes.xl,

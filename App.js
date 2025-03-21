@@ -12,7 +12,6 @@ import GameTutorialScreen from './src/screens/GameTutorialScreen';
 import JoinGameScreen from './src/screens/JoinGameScreen';  
 import SettingsScreen from './src/screens/settings/SettingsScreen';
 import EditProfileScreen from './src/screens/settings/EditProfileScreen';
-import ChangeAvatarScreen from './src/screens/settings/ChangeAvatarScreen'; 
 import GameStatsScreen from './src/screens/settings/GameStatsScreen';
 import GameOverview from './src/screens/GameOverviewScreen';
 import RolesAndAbilities from './src/screens/RolesAndAbilitiesScreen';
@@ -50,7 +49,6 @@ export default function App() {
             <Stack.Screen name="GameHistory" component={GameHistoryScreen} />
             <Stack.Screen name="Settings" component={SettingsScreen} />
             <Stack.Screen name="EditProfile" component={EditProfileScreen} />
-            <Stack.Screen name="ChangeAvatar" component={ChangeAvatarScreen} />
             <Stack.Screen name="GameStats" component={GameStatsScreen} />
             <Stack.Screen name="HostGame" component={HostGameScreen} />
             <Stack.Screen name="JoinGame" component={JoinGameScreen} />

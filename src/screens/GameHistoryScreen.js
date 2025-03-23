@@ -38,7 +38,7 @@ const GameHistoryScreen = ({ navigation }) => {
       setError(null);
       console.log('Fetching game history...');
       const gameHistory = await gameService.getAllGameHistory();
-      console.log('Fetched game history:', gameHistory);
+     // console.log('Fetched game history:', gameHistory);
       const sortedGames = gameHistory.sort((a, b) => 
         new Date(b.createdAt) - new Date(a.createdAt)
       );

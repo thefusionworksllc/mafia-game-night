@@ -348,7 +348,7 @@ const GameLobbyScreen = ({ route, navigation }) => {
           </View>
 
           <View style={styles.playersSection}>
-            <Text style={styles.sectionTitle}>Players</Text>
+           {/* <Text style={styles.sectionTitle}>Players</Text> */}
             <View style={styles.playersList}>
               <FlatList
                 data={actualPlayers}
@@ -478,7 +478,6 @@ const GameLobbyScreen = ({ route, navigation }) => {
           </View>
         )}
       </ModernBackground>
-      <BottomNavigation navigation={navigation} activeScreen="GameLobby" />
     </View>
   );
 };
@@ -563,7 +562,7 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     backgroundColor: 'rgba(0, 0, 0, 0.2)',
     marginBottom: theme.spacing.md,
-    height:200,
+    height:170,
 
   },
   playersListContent: {
@@ -652,7 +651,7 @@ const styles = StyleSheet.create({
   },
   header: {
     alignItems: 'center',
-    marginBottom: theme.spacing.sm,
+    marginBottom: theme.spacing.xs,
   },
   infoContainer: {
     flexDirection: 'row',
@@ -661,7 +660,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(15, 23, 42, 0.7)',
     padding: theme.spacing.md,
     borderRadius: theme.borderRadius.medium,
-    marginBottom: theme.spacing.md,
+    marginBottom: theme.spacing.xs,
     borderWidth: 1,
     borderColor: 'rgba(59, 130, 246, 0.2)',
     ...theme.shadows.small,
@@ -720,7 +719,7 @@ const styles = StyleSheet.create({
   civilianInfoContainer: {
     flexDirection: 'row',
     justifyContent: 'flex-start',
-    marginBottom: theme.spacing.md,
+    marginBottom: theme.spacing.xs,
   },
   playerCountContainer: {
     backgroundColor: 'rgba(15, 23, 42, 0.7)',

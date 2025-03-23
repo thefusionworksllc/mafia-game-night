@@ -8,10 +8,10 @@
     "ios": "expo start --ios",
     "web": "expo start --web",
     "build": "npx expo export",
-    "build:web": "npx expo export -p web --output-dir web-build && npx copy-files-from-to --config web-build-config.json",
+    "build:web": "node scripts/complete-pwa-build.js",
     "predeploy": "node fix-deploy.js",
     "deploy": "npm run build:web && npm run predeploy",
-    "deploy:netlify": "npm run build:web && npm run predeploy && netlify deploy --prod"
+    "deploy:netlify": "npm run build:web && netlify deploy --prod"
   },
   "dependencies": {
     "@expo/metro-runtime": "~4.0.1",

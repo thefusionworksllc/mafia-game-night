@@ -2,11 +2,15 @@
   "name": "Mafia Game Night",
   "short_name": "Mafia",
   "description": "Play Mafia Game Night with friends and family",
-  "start_url": "/",
+  "start_url": "./",
+  "scope": "./",
   "display": "standalone",
   "background_color": "#000000",
   "theme_color": "#000000",
   "orientation": "portrait",
+  "categories": ["games", "entertainment"],
+  "lang": "en-US",
+  "prefer_related_applications": false,
   "icons": [
     {
       "src": "assets/icon.png",

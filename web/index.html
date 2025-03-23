@@ -2,16 +2,19 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <meta httpEquiv="X-UA-Compatible" content="IE=edge" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover, user-scalable=no" />
+  
   <!-- Full-screen mode for iOS devices -->
   <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-touch-fullscreen" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="Mafia Game Night" />
   
   <!-- Full-screen mode for Android devices -->
   <meta name="mobile-web-app-capable" content="yes" />
   <meta name="theme-color" content="#000000" />
+  <meta name="application-name" content="Mafia Game Night" />
   
   <!-- PWA manifest -->
   <link rel="manifest" href="manifest.json" />
@@ -25,49 +28,62 @@
   <!-- iOS startup images -->
   <link rel="apple-touch-startup-image" href="assets/splash-icon.png" />
   
+  <!-- Shortcut icon -->
+  <link rel="shortcut icon" href="favicon.ico" />
+  
   <title>Mafia Game Night</title>
   <style>
     /* Ensure the app takes up the full screen */
     html, body, #root {
       height: 100%;
+      width: 100%;
       margin: 0;
       padding: 0;
       overflow: hidden;
+      position: fixed;
       background-color: #000000;
     }
     
     /* Add safe area insets for notched devices */
     #root {
       padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+      display: flex;
+      flex: 1;
     }
 
-    /* Display install prompt for iOS */
-    .ios-prompt {
+    /* iOS install prompt */
+    #ios-install-prompt {
       display: none;
       position: fixed;
-      bottom: 0;
-      left: 0;
-      right: 0;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 90%;
+      max-width: 320px;
       padding: 16px;
       background-color: rgba(0, 0, 0, 0.85);
       color: white;
       text-align: center;
       z-index: 9999;
+      border-radius: 10px;
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
     }
 
-    .ios-prompt p {
-      margin: 0 0 8px 0;
+    #ios-install-prompt p {
+      margin: 0 0 12px 0;
+      font-size: 14px;
+      line-height: 1.4;
     }
 
-    .close-prompt {
+    #close-prompt {
+      background-color: #4285F4;
       border: none;
-      background: none;
-      color: #ffffff;
-      font-size: 24px;
-      position: absolute;
-      top: 5px;
-      right: 10px;
+      color: white;
+      padding: 8px 16px;
+      border-radius: 4px;
+      font-weight: bold;
+      font-size: 14px;
       cursor: pointer;
     }
   </style>
@@ -82,6 +98,16 @@
   </div>
 
   <script>
+    // Fix viewport issues on iOS
+    function fixViewport() {
+      document.documentElement.style.height = window.innerHeight + 'px';
+      document.body.style.height = window.innerHeight + 'px';
+      document.getElementById('root').style.height = window.innerHeight + 'px';
+    }
+    window.addEventListener('resize', fixViewport);
+    window.addEventListener('orientationchange', fixViewport);
+    fixViewport();
+
     // Check if the app is in standalone mode (PWA installed)
     if (('standalone' in window.navigator) && !window.navigator.standalone) {
       // Not in standalone mode, might be iOS
@@ -130,5 +156,8 @@
       });
     }
   </script>
+  
+  <!-- The Expo script will be replaced with the correct version during build -->
+  <script src="/_expo/static/js/web/index.js" defer></script>
 </body>
 </html> 

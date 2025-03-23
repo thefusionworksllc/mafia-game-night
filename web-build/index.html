@@ -1,39 +1,163 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <meta httpEquiv="X-UA-Compatible" content="IE=edge" />
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
-    <title>Mafia Game Night</title>
-    <!-- The `react-native-web` recommended style reset: https://necolas.github.io/react-native-web/docs/setup/#root-element -->
-    <style id="expo-reset">
-      /* These styles make the body full-height */
-      html,
-      body {
-        height: 100%;
-      }
-      /* These styles disable body scrolling if you are using <ScrollView> */
-      body {
-        overflow: hidden;
-      }
-      /* These styles make the root element full-height */
-      #root {
-        display: flex;
-        height: 100%;
-        flex: 1;
-      }
-    </style>
-  <meta name="theme-color" content="#000000">
-<meta name="description" content="Play Mafia Game Night with friends and family">
-<link rel="shortcut icon" href="/favicon.ico" /></head>
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover, user-scalable=no" />
+  
+  <!-- Full-screen mode for iOS devices -->
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-touch-fullscreen" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Mafia Game Night" />
+  
+  <!-- Full-screen mode for Android devices -->
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="theme-color" content="#000000" />
+  <meta name="application-name" content="Mafia Game Night" />
+  
+  <!-- PWA manifest -->
+  <link rel="manifest" href="manifest.json" />
+  
+  <!-- iOS icons -->
+  <link rel="apple-touch-icon" href="assets/icon.png" />
+  <link rel="apple-touch-icon" sizes="152x152" href="assets/icon-152x152.png" />
+  <link rel="apple-touch-icon" sizes="180x180" href="assets/icon-180x180.png" />
+  <link rel="apple-touch-icon" sizes="167x167" href="assets/icon-167x167.png" />
+  
+  <!-- iOS startup images -->
+  <link rel="apple-touch-startup-image" href="assets/splash-icon.png" />
+  
+  <!-- Shortcut icon -->
+  <link rel="shortcut icon" href="favicon.ico" />
+  
+  <title>Mafia Game Night</title>
+  <style>
+    /* Ensure the app takes up the full screen */
+    html, body, #root {
+      height: 100%;
+      width: 100%;
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      position: fixed;
+      background-color: #000000;
+    }
+    
+    /* Add safe area insets for notched devices */
+    #root {
+      padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+      display: flex;
+      flex: 1;
+    }
 
-  <body>
-    <!-- Use static rendering with Expo Router to support running without JavaScript. -->
-    <noscript>
-      You need to enable JavaScript to run this app.
-    </noscript>
-    <!-- The root element for your Expo app. -->
-    <div id="root"></div>
+    /* iOS install prompt */
+    #ios-install-prompt {
+      display: none;
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 90%;
+      max-width: 320px;
+      padding: 16px;
+      background-color: rgba(0, 0, 0, 0.85);
+      color: white;
+      text-align: center;
+      z-index: 9999;
+      border-radius: 10px;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+    }
+
+    #ios-install-prompt p {
+      margin: 0 0 12px 0;
+      font-size: 14px;
+      line-height: 1.4;
+    }
+
+    #close-prompt {
+      background-color: #4285F4;
+      border: none;
+      color: white;
+      padding: 8px 16px;
+      border-radius: 4px;
+      font-weight: bold;
+      font-size: 14px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+  
+  <!-- iOS install prompt -->
+  <div id="ios-install-prompt">
+    <p>Install this app on your device: tap <strong>Share</strong> and then <strong>Add to Home Screen</strong></p>
+    <button id="close-prompt">Got it</button>
+  </div>
+
+  <script>
+    // Fix viewport issues on iOS
+    function fixViewport() {
+      document.documentElement.style.height = window.innerHeight + 'px';
+      document.body.style.height = window.innerHeight + 'px';
+      document.getElementById('root').style.height = window.innerHeight + 'px';
+    }
+    window.addEventListener('resize', fixViewport);
+    window.addEventListener('orientationchange', fixViewport);
+    fixViewport();
+
+    // Check if the app is in standalone mode (PWA installed)
+    if (('standalone' in window.navigator) && !window.navigator.standalone) {
+      // Not in standalone mode, might be iOS
+      if (/iphone|ipad|ipod/.test(navigator.userAgent.toLowerCase())) {
+        // Show the iOS install prompt if not already dismissed
+        if (!localStorage.getItem('iosInstallPromptDismissed')) {
+          document.getElementById('ios-install-prompt').style.display = 'block';
+        }
+        
+        // Handle dismissal
+        document.getElementById('close-prompt').addEventListener('click', function() {
+          document.getElementById('ios-install-prompt').style.display = 'none';
+          localStorage.setItem('iosInstallPromptDismissed', 'true');
+        });
+      }
+    }
+
+    // Prevent page scrolling and bouncing on iOS
+    document.addEventListener('touchmove', function(e) {
+      if (e.target.tagName !== 'INPUT' && e.target.tagName !== 'TEXTAREA') {
+        e.preventDefault();
+      }
+    }, { passive: false });
+    
+    // Prevent pull-to-refresh
+    document.body.addEventListener('touchstart', function(e) {
+      if (e.touches.length === 1) {
+        window.touchStartY = e.touches[0].clientY;
+      }
+    }, { passive: true });
+    
+    document.body.addEventListener('touchmove', function(e) {
+      if (e.touches.length === 1 && window.touchStartY && e.touches[0].clientY > window.touchStartY) {
+        e.preventDefault();
+      }
+    }, { passive: false });
+    
+    // Register service worker for PWA
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', function() {
+        navigator.serviceWorker.register('service-worker.js').then(function(registration) {
+          console.log('ServiceWorker registration successful with scope: ', registration.scope);
+        }, function(err) {
+          console.log('ServiceWorker registration failed: ', err);
+        });
+      });
+    }
+  </script>
+  
+  <!-- The Expo script will be replaced with the correct version during build -->
   <script src="/_expo/static/js/web/index-7ee310ddbc1360ef8f3fea46cb831e94.js" defer></script>
 </body>
-</html>
+</html> 

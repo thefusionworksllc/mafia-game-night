@@ -14,6 +14,7 @@ if (!fs.existsSync(webBuildAssetsDir)) {
 const sourceIconPath = path.join(__dirname, '../assets/icon.png');
 const destIconPath = path.join(webBuildAssetsDir, 'icon.png');
 fs.copyFileSync(sourceIconPath, destIconPath);
+console.log(`Copied icon.png to ${destIconPath}`);
 
 // Copy icon to additional sizes since ImageMagick isn't available
 const sizes = [152, 167, 180, 512];
@@ -21,6 +22,7 @@ sizes.forEach(size => {
   const outputPath = path.join(webBuildAssetsDir, `icon-${size}x${size}.png`);
   console.log(`Copying original icon to ${size}x${size} (resizing not available)...`);
   fs.copyFileSync(sourceIconPath, outputPath);
+  console.log(`Copied icon to ${outputPath}`);
 });
 
 // Copy splash icon to web-build/assets

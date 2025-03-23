@@ -23,13 +23,13 @@ const RoleCard = ({ role, name, description, icon }) => {
   const getRoleColor = (roleType) => {
     switch (roleType.toLowerCase()) {
       case 'mafia':
-        return theme.colors.tertiary;
+        return theme.colors.mafia;
       case 'detective':
-        return theme.colors.info;
+        return theme.colors.detective;
       case 'doctor':
-        return theme.colors.success;
+        return theme.colors.doctor;
       default:
-        return theme.colors.primary;
+        return theme.colors.civilian;
     }
   };
 
@@ -199,8 +199,8 @@ const RoleAssignmentScreen = ({ route, navigation }) => {
       >
         <LinearGradient
           colors={[
-            'rgba(20, 20, 35, 0.9)', 
-            'rgba(15, 15, 30, 0.95)'
+            'rgba(15, 23, 42, 0.92)', 
+            'rgba(30, 41, 59, 0.97)'
           ]}
           style={[
             styles.container,
@@ -283,7 +283,6 @@ const RoleAssignmentScreen = ({ route, navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: theme.colors.background,
   },
   backgroundImage: {
     flex: 1,
@@ -316,10 +315,12 @@ const styles = StyleSheet.create({
   },
   rolesContainer: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.3)',
+    backgroundColor: 'rgba(15, 23, 42, 0.7)',
     borderRadius: theme.borderRadius.large,
     padding: theme.spacing.lg,
     marginBottom: theme.spacing.lg,
+    borderWidth: 1,
+    borderColor: 'rgba(59, 130, 246, 0.2)',
     ...theme.shadows.medium,
   },
   rolesList: {
@@ -344,6 +345,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: theme.spacing.md,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.1)',
   },
   roleContent: {
     flex: 1,
@@ -391,7 +394,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    marginBottom: theme.spacing.lg,
+    marginBottom: theme.spacing.md,
     paddingHorizontal: theme.spacing.horizontalPadding,
   },
   continueButton: {

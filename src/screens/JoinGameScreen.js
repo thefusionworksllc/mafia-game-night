@@ -150,7 +150,7 @@ const JoinGameScreen = ({ navigation }) => {
               ]}
             >
               <LinearGradient
-                colors={['rgba(30, 30, 50, 0.8)', 'rgba(20, 20, 35, 0.9)']}
+                colors={[theme.colors.card.background, theme.colors.card.backgroundAlt]}
                 style={styles.formGradient}
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 1 }}
@@ -166,7 +166,7 @@ const JoinGameScreen = ({ navigation }) => {
                     leftIcon={{ 
                       type: 'material',
                       name: 'games',
-                      color: theme.colors.primary,
+                      color: theme.colors.secondary,
                       size: 24 
                     }}
                     inputStyle={{
@@ -177,7 +177,7 @@ const JoinGameScreen = ({ navigation }) => {
                       letterSpacing: 5,
                     }}
                     inputContainerStyle={{
-                      borderBottomColor: theme.colors.primary,
+                      borderBottomColor: theme.colors.secondary,
                       borderBottomWidth: 2,
                     }}
                     containerStyle={{
@@ -191,7 +191,7 @@ const JoinGameScreen = ({ navigation }) => {
 
                 {user ? (
                   <View style={styles.userInfoContainer}>
-                    <Icon name="person" size={20} color={theme.colors.success} />
+                    <Icon name="person" size={20} color={theme.colors.info} />
                     <Text style={styles.userInfoText}>
                       Joining as: <Text style={styles.userName}>{user.displayName || user.email}</Text>
                     </Text>
@@ -200,32 +200,28 @@ const JoinGameScreen = ({ navigation }) => {
                   <View style={styles.userInfoContainer}>
                     <Icon name="warning" size={20} color={theme.colors.warning} />
                     <Text style={styles.userInfoText}>
-                      You need to be logged in to join a game
+                      You are not logged in
                     </Text>
-                    <TouchableOpacity 
-                      onPress={() => navigation.navigate('Login')}
-                      style={styles.loginLink}
-                    >
-                      <Text style={styles.loginLinkText}>Click here to login</Text>
-                    </TouchableOpacity>
                   </View>
                 )}
 
                 <View style={styles.buttonContainer}>
                   <CustomButton
-                    title="Join Game"
+                    title="JOIN GAME"
                     onPress={handleJoinGame}
                     loading={loading}
-                    disabled={gameCode.length !== 6 || loading}
-                    style={styles.joinButton}
                     leftIcon={<Icon name="login" size={20} color={theme.colors.text.primary} />}
+                    style={styles.joinButton}
+                    fullWidth
                   />
+                  
                   <CustomButton
-                    title="Back to Home"
+                    title="BACK TO HOME"
                     onPress={() => navigation.navigate('Home')}
                     variant="outline"
+                    leftIcon={<Icon name="home" size={20} color={theme.colors.primary} />}
                     style={styles.backButton}
-                    leftIcon={<Icon name="home" size={20} color={theme.colors.text.accent} />}
+                    fullWidth
                   />
                 </View>
               </LinearGradient>
@@ -293,76 +289,76 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   contentContainer: {
-    flex: 1,
-    padding: theme.spacing.horizontalPadding,
+    flexGrow: 1,
+    paddingHorizontal: theme.spacing.horizontalPadding,
+    paddingBottom: theme.spacing.bottomNavHeight + theme.spacing.safeBottom + 20,
     alignItems: 'center',
+    justifyContent: 'center',
   },
   welcomeSection: {
     marginBottom: theme.spacing.xl,
-    alignItems: 'center',
+    width: '100%',
+    maxWidth: 500,
+    alignSelf: 'center',
   },
   title: {
-    fontSize: theme.typography.sizes.xxl,
+    fontSize: theme.typography.sizes.xxxl,
     fontWeight: theme.typography.weights.bold,
     color: theme.colors.text.primary,
     textAlign: 'center',
-    marginBottom: theme.spacing.sm,
-    textShadowColor: 'rgba(0, 0, 0, 0.75)',
-    textShadowOffset: { width: 0, height: 1 },
-    textShadowRadius: 4,
+    marginBottom: theme.spacing.xs,
   },
   subtitle: {
     fontSize: theme.typography.sizes.md,
     color: theme.colors.text.secondary,
     textAlign: 'center',
-    marginBottom: theme.spacing.xl,
+    marginBottom: theme.spacing.md,
   },
   formContainer: {
-    width: CARD_WIDTH,
+    width: '100%',
+    maxWidth: 500,
+    alignSelf: 'center',
     borderRadius: theme.borderRadius.large,
     overflow: 'hidden',
     ...theme.shadows.medium,
-    marginBottom: theme.spacing.xl,
   },
   formGradient: {
     padding: theme.spacing.lg,
     borderRadius: theme.borderRadius.large,
   },
   codeInputContainer: {
-    marginBottom: theme.spacing.md,
-    pointerEvents: 'auto',
-    width: '100%',
+    marginBottom: theme.spacing.lg,
   },
   inputLabel: {
     fontSize: theme.typography.sizes.md,
-    fontWeight: theme.typography.weights.bold,
-    color: theme.colors.text.accent,
-    marginBottom: theme.spacing.sm,
+    color: theme.colors.info,
+    marginBottom: theme.spacing.xs,
   },
   userInfoContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.3)',
-    borderRadius: theme.borderRadius.medium,
+    backgroundColor: 'rgba(0, 0, 0, 0.2)',
     padding: theme.spacing.md,
+    borderRadius: theme.borderRadius.medium,
     marginBottom: theme.spacing.lg,
   },
   userInfoText: {
-    fontSize: theme.typography.sizes.sm,
+    fontSize: theme.typography.sizes.md,
     color: theme.colors.text.secondary,
     marginLeft: theme.spacing.sm,
   },
   userName: {
-    color: theme.colors.text.accent,
+    color: theme.colors.text.primary,
     fontWeight: theme.typography.weights.bold,
   },
   buttonContainer: {
-    width: '100%',
+    marginTop: theme.spacing.md,
   },
   joinButton: {
     marginBottom: theme.spacing.md,
   },
   backButton: {
+    marginTop: theme.spacing.xs,
   },
   instructionsContainer: {
     width: CARD_WIDTH,
@@ -380,15 +376,6 @@ const styles = StyleSheet.create({
     fontSize: theme.typography.sizes.md,
     color: theme.colors.text.secondary,
     marginLeft: theme.spacing.sm,
-  },
-  loginLink: {
-    marginTop: theme.spacing.xs,
-    alignSelf: 'center',
-  },
-  loginLinkText: {
-    color: theme.colors.primary,
-    fontWeight: theme.typography.weights.bold,
-    textDecorationLine: 'underline',
   },
   confirmationOverlay: {
     position: 'absolute',

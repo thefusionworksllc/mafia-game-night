@@ -258,6 +258,7 @@ const styles = StyleSheet.create({
     zIndex: 1000,
     elevation: 8,
     height: 'auto',
+    marginTop: theme.spacing.md,
     ...theme.shadows.large,
   },
   bottomNavGradient: {

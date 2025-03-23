@@ -54,7 +54,7 @@ const AnimatedControl = ({
     <View style={styles.controlContainer}>
       <View style={styles.controlHeader}>
         <View style={styles.controlIconContainer}>
-          <Icon name={icon} size={24} color={theme.colors.primary} />
+          <Icon name={icon} size={24} color={theme.colors.secondary} />
         </View>
         <View style={styles.controlLabelContainer}>
           <Text style={styles.controlLabel}>{label}</Text>
@@ -79,8 +79,8 @@ const AnimatedControl = ({
         >
           <Icon 
             name="remove" 
-            size={24} 
-            color={value <= minValue ? theme.colors.text.disabled : theme.colors.text.secondary} 
+            size={28} 
+            color={value <= minValue ? theme.colors.text.disabled : theme.colors.primary} 
           />
         </TouchableOpacity>
         
@@ -109,8 +109,8 @@ const AnimatedControl = ({
         >
           <Icon 
             name="add" 
-            size={24} 
-            color={value >= maxValue ? theme.colors.text.disabled : theme.colors.text.secondary} 
+            size={28} 
+            color={value >= maxValue ? theme.colors.text.disabled : theme.colors.primary} 
           />
         </TouchableOpacity>
       </View>
@@ -325,7 +325,6 @@ const HostGameScreen = ({ navigation }) => {
                 description="Number of players excluding you as host (4-15)"
               />
               
-             
                 <View style={styles.roleControls}>
                   <AnimatedControl
                     label="Mafia Count"
@@ -360,7 +359,7 @@ const HostGameScreen = ({ navigation }) => {
                   <View style={styles.nonEditableControl}>
                     <View style={styles.controlHeader}>
                       <View style={styles.controlIconContainer}>
-                        <Icon name="people" size={24} color={theme.colors.primary} />
+                        <Icon name="people" size={24} color={theme.colors.civilian} />
                       </View>
                       <View style={styles.controlLabelContainer}>
                         <Text style={styles.controlLabel}>Civilian Count</Text>
@@ -376,37 +375,36 @@ const HostGameScreen = ({ navigation }) => {
                   </View>
                 </View>
               
-              
               {/* Role Summary */}
               <View style={styles.roleSummary}>
                 <Text style={styles.roleSummaryTitle}>Role Summary Review</Text>
                 <View style={styles.roleSummaryCards}>
                   <View style={styles.roleCard}>
                     <LinearGradient
-                      colors={[`${theme.colors.tertiary}20`, `${theme.colors.tertiary}10`]}
+                      colors={[`${theme.colors.mafia}20`, `${theme.colors.mafia}10`]}
                       style={styles.roleCardGradient}
                     >
-                      <View style={[styles.roleIconContainer, { backgroundColor: `${theme.colors.tertiary}30` }]}>
-                        <Icon name="security" size={24} color={theme.colors.tertiary} />
+                      <View style={[styles.roleIconContainer, { backgroundColor: `${theme.colors.mafia}30` }]}>
+                        <Icon name="security" size={24} color={theme.colors.mafia} />
                       </View>
                       <Text style={styles.roleName}>Mafia</Text>
                       <View style={styles.roleCountContainer}>
-                        <Text style={[styles.roleCount, { color: theme.colors.tertiary }]}>{mafiaCount}</Text>
+                        <Text style={[styles.roleCount, { color: theme.colors.mafia }]}>{mafiaCount}</Text>
                       </View>
                     </LinearGradient>
                   </View>
                   
                   <View style={styles.roleCard}>
                     <LinearGradient
-                      colors={[`${theme.colors.info}20`, `${theme.colors.info}10`]}
+                      colors={[`${theme.colors.detective}20`, `${theme.colors.detective}10`]}
                       style={styles.roleCardGradient}
                     >
-                      <View style={[styles.roleIconContainer, { backgroundColor: `${theme.colors.info}30` }]}>
-                        <Icon name="visibility" size={24} color={theme.colors.info} />
+                      <View style={[styles.roleIconContainer, { backgroundColor: `${theme.colors.detective}30` }]}>
+                        <Icon name="visibility" size={24} color={theme.colors.detective} />
                       </View>
                       <Text style={styles.roleName}>Detective</Text>
                       <View style={styles.roleCountContainer}>
-                        <Text style={[styles.roleCount, { color: theme.colors.info }]}>{detectiveCount}</Text>
+                        <Text style={[styles.roleCount, { color: theme.colors.detective }]}>{detectiveCount}</Text>
                         {detectiveCount === 2 && (
                           <Text style={styles.maxLabel}>MAX</Text>
                         )}
@@ -416,15 +414,15 @@ const HostGameScreen = ({ navigation }) => {
                   
                   <View style={styles.roleCard}>
                     <LinearGradient
-                      colors={[`${theme.colors.success}20`, `${theme.colors.success}10`]}
+                      colors={[`${theme.colors.doctor}20`, `${theme.colors.doctor}10`]}
                       style={styles.roleCardGradient}
                     >
-                      <View style={[styles.roleIconContainer, { backgroundColor: `${theme.colors.success}30` }]}>
-                        <Icon name="healing" size={24} color={theme.colors.success} />
+                      <View style={[styles.roleIconContainer, { backgroundColor: `${theme.colors.doctor}30` }]}>
+                        <Icon name="healing" size={24} color={theme.colors.doctor} />
                       </View>
                       <Text style={styles.roleName}>Doctor</Text>
                       <View style={styles.roleCountContainer}>
-                        <Text style={[styles.roleCount, { color: theme.colors.success }]}>{doctorCount}</Text>
+                        <Text style={[styles.roleCount, { color: theme.colors.doctor }]}>{doctorCount}</Text>
                         {doctorCount === 2 && (
                           <Text style={styles.maxLabel}>MAX</Text>
                         )}
@@ -434,15 +432,15 @@ const HostGameScreen = ({ navigation }) => {
                   
                   <View style={styles.roleCard}>
                     <LinearGradient
-                      colors={[`${theme.colors.primary}20`, `${theme.colors.primary}10`]}
+                      colors={[`${theme.colors.civilian}20`, `${theme.colors.civilian}10`]}
                       style={styles.roleCardGradient}
                     >
-                      <View style={[styles.roleIconContainer, { backgroundColor: `${theme.colors.primary}30` }]}>
-                        <Icon name="people" size={24} color={theme.colors.primary} />
+                      <View style={[styles.roleIconContainer, { backgroundColor: `${theme.colors.civilian}30` }]}>
+                        <Icon name="people" size={24} color={theme.colors.civilian} />
                       </View>
                       <Text style={styles.roleName}>Civilian</Text>
                       <View style={styles.roleCountContainer}>
-                        <Text style={[styles.roleCount, { color: theme.colors.primary }]}>{civilianCount}</Text>
+                        <Text style={[styles.roleCount, { color: theme.colors.civilian }]}>{civilianCount}</Text>
                       </View>
                     </LinearGradient>
                   </View>
@@ -462,8 +460,7 @@ const HostGameScreen = ({ navigation }) => {
                 title="HOST GAME"
                 onPress={handleHostGame}
                 loading={loading}
-                disabled={loading || civilianCount < 0}
-                leftIcon={<Icon name="play-arrow" size={20} color={theme.colors.text.primary} />}
+                leftIcon={<Icon name="videogame-asset" size={20} color={theme.colors.text.primary} />}
                 fullWidth
               />
               
@@ -471,8 +468,8 @@ const HostGameScreen = ({ navigation }) => {
                 title="BACK TO HOME"
                 onPress={() => navigation.navigate('Home')}
                 variant="outline"
+                leftIcon={<Icon name="home" size={20} color={theme.colors.primary} />}
                 style={styles.backButton}
-                leftIcon={<Icon name="arrow-back" size={20} color={theme.colors.text.accent} />}
                 fullWidth
               />
             </View>
@@ -514,16 +511,17 @@ const styles = StyleSheet.create({
   },
   section: {
     marginBottom: theme.spacing.lg,
-    backgroundColor: 'rgba(30, 30, 50, 0.5)',
+    backgroundColor: 'rgba(10, 25, 45, 0.7)',
     borderRadius: theme.borderRadius.large,
-    padding: theme.spacing.sm,
+    padding: theme.spacing.lg,
     borderWidth: 1,
-    borderColor: 'rgba(108, 99, 255, 0.2)',
+    borderColor: 'rgba(59, 130, 246, 0.2)',
+    ...theme.shadows.medium,
   },
   sectionTitle: {
     fontSize: theme.typography.sizes.lg,
     fontWeight: theme.typography.weights.bold,
-    color: theme.colors.text.accent,
+    color: theme.colors.text.primary,
     marginBottom: theme.spacing.md,
     textAlign: 'center',
     textTransform: 'uppercase',
@@ -532,7 +530,7 @@ const styles = StyleSheet.create({
   roleDistributionTitle: {
     fontSize: theme.typography.sizes.lg,
     fontWeight: theme.typography.weights.bold,
-    color: theme.colors.text.accent,
+    color: theme.colors.text.primary,
     marginBottom: theme.spacing.md,
     textAlign: 'center',
     textTransform: 'uppercase',
@@ -554,9 +552,9 @@ const styles = StyleSheet.create({
     marginBottom: theme.spacing.xs,
   },
   roleSummaryTitle: {
-    fontSize: theme.typography.sizes.xl,
+    fontSize: theme.typography.sizes.lg,
     fontWeight: theme.typography.weights.bold,
-    color: theme.colors.text.accent,
+    color: theme.colors.text.primary,
     marginBottom: theme.spacing.md,
   },
   roleSummaryCards: {
@@ -613,17 +611,20 @@ const styles = StyleSheet.create({
   },
   buttonContainer: {
     marginBottom: theme.spacing.xxl,
+    width: '100%',
+    maxWidth: 500,
+    alignSelf: 'center',
   },
   backButton: {
     marginBottom: theme.spacing.md,
   },
   controlContainer: {
     marginBottom: theme.spacing.lg,
-    backgroundColor: 'rgba(50, 50, 70, 0.5)',
+    backgroundColor: 'rgba(15, 23, 42, 0.6)',
     borderRadius: theme.borderRadius.medium,
     padding: theme.spacing.md,
     borderWidth: 1,
-    borderColor: 'rgba(108, 99, 255, 0.1)',
+    borderColor: 'rgba(59, 130, 246, 0.15)',
     ...theme.shadows.small,
   },
   controlHeader: {
@@ -635,7 +636,7 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: 'rgba(108, 99, 255, 0.15)',
+    backgroundColor: 'rgba(59, 130, 246, 0.15)',
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: theme.spacing.md,
@@ -656,41 +657,42 @@ const styles = StyleSheet.create({
   },
   controlActions: {
     flexDirection: 'row',
-    alignItems: 'center',
     justifyContent: 'space-between',
+    alignItems: 'center',
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(59, 130, 246, 0.1)',
+    paddingTop: theme.spacing.md,
+    marginTop: theme.spacing.sm,
   },
   controlButton: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    backgroundColor: 'rgba(108, 99, 255, 0.1)',
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: 'rgba(59, 130, 246, 0.25)',
     alignItems: 'center',
     justifyContent: 'center',
-    ...theme.shadows.small,
     borderWidth: 1,
-    borderColor: 'rgba(108, 99, 255, 0.3)',
+    borderColor: 'rgba(59, 130, 246, 0.35)',
+    ...theme.shadows.medium,
   },
   controlButtonDisabled: {
     opacity: 0.5,
-    backgroundColor: 'rgba(0, 0, 0, 0.1)',
+    backgroundColor: 'rgba(0, 0, 0, 0.2)',
     borderColor: 'rgba(108, 99, 255, 0.1)',
   },
   controlValueContainer: {
-    flex: 1,
-    backgroundColor: 'rgba(108, 99, 255, 0.1)',
-    borderRadius: theme.borderRadius.medium,
-    paddingVertical: theme.spacing.sm,
-    marginHorizontal: theme.spacing.md,
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    backgroundColor: 'rgba(59, 130, 246, 0.15)',
     alignItems: 'center',
     justifyContent: 'center',
-    borderWidth: 1,
-    borderColor: 'rgba(108, 99, 255, 0.2)',
-    ...theme.shadows.small,
+    ...theme.shadows.medium,
   },
   controlValue: {
-    fontSize: theme.typography.sizes.xl,
+    fontSize: theme.typography.sizes.xxl,
     fontWeight: theme.typography.weights.bold,
-    color: theme.colors.text.accent,
+    color: theme.colors.text.primary,
   },
   controlMaxValue: {
     fontSize: theme.typography.sizes.xs,
@@ -707,40 +709,37 @@ const styles = StyleSheet.create({
   hostInfoContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'rgba(108, 99, 255, 0.1)',
-    borderRadius: theme.borderRadius.medium,
+    backgroundColor: 'rgba(0, 0, 0, 0.3)',
     padding: theme.spacing.md,
-    marginBottom: theme.spacing.md,
+    borderRadius: theme.borderRadius.medium,
+    marginBottom: theme.spacing.lg,
   },
   hostInfoText: {
-    flex: 1,
-    marginLeft: theme.spacing.sm,
-    fontSize: theme.typography.sizes.sm,
     color: theme.colors.text.secondary,
+    marginLeft: theme.spacing.md,
+    fontSize: theme.typography.sizes.sm,
   },
   nonEditableControl: {
     marginBottom: theme.spacing.lg,
-    backgroundColor: 'rgba(50, 50, 70, 0.5)',
+    backgroundColor: 'rgba(15, 23, 42, 0.6)',
     borderRadius: theme.borderRadius.medium,
     padding: theme.spacing.md,
     borderWidth: 1,
-    borderColor: 'rgba(108, 99, 255, 0.1)',
+    borderColor: 'rgba(59, 130, 246, 0.15)',
     ...theme.shadows.small,
   },
   civilianValueContainer: {
-    backgroundColor: 'rgba(108, 99, 255, 0.1)',
-    borderRadius: theme.borderRadius.medium,
-    paddingVertical: theme.spacing.sm,
     alignItems: 'center',
     justifyContent: 'center',
-    borderWidth: 1,
-    borderColor: 'rgba(108, 99, 255, 0.2)',
-    ...theme.shadows.small,
+    backgroundColor: 'rgba(59, 130, 246, 0.1)',
+    borderRadius: theme.borderRadius.medium,
+    padding: theme.spacing.md,
+    marginTop: theme.spacing.sm,
   },
   civilianValue: {
-    fontSize: theme.typography.sizes.xl,
+    fontSize: theme.typography.sizes.xxl,
     fontWeight: theme.typography.weights.bold,
-    color: theme.colors.primary,
+    color: theme.colors.civilian,
   },
   confirmationOverlay: {
     position: 'absolute',

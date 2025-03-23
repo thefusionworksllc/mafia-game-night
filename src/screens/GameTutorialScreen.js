@@ -84,28 +84,28 @@ const GameTutorialScreen = ({ navigation }) => {
       description: 'During the night phase, Mafia members secretly choose a civilian to eliminate. During the day phase, they must blend in and avoid suspicion.',
       icon: 'security',
       image: require('../../assets/roles/mafia.png'),
-      color: theme.colors.tertiary
+      color: theme.colors.mafia
     },
     {
       title: 'Detective',
       description: 'During the night phase, the Detective can investigate one player to determine if they are a member of the Mafia or a Civilian.',
       icon: 'visibility',
       image: require('../../assets/roles/detective.png'),
-      color: theme.colors.info
+      color: theme.colors.detective
     },
     {
       title: 'Doctor',
       description: 'During the night phase, the Doctor can choose one player to protect from elimination. The Doctor can save themselves.',
       icon: 'healing',
       image: require('../../assets/roles/doctor.png'),
-      color: theme.colors.success
+      color: theme.colors.doctor
     },
     {
       title: 'Civilian',
       description: 'Civilians must work together during the day phase to identify and vote out Mafia members before they are outnumbered.',
       icon: 'people',
       image: require('../../assets/roles/civilian.png'),
-      color: theme.colors.primary
+      color: theme.colors.civilian
     }
   ];
 
@@ -221,6 +221,8 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     alignSelf: 'center',
     ...theme.shadows.medium,
+    borderWidth: 1,
+    borderColor: 'rgba(59, 130, 246, 0.2)',
   },
   cardGradient: {
     borderRadius: theme.borderRadius.large,
@@ -238,6 +240,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: theme.spacing.md,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.1)',
   },
   roleTitle: {
     fontSize: theme.typography.sizes.xl,
@@ -255,14 +259,15 @@ const styles = StyleSheet.create({
     ...theme.shadows.small,
   },
   descriptionContainer: {
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    backgroundColor: 'rgba(15, 23, 42, 0.7)',
     borderRadius: theme.borderRadius.medium,
     padding: theme.spacing.md,
+    borderWidth: 1,
+    borderColor: 'rgba(59, 130, 246, 0.2)',
   },
   roleDescription: {
     fontSize: theme.typography.sizes.md,
     color: '#FFFFFF',
-    // lineHeight: theme.typography.lineHeights.relaxed,
     textShadowColor: 'rgba(0, 0, 0, 0.75)',
     textShadowOffset: { width: 0, height: 1 },
     textShadowRadius: 3,
@@ -275,6 +280,8 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     alignSelf: 'center',
     ...theme.shadows.medium,
+    borderWidth: 1,
+    borderColor: 'rgba(59, 130, 246, 0.2)',
   },
   phaseHeader: {
     flexDirection: 'row',
@@ -288,6 +295,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: theme.spacing.md,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.1)',
   },
   phaseTitle: {
     fontSize: theme.typography.sizes.xl,
@@ -298,14 +307,15 @@ const styles = StyleSheet.create({
     textShadowRadius: 3,
   },
   phaseContent: {
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    backgroundColor: 'rgba(15, 23, 42, 0.7)',
     borderRadius: theme.borderRadius.medium,
     padding: theme.spacing.md,
+    borderWidth: 1,
+    borderColor: 'rgba(59, 130, 246, 0.2)',
   },
   phaseDescription: {
     fontSize: theme.typography.sizes.md,
     color: '#FFFFFF',
-    // lineHeight: theme.typography.lineHeights.relaxed,
     textShadowColor: 'rgba(0, 0, 0, 0.75)',
     textShadowOffset: { width: 0, height: 1 },
     textShadowRadius: 3,
@@ -318,6 +328,8 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     alignSelf: 'center',
     ...theme.shadows.medium,
+    borderWidth: 1,
+    borderColor: 'rgba(59, 130, 246, 0.2)',
   },
   winHeader: {
     flexDirection: 'row',
@@ -331,6 +343,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: theme.spacing.md,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.1)',
   },
   winTitle: {
     fontSize: theme.typography.sizes.xl,
@@ -341,14 +355,15 @@ const styles = StyleSheet.create({
     textShadowRadius: 3,
   },
   winContent: {
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    backgroundColor: 'rgba(15, 23, 42, 0.7)',
     borderRadius: theme.borderRadius.medium,
     padding: theme.spacing.md,
+    borderWidth: 1,
+    borderColor: 'rgba(59, 130, 246, 0.2)',
   },
   winDescription: {
     fontSize: theme.typography.sizes.md,
     color: '#FFFFFF',
-    // lineHeight: theme.typography.lineHeights.relaxed,
     textShadowColor: 'rgba(0, 0, 0, 0.75)',
     textShadowOffset: { width: 0, height: 1 },
     textShadowRadius: 3,

@@ -321,13 +321,13 @@ const GameControlScreen = ({ route, navigation }) => {
     const normalizedRole = role?.toLowerCase();
     switch(normalizedRole) {
       case 'mafia':
-        return theme.colors.tertiary;
+        return theme.colors.mafia;
       case 'detective':
-        return theme.colors.info;
+        return theme.colors.detective;
       case 'doctor':
-        return theme.colors.success;
+        return theme.colors.doctor;
       case 'civilian':
-        return theme.colors.primary;
+        return theme.colors.civilian;
       default:
         return theme.colors.text.secondary;
     }

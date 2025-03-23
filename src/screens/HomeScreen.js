@@ -197,7 +197,7 @@ const HomeScreen = ({ navigation, route }) => {
           <View style={styles.welcomeSection}>
             <Text style={styles.welcomeText}>Welcome to</Text>
             <LinearGradient
-              colors={['rgba(138, 43, 226, 0.8)', 'rgba(75, 0, 130, 0.9)']}
+              colors={[theme.colors.primary, theme.colors.night?.[0] || 'rgba(54, 60, 77, 0.92)']}
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 1 }}
               style={styles.titleGradientContainer}
@@ -213,7 +213,7 @@ const HomeScreen = ({ navigation, route }) => {
             </LinearGradient>
             {isLoggedIn ? (
               <View style={styles.userInfoContainer}>
-                <Icon name="account-circle" size={20} color={theme.colors.primary} />
+                <Icon name="account-circle" size={20} color={theme.colors.secondary} />
                 <Text style={styles.loggedInText}>
                   Logged in as: <Text style={styles.username}>{user.displayName}</Text>
                 </Text>
@@ -240,12 +240,10 @@ const HomeScreen = ({ navigation, route }) => {
                 activeOpacity={0.7}
               >
                 <LinearGradient
-                  colors={theme.gradients.accent}
+                  colors={theme.gradients.primary || theme.gradients.button}
                   style={styles.actionGradient}
-                  start={{ x: 0, y: 0 }}
-                  end={{ x: 1, y: 1 }}
                 >
-                  <Icon name="add-circle" size={24} color={theme.colors.text.primary} />
+                  <Icon name="add" size={24} color="#FFFFFF" />
                   <Text style={styles.actionText}>HOST GAME</Text>
                 </LinearGradient>
               </TouchableOpacity>
@@ -256,12 +254,10 @@ const HomeScreen = ({ navigation, route }) => {
                 activeOpacity={0.7}
               >
                 <LinearGradient
-                  colors={theme.gradients.accentSecondary}
+                  colors={theme.gradients.secondary || theme.gradients.buttonSecondary}
                   style={styles.actionGradient}
-                  start={{ x: 0, y: 0 }}
-                  end={{ x: 1, y: 1 }}
                 >
-                  <Icon name="group-add" size={24} color={theme.colors.text.primary} />
+                  <Icon name="group-add" size={24} color="#FFFFFF" />
                   <Text style={styles.actionText}>JOIN GAME</Text>
                 </LinearGradient>
               </TouchableOpacity>
@@ -534,7 +530,7 @@ const styles = StyleSheet.create({
     width: 48,
     height: 48,
     borderRadius: 24,
-    backgroundColor: 'rgba(108, 99, 255, 0.15)',
+    backgroundColor: 'rgba(38, 99, 235, 0.15)',
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: theme.spacing.md,
@@ -599,7 +595,7 @@ const styles = StyleSheet.create({
     marginLeft: theme.spacing.sm,
   },
   activeGameDetails: {
-    backgroundColor: 'rgba(0, 0, 0, 0.2)',
+    backgroundColor: 'rgba(30, 41, 59, 0.6)',
     borderRadius: theme.borderRadius.medium,
     padding: theme.spacing.md,
     marginBottom: theme.spacing.md,
@@ -617,7 +613,7 @@ const styles = StyleSheet.create({
   gameCode: {
     fontSize: theme.typography.sizes.md,
     fontWeight: theme.typography.weights.bold,
-    color: theme.colors.primary,
+    color: theme.colors.secondary,
   },
   gameStatusContainer: {
     flexDirection: 'row',

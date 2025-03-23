@@ -58,28 +58,28 @@ const PlayerRoleScreen = ({ route, navigation }) => {
     civilian: {
       name: 'Civilian',
       icon: 'people',
-      color: theme.colors.accent,
+      color: theme.colors.civilian,
       description: 'Your goal is to work with other civilians to identify and eliminate the mafia during the day phase.',
       ability: 'You can vote during the day phase to eliminate suspected mafia members.'
     },
     mafia: {
       name: 'Mafia',
       icon: 'security',
-      color: theme.colors.error,
+      color: theme.colors.mafia,
       description: 'Your goal is to eliminate all civilians without being detected.',
       ability: 'During the night phase, you and your fellow mafia members can choose a civilian to eliminate.'
     },
     detective: {
       name: 'Detective',
       icon: 'search',
-      color: theme.colors.info,
+      color: theme.colors.detective,
       description: 'Your goal is to identify the mafia and help the civilians eliminate them.',
       ability: 'During the night phase, you can investigate one player to discover if they are a mafia member.'
     },
     doctor: {
       name: 'Doctor',
       icon: 'healing',
-      color: theme.colors.success,
+      color: theme.colors.doctor,
       description: 'Your goal is to protect civilians from the mafia\'s attacks.',
       ability: 'During the night phase, you can choose one player to protect from elimination.'
     }
@@ -89,13 +89,13 @@ const PlayerRoleScreen = ({ route, navigation }) => {
   const getRoleColor = (role) => {
     switch (role.toLowerCase()) {
       case 'mafia':
-        return theme.colors.mafia|| theme.colors.error
+        return theme.colors.mafia;
       case 'detective':
-        return theme.colors.detective|| theme.colors.info;
+        return theme.colors.detective;
       case 'doctor':
-        return theme.colors.doctor|| theme.colors.success;
+        return theme.colors.doctor;
       case 'civilian':
-        return theme.colors.civilian || theme.colors.primary;
+        return theme.colors.civilian;
       default:
         return theme.colors.primary;
     }
@@ -532,9 +532,12 @@ const styles = StyleSheet.create({
   hostContainer: {
     alignItems: 'center',
     padding: theme.spacing.lg,
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    backgroundColor: 'rgba(15, 23, 42, 0.7)',
     borderRadius: theme.borderRadius.large,
     marginBottom: theme.spacing.lg,
+    borderWidth: 1,
+    borderColor: 'rgba(59, 130, 246, 0.2)',
+    ...theme.shadows.small,
   },
   hostTitle: {
     fontSize: theme.typography.sizes.xl,
@@ -566,26 +569,58 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     borderWidth: 2,
     marginVertical: theme.spacing.md,
-    elevation: 5,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 4,
+    ...theme.shadows.medium,
   },
   roleGradient: {
     padding: theme.spacing.lg,
     alignItems: 'center',
   },
+  roleImageContainer: {
+    padding: theme.spacing.sm,
+    backgroundColor: 'rgba(15, 23, 42, 0.7)',
+    borderRadius: theme.borderRadius.large,
+    marginBottom: theme.spacing.md,
+    ...theme.shadows.small,
+    borderWidth: 1,
+    borderColor: 'rgba(59, 130, 246, 0.2)',
+  },
+  roleImage: {
+    width: 150,
+    height: 150,
+    borderRadius: theme.borderRadius.medium,
+  },
+  roleName: {
+    fontSize: theme.typography.sizes.xl,
+    fontWeight: theme.typography.weights.bold,
+    textAlign: 'center',
+    marginBottom: theme.spacing.sm,
+    textShadowColor: 'rgba(0, 0, 0, 0.75)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 3,
+  },
   divider: {
     height: 1,
     width: '80%',
-    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    backgroundColor: 'rgba(59, 130, 246, 0.2)',
     marginBottom: theme.spacing.md,
+  },
+  roleDescription: {
+    fontSize: theme.typography.sizes.md,
+    color: theme.colors.text.primary,
+    textAlign: 'center',
+    marginBottom: theme.spacing.md,
+    lineHeight: 22,
   },
   abilityContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: theme.spacing.sm,
+    backgroundColor: 'rgba(15, 23, 42, 0.7)',
+    padding: theme.spacing.sm,
+    borderRadius: theme.borderRadius.medium,
+    paddingHorizontal: theme.spacing.md,
+    borderWidth: 1,
+    borderColor: 'rgba(59, 130, 246, 0.2)',
   },
   abilityTitle: {
     fontSize: theme.typography.sizes.md,
@@ -597,6 +632,18 @@ const styles = StyleSheet.create({
     fontSize: theme.typography.sizes.md,
     color: theme.colors.text.secondary,
     textAlign: 'center',
+    marginTop: theme.spacing.xs,
+  },
+  buttonContainer: {
+    width: '100%',
+    marginTop: theme.spacing.lg,
+  },
+  actionButton: {
+    marginBottom: theme.spacing.md,
+  },
+  endGameButton: {
+    marginTop: theme.spacing.sm,
+    borderColor: theme.colors.error,
   },
   modalOverlay: {
     flex: 1,
@@ -605,12 +652,13 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0, 0, 0, 0.8)',
   },
   modalContent: {
-    backgroundColor: theme.colors.card.background,
+    backgroundColor: 'rgba(15, 23, 42, 0.9)',
     borderRadius: theme.borderRadius.large,
-    padding: theme.spacing.lg,
-    width: '100%',
+    width: '90%',
     maxHeight: '80%',
     ...theme.shadows.large,
+    borderWidth: 1,
+    borderColor: 'rgba(59, 130, 246, 0.2)',
   },
   modalGradient: {
     padding: theme.spacing.lg,
@@ -619,13 +667,21 @@ const styles = StyleSheet.create({
   modalHeader: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'space-between',
     marginBottom: theme.spacing.md,
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(59, 130, 246, 0.2)',
+    paddingBottom: theme.spacing.sm,
+  },
+  modalTitle: {
+    fontSize: theme.typography.sizes.xl,
+    fontWeight: theme.typography.weights.bold,
+    color: theme.colors.text.accent,
+    textAlign: 'center',
+    flex: 1,
   },
   closeButton: {
     padding: theme.spacing.sm,
-  },
-  actionButton: {
-    marginBottom: theme.spacing.md,
   },
   historyButton: {
     marginBottom: theme.spacing.md,

@@ -263,14 +263,12 @@ const GameLobbyScreen = ({ route, navigation }) => {
 
   const renderPlayer = ({ item }) => (
     <LinearGradient
-      colors={['rgba(45, 45, 65, 0.5)', 'rgba(35, 35, 55, 0.7)']}
-      start={{ x: 0, y: 0 }}
-      end={{ x: 1, y: 1 }}
+      colors={['rgba(15, 23, 42, 0.7)', 'rgba(15, 23, 42, 0.6)']}
       style={styles.playerItem}
     >
       <View style={styles.playerContent}>
         <View style={styles.playerAvatarContainer}>
-          <Icon name="person" size={24} color={theme.colors.primary} style={styles.playerAvatar} />
+          <Icon name="person" size={24} color={theme.colors.secondary} style={styles.playerAvatar} />
         </View>
         <Text style={styles.playerName}>
           {item.name} 
@@ -302,14 +300,20 @@ const GameLobbyScreen = ({ route, navigation }) => {
               activeOpacity={0.7}
             >
               <Text style={styles.gameCodeLabel}>Game Code:</Text>
-              <Text style={styles.gameCode}>{gameCode}</Text>
+              <Text style={styles.gameCode}>
+                {gameCode.length > 0 ? (
+                  gameCode.match(/.{1,3}/g).join(' ')
+                ) : (
+                  gameCode
+                )}
+              </Text>
             </TouchableOpacity>
           </View>
 
           {/* Host Information */}
           {hostPlayer && (
             <View style={styles.hostInfoContainer}>
-              <Icon name="stars" size={30} color={theme.colors.primary} />
+              <Icon name="stars" size={30} color={theme.colors.secondary} />
               <Text style={styles.hostInfoText}>
                 Host: <Text style={styles.hostName}>{hostPlayer.name}</Text>
               </Text>
@@ -318,25 +322,25 @@ const GameLobbyScreen = ({ route, navigation }) => {
 
           <View style={styles.infoContainer}>
             <View style={styles.infoItem}>
-              <Icon name="security" size={24} color={theme.colors.tertiary} />
+              <Icon name="security" size={24} color={theme.colors.mafia} />
               <Text style={styles.infoText}>
                 Mafia: {mafiaCount}
               </Text>
             </View>
             <View style={styles.infoItem}>
-              <Icon name="visibility" size={24} color={theme.colors.info} />
+              <Icon name="visibility" size={24} color={theme.colors.detective} />
               <Text style={styles.infoText}>
                 Detective: {detectiveCount}
               </Text>
             </View>
             <View style={styles.infoItem}>
-              <Icon name="healing" size={24} color={theme.colors.success} />
+              <Icon name="healing" size={24} color={theme.colors.doctor} />
               <Text style={styles.infoText}>
                 Doctor: {doctorCount}
               </Text>
             </View>
             <View style={styles.infoItem}>
-              <Icon name="person" size={24} color={theme.colors.primary} />
+              <Icon name="person" size={24} color={theme.colors.civilian} />
               <Text style={styles.infoText}>
                 Civilian: {civilianCount}
               </Text>
@@ -408,7 +412,7 @@ const GameLobbyScreen = ({ route, navigation }) => {
                     onPress={() => navigation.navigate('Home')}
                     variant="outline"
                     style={styles.backButton}
-                    leftIcon={<Icon name="home" size={20} color={theme.colors.text.accent} />}
+                    leftIcon={<Icon name="home" size={20} color={theme.colors.primary} />}
                     fullWidth
                   />
                 </View>
@@ -439,7 +443,7 @@ const GameLobbyScreen = ({ route, navigation }) => {
                     onPress={() => navigation.navigate('Home')}
                     variant="outline"
                     style={styles.backButton}
-                    leftIcon={<Icon name="home" size={20} color={theme.colors.text.accent} />}
+                    leftIcon={<Icon name="home" size={20} color={theme.colors.primary} />}
                     fullWidth
                   />
                 </View>
@@ -474,7 +478,7 @@ const GameLobbyScreen = ({ route, navigation }) => {
           </View>
         )}
       </ModernBackground>
-      <BottomNavigation navigation={navigation} activeScreen="Home" />
+      <BottomNavigation navigation={navigation} activeScreen="GameLobby" />
     </View>
   );
 };
@@ -508,19 +512,28 @@ const styles = StyleSheet.create({
     textShadowRadius: 4,
   },
   gameCodeContainer: {
+    flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: theme.spacing.md,
-  },
-  gameCodeText: {
-    fontSize: theme.typography.sizes.xl,
-    fontWeight: theme.typography.weights.bold,
-    color: theme.colors.primary,
-    textAlign: 'center',
-    backgroundColor: 'rgba(187, 134, 252, 0.2)',
-    paddingVertical: theme.spacing.sm,
-    paddingHorizontal: theme.spacing.lg,
+    backgroundColor: 'rgba(15, 23, 42, 0.7)',
     borderRadius: theme.borderRadius.medium,
-    overflow: 'hidden',
+    paddingHorizontal: theme.spacing.lg,
+    paddingVertical: theme.spacing.sm,
+    marginBottom: theme.spacing.sm,
+    borderWidth: 1,
+    borderColor: 'rgba(59, 130, 246, 0.2)',
+    ...theme.shadows.small,
+  },
+  gameCodeLabel: {
+    fontSize: theme.typography.sizes.lg,
+    fontWeight: theme.typography.weights.bold,
+    color: theme.colors.secondary,
+    marginRight: theme.spacing.md,
+  },
+  gameCode: {
+    fontSize: theme.typography.sizes.lg,
+    fontWeight: theme.typography.weights.bold,
+    color: theme.colors.text.primary,
+    letterSpacing: 3,
   },
   subTitle: {
     fontSize: theme.typography.sizes.lg,
@@ -550,22 +563,21 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     backgroundColor: 'rgba(0, 0, 0, 0.2)',
     marginBottom: theme.spacing.md,
-    height: 180,
+    height:200,
 
   },
   playersListContent: {
     padding: theme.spacing.sm,
   },
   playerItem: {
+    marginBottom: theme.spacing.sm,
+    borderRadius: theme.borderRadius.medium,
+    padding: theme.spacing.sm,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    marginBottom: theme.spacing.sm,
-    borderRadius: theme.borderRadius.medium,
-    padding: theme.spacing.md,
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.1)',
-    ...theme.shadows.small,
+    borderColor: 'rgba(59, 130, 246, 0.15)',
   },
   playerContent: {
     flexDirection: 'row',
@@ -573,12 +585,12 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   playerAvatarContainer: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: 'rgba(59, 130, 246, 0.15)',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: 'rgba(187, 134, 252, 0.2)',
     marginRight: theme.spacing.md,
   },
   playerAvatar: {
@@ -616,7 +628,7 @@ const styles = StyleSheet.create({
     marginTop: theme.spacing.xs,
   },
   leaveButton: {
-    marginTop: theme.spacing.md,
+    marginTop: theme.spacing.xs,
     borderColor: theme.colors.error,
   },
   waitingContainer: {
@@ -624,10 +636,9 @@ const styles = StyleSheet.create({
     marginTop: theme.spacing.sm,
   },
   waitingText: {
+    fontSize: theme.typography.sizes.sm,
+    color: theme.colors.secondary,
     textAlign: 'center',
-    color: theme.colors.text.accent,
-    fontSize: theme.typography.sizes.md,
-    marginBottom: theme.spacing.sm,
   },
   emptyText: {
     textAlign: 'center',
@@ -643,30 +654,17 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: theme.spacing.sm,
   },
-  gameCodeContainer: {
-    alignItems: 'center',
-    marginBottom: theme.spacing.md,
-  },
-  gameCodeLabel: {
-    fontSize: theme.typography.sizes.lg,
-    fontWeight: theme.typography.weights.bold,
-    color: theme.colors.text.secondary,
-    marginRight: theme.spacing.sm,
-  },
-  gameCode: {
-    fontSize: theme.typography.sizes.xl,
-    fontWeight: theme.typography.weights.bold,
-    color: theme.colors.primary,
-    backgroundColor: 'rgba(187, 134, 252, 0.2)',
-    paddingVertical: theme.spacing.sm,
-    paddingHorizontal: theme.spacing.md,
-    borderRadius: theme.borderRadius.medium,
-    overflow: 'hidden',
-  },
   infoContainer: {
     flexDirection: 'row',
+    flexWrap: 'wrap',
     justifyContent: 'space-between',
-    marginBottom: theme.spacing.sm,
+    backgroundColor: 'rgba(15, 23, 42, 0.7)',
+    padding: theme.spacing.md,
+    borderRadius: theme.borderRadius.medium,
+    marginBottom: theme.spacing.md,
+    borderWidth: 1,
+    borderColor: 'rgba(59, 130, 246, 0.2)',
+    ...theme.shadows.small,
   },
   infoItem: {
     alignItems: 'center',
@@ -677,36 +675,46 @@ const styles = StyleSheet.create({
     marginLeft: theme.spacing.sm,
   },
   playersSection: {
-    marginBottom: theme.spacing.md,
+    backgroundColor: 'rgba(15, 23, 42, 0.7)',
+    borderRadius: theme.borderRadius.medium,
+    padding: theme.spacing.md,
+    marginBottom: theme.spacing.xs,
+    borderWidth: 1,
+    borderColor: 'rgba(59, 130, 246, 0.2)',
+    ...theme.shadows.small,
   },
   sectionTitle: {
     fontSize: theme.typography.sizes.lg,
     fontWeight: theme.typography.weights.bold,
-    color: theme.colors.text.accent,
-    marginBottom: theme.spacing.sm,
+    color: theme.colors.text.primary,
+    marginBottom: theme.spacing.xs,
+    textAlign: 'center',
   },
   endGameButton: {
-    marginTop: theme.spacing.md,
+    marginTop: theme.spacing.xs,
     borderColor: theme.colors.error,
   },
   copyIcon: {
     marginLeft: 8,
   },
   backButton: {
-    marginTop: theme.spacing.md,
+    marginTop: theme.spacing.xs,
   },
   hostInfoContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'rgba(187, 134, 252, 0.1)',
+    backgroundColor: 'rgba(15, 23, 42, 0.7)',
+    padding: theme.spacing.md,
     borderRadius: theme.borderRadius.medium,
-    padding: theme.spacing.sm,
     marginBottom: theme.spacing.xs,
+    borderWidth: 1,
+    borderColor: 'rgba(59, 130, 246, 0.2)',
+    ...theme.shadows.small,
   },
   hostInfoText: {
     flex: 1,
     marginLeft: theme.spacing.sm,
-    fontSize: theme.typography.sizes.md,
+    fontSize: theme.typography.sizes.lg,
     color: theme.colors.text.secondary,
   },
   civilianInfoContainer: {
@@ -715,21 +723,23 @@ const styles = StyleSheet.create({
     marginBottom: theme.spacing.md,
   },
   playerCountContainer: {
-    flexDirection: 'column',
-    alignItems: 'center',
-    marginBottom: theme.spacing.xs,
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    backgroundColor: 'rgba(15, 23, 42, 0.7)',
     borderRadius: theme.borderRadius.medium,
-    padding: theme.spacing.xs,
+    padding: theme.spacing.md,
+    marginBottom: theme.spacing.sm,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: 'rgba(59, 130, 246, 0.2)',
+    ...theme.shadows.small,
   },
   playerCountText: {
     fontSize: theme.typography.sizes.lg,
     fontWeight: theme.typography.weights.bold,
-    color: theme.colors.text.accent,
-    marginVertical: theme.spacing.xs,
+    color: theme.colors.text.primary,
+    marginBottom: theme.spacing.xs,
   },
   actionButton: {
-    marginTop: theme.spacing.md,
+    marginTop: theme.spacing.xs,
   },
   confirmationOverlay: {
     position: 'absolute',

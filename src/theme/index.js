@@ -51,7 +51,40 @@ const createGlassEffect = (opacity = 0.1) => {
   };
 };
 
-export const theme = {
+// Helper for creating neumorphic effect (modern raised UI elements)
+const createNeumorphicEffect = (bgColor = colors.surface, raised = true) => {
+  const type = raised ? 'convex' : 'concave';
+  const lightShadow = 'rgba(255, 255, 255, 0.07)';
+  const darkShadow = 'rgba(0, 0, 0, 0.15)';
+
+  return Platform.select({
+    ios: {
+      backgroundColor: bgColor,
+      shadowColor: type === 'convex' ? lightShadow : darkShadow,
+      shadowOffset: { width: -4, height: -4 },
+      shadowOpacity: 1,
+      shadowRadius: 6,
+      borderWidth: 1,
+      borderColor: 'rgba(255, 255, 255, 0.05)',
+    },
+    android: {
+      backgroundColor: bgColor,
+      elevation: 6,
+    },
+    default: {
+      backgroundColor: bgColor,
+      shadowColor: type === 'convex' ? lightShadow : darkShadow,
+      shadowOffset: { width: -4, height: -4 },
+      shadowOpacity: 1,
+      shadowRadius: 6,
+      borderWidth: 1,
+      borderColor: 'rgba(255, 255, 255, 0.05)',
+    },
+  });
+};
+
+// Export the completed theme object
+const theme = {
   colors,
   gradients,
   typography,
@@ -72,6 +105,17 @@ export const theme = {
     heavy: createGlassEffect(0.18),
   },
   
+  // Neumorphic effects
+  neumorphic: {
+    raised: createNeumorphicEffect(colors.surface, true),
+    pressed: createNeumorphicEffect(colors.surface, false),
+    subtle: {
+      ...createNeumorphicEffect(colors.surface, true),
+      shadowOpacity: 0.5,
+      borderWidth: 0.5,
+    },
+  },
+  
   // Border radius
   borderRadius: {
     small: 4,
@@ -82,6 +126,17 @@ export const theme = {
     round: 9999,
   },
   
+  // Animations settings
+  animation: {
+    timingFast: 200,
+    timingNormal: 350,
+    timingSlow: 500,
+    springConfig: {
+      tension: 40,
+      friction: 7,
+    },
+  },
+
   // Common styles that can be reused across screens
   commonStyles: {
     // Base container for screens
@@ -159,11 +214,29 @@ export const theme = {
       overflow: 'hidden',
     },
     
+    // Neumorphic card (modern raised effect)
+    cardNeumorphic: {
+      borderRadius: 16,
+      padding: spacing.lg,
+      marginVertical: spacing.md,
+      ...createNeumorphicEffect(colors.card.background, true),
+    },
+    
+    // Dynamic card that can be used with different gradient backgrounds
+    cardDynamic: {
+      borderRadius: 16,
+      padding: spacing.lg,
+      marginVertical: spacing.md,
+      overflow: 'hidden',
+      borderWidth: 1,
+      borderColor: 'rgba(255, 255, 255, 0.1)',
+    },
+    
     // Text styles with enhanced readability
     title: {
       fontSize: typography.sizes.xxl,
       fontWeight: typography.weights.bold,
-      color: colors.text.accent,
+      color: colors.text.primary,
       textAlign: 'center',
       marginVertical: spacing.lg,
       // Text shadow for better readability
@@ -187,6 +260,148 @@ export const theme = {
     // Back button style
     backButton: {
       marginTop: spacing.md,
+    },
+
+    // Modern translucent tab bar
+    modernTabBar: {
+      flexDirection: 'row',
+      justifyContent: 'space-around',
+      alignItems: 'center',
+      height: 60,
+      ...createGlassEffect(0.08),
+      borderTopWidth: 1,
+      borderTopColor: 'rgba(255, 255, 255, 0.05)',
+    },
+    
+    // Modern tab item
+    modernTabItem: {
+      flex: 1,
+      height: '100%',
+      justifyContent: 'center',
+      alignItems: 'center',
+      paddingVertical: 8,
+    },
+    
+    // Modern tab indicator
+    modernTabIndicator: {
+      position: 'absolute',
+      bottom: 0,
+      height: 3,
+      width: '20%',
+      backgroundColor: colors.primary,
+      borderRadius: 3,
+    },
+    
+    // Modern floating button
+    floatingButton: {
+      position: 'absolute',
+      bottom: spacing.xl,
+      right: spacing.xl,
+      width: 56,
+      height: 56,
+      borderRadius: 28,
+      backgroundColor: colors.primary,
+      justifyContent: 'center',
+      alignItems: 'center',
+      ...createShadow(8),
+    },
+    
+    // Modern card styles
+    modernCard: {
+      backgroundColor: colors.surface,
+      borderRadius: 16,
+      padding: spacing.lg,
+      marginVertical: spacing.md,
+      borderWidth: 1,
+      borderColor: 'rgba(255, 255, 255, 0.08)',
+      ...createShadow(4),
+    },
+    
+    // Gradient card with border
+    gradientCardWithBorder: {
+      borderRadius: 16,
+      padding: spacing.lg,
+      marginVertical: spacing.md,
+      overflow: 'hidden',
+      borderWidth: 1,
+      borderColor: 'rgba(255, 255, 255, 0.1)',
+    },
+    
+    // Modern action button - more tactile
+    actionButton: {
+      backgroundColor: colors.primary,
+      borderRadius: 12,
+      paddingVertical: spacing.md,
+      paddingHorizontal: spacing.lg,
+      alignItems: 'center',
+      justifyContent: 'center',
+      flexDirection: 'row',
+      ...createShadow(3),
+    },
+    
+    // Outlined action button
+    actionButtonOutlined: {
+      backgroundColor: 'transparent',
+      borderRadius: 12,
+      paddingVertical: spacing.md - 1, // -1 to account for border
+      paddingHorizontal: spacing.lg,
+      alignItems: 'center',
+      justifyContent: 'center',
+      flexDirection: 'row',
+      borderWidth: 1,
+      borderColor: colors.primary,
+    },
+    
+    // Modern header with slight gradient
+    modernHeader: {
+      paddingTop: spacing.safeTop + spacing.md,
+      paddingBottom: spacing.md,
+      paddingHorizontal: spacing.lg,
+    },
+    
+    // Input with animated label
+    inputAnimated: {
+      borderWidth: 1,
+      borderColor: 'rgba(255, 255, 255, 0.1)',
+      borderRadius: 12,
+      backgroundColor: 'rgba(255, 255, 255, 0.05)',
+      height: 56,
+      paddingHorizontal: spacing.lg,
+      color: colors.text.primary,
+      fontSize: typography.sizes.md,
+    },
+    
+    // Modern slider UI element
+    slider: {
+      height: 40,
+      width: '100%',
+    },
+    
+    // Value display in modern UI
+    valueDisplay: {
+      fontSize: 28,
+      fontWeight: typography.weights.semibold,
+      color: colors.text.primary,
+      textAlign: 'center',
+    },
+    
+    // Section label with accent
+    sectionLabel: {
+      fontSize: typography.sizes.md,
+      fontWeight: typography.weights.semibold,
+      color: colors.text.accent,
+      marginBottom: spacing.sm,
+    },
+    
+    // Circle icon container for better visual hierarchy
+    circleIconContainer: {
+      width: 40,
+      height: 40,
+      borderRadius: 20,
+      backgroundColor: 'rgba(255, 255, 255, 0.08)',
+      justifyContent: 'center',
+      alignItems: 'center',
+      marginRight: spacing.sm,
     },
     
     // Legacy styles (kept for backward compatibility)
@@ -251,7 +466,6 @@ export const theme = {
       color: colors.text.secondary,
       fontSize: typography.sizes.sm,
       marginBottom: spacing.xs,
-      pointerEvents: 'auto',
     },
     
     // Section headers

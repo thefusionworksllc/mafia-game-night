@@ -33,25 +33,35 @@
   
   <title>Mafia Game Night</title>
   <style>
-    /* Ensure the app takes up the full screen */
+    /* Reset styles */
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+    
+    /* Base styles for full viewport */
     html, body {
       height: 100%;
       width: 100%;
       margin: 0;
       padding: 0;
       background-color: #000000;
-      overscroll-behavior: none; /* Prevent pull-to-refresh */
+      position: fixed;
+      overflow: hidden;
     }
     
+    /* Root element - main scrollable area */
     #root {
       height: 100%;
       width: 100%;
       padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
-      display: flex;
-      flex: 1;
-      overflow-y: auto; /* Allow scrolling within the app */
-      -webkit-overflow-scrolling: touch; /* Enable momentum scrolling on iOS */
-      position: relative;
+      overflow: auto;
+      -webkit-overflow-scrolling: touch;
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
     }
 
     /* iOS install prompt */
@@ -101,16 +111,33 @@
   </div>
 
   <script>
-    // Fix viewport issues on iOS
-    function fixViewport() {
-      document.documentElement.style.height = window.innerHeight + 'px';
-      document.body.style.height = window.innerHeight + 'px';
-      document.getElementById('root').style.height = window.innerHeight + 'px';
-    }
-    window.addEventListener('resize', fixViewport);
-    window.addEventListener('orientationchange', fixViewport);
-    fixViewport();
-
+    // Disable pull-to-refresh completely
+    document.documentElement.style.overscrollBehavior = 'none';
+    document.body.style.overscrollBehavior = 'none';
+    
+    // Listen for touchstart events and prevent default for certain gestures
+    let startY;
+    
+    document.addEventListener('touchstart', function(e) {
+      startY = e.touches[0].clientY;
+    }, { passive: true });
+    
+    document.addEventListener('touchmove', function(e) {
+      const root = document.getElementById('root');
+      const touchY = e.touches[0].clientY;
+      const deltaY = touchY - startY;
+      
+      // Prevent overscrolling at top
+      if (root.scrollTop <= 0 && deltaY > 0) {
+        e.preventDefault();
+      }
+      
+      // Prevent overscrolling at bottom
+      if ((root.scrollTop + root.clientHeight >= root.scrollHeight) && deltaY < 0) {
+        e.preventDefault();
+      }
+    }, { passive: false });
+    
     // Check if the app is in standalone mode (PWA installed)
     if (('standalone' in window.navigator) && !window.navigator.standalone) {
       // Not in standalone mode, might be iOS
@@ -127,20 +154,6 @@
         });
       }
     }
-
-    // Only prevent browser bouncing at edges, but allow normal scrolling
-    document.addEventListener('touchmove', function(e) {
-      // Only prevent if we're at the edge (top bounce effect)
-      if (document.scrollingElement.scrollTop === 0 && e.touches[0].clientY > 0) {
-        // We're at the top and trying to scroll further up (pull-to-refresh)
-        e.preventDefault();
-      }
-      // Prevent overscroll at bottom too
-      else if (document.scrollingElement.scrollHeight - document.scrollingElement.scrollTop <= document.scrollingElement.clientHeight + 10 &&
-                e.touches[0].clientY < 0) {
-        e.preventDefault();
-      }
-    }, { passive: false });
     
     // Register service worker for PWA
     if ('serviceWorker' in navigator) {
@@ -150,6 +163,21 @@
         }, function(err) {
           console.log('ServiceWorker registration failed: ', err);
         });
+      });
+    }
+
+    // Fix iOS scrolling issues with virtual keyboard
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.platform) || 
+                 (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+    
+    if (isIOS) {
+      document.addEventListener('focusin', function(e) {
+        if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
+          document.body.scrollTop = 0;
+          setTimeout(function() {
+            document.getElementById('root').scrollTop += 100;
+          }, 200);
+        }
       });
     }
   </script>

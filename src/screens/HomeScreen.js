@@ -197,7 +197,7 @@ const HomeScreen = ({ navigation, route }) => {
           <View style={styles.welcomeSection}>
             <Text style={styles.welcomeText}>Welcome to</Text>
             <LinearGradient
-              colors={[theme.colors.primary, theme.colors.night?.[0] || 'rgba(54, 60, 77, 0.92)']}
+              colors={[theme.colors.primary, theme.colors.night?.[0] || 'rgba(108, 42, 205, 0.3)']}
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 1 }}
               style={styles.titleGradientContainer}

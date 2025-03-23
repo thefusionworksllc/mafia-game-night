@@ -31,6 +31,7 @@ const GameControlScreen = ({ route, navigation }) => {
   const [timer, setTimer] = useState(180); // 3 minutes timer
   const [timerActive, setTimerActive] = useState(false);
   const [eliminatedPlayers, setEliminatedPlayers] = useState([]);
+  const [inactivePlayers, setInactivePlayers] = useState([]);
   const { user } = useAuth();
   const { showError, showToast } = useError();
   
@@ -63,6 +64,11 @@ const GameControlScreen = ({ route, navigation }) => {
       // Set eliminated players if available
       if (data.eliminatedPlayers) {
         setEliminatedPlayers(data.eliminatedPlayers);
+      }
+
+      // Set inactive players if available
+      if (data.inactivePlayers) {
+        setInactivePlayers(data.inactivePlayers);
       }
 
       setLoading(false);
@@ -138,9 +144,15 @@ const GameControlScreen = ({ route, navigation }) => {
 
   const handleStartPhase = (phase) => {
     setLoading(true);
-    setCurrentPhase(phase);
-    animatePhaseChange();
-    setTimer(getPhaseTime(phase));
+    
+    // Only set a new phase and timer if it's a new phase or the timer isn't active
+    if (currentPhase !== phase || timer === 0) {
+      setCurrentPhase(phase);
+      animatePhaseChange();
+      setTimer(getPhaseTime(phase));
+    }
+    
+    // Activate the timer
     setTimerActive(true);
 
     // Update game phase in database
@@ -292,31 +304,53 @@ const GameControlScreen = ({ route, navigation }) => {
     }
   };
 
-  const handleReturnToLobby = async () => {
+  const handleReturnToHome = async () => {
     try {
-      const isHost = await gameService.isGameHost(gameCode);
-      
-      navigation.replace('GameLobby', {
-        gameCode,
-        isHost,
-        totalPlayers: gameData?.settings?.totalPlayers || 5,
-        mafiaCount: gameData?.settings?.mafiaCount || 1,
-        detectiveCount: gameData?.settings?.detectiveCount || 1,
-        doctorCount: gameData?.settings?.doctorCount || 1
-      });
+      navigation.replace('Home');
     } catch (error) {
-      showError(error.message || 'Failed to return to lobby');
+      console.error('Failed to navigate to home:', error);
+      showError(error.message || 'Failed to return to home');
     }
   };
 
-  const handleViewPlayerRole = () => {
-    navigation.replace('PlayerRole', {
-      gameCode,
-      isHost: true
-    });
+  // Toggle player active/inactive status
+  const togglePlayerActive = async (playerId) => {
+    try {
+      setLoading(true);
+      
+      // Check if player is already inactive
+      const isCurrentlyInactive = inactivePlayers.includes(playerId);
+      
+      // Create updated array
+      let updatedInactivePlayers;
+      if (isCurrentlyInactive) {
+        // Remove from inactive list
+        updatedInactivePlayers = inactivePlayers.filter(id => id !== playerId);
+      } else {
+        // Add to inactive list
+        updatedInactivePlayers = [...inactivePlayers, playerId];
+      }
+      
+      // Update local state
+      setInactivePlayers(updatedInactivePlayers);
+      
+      // Update in database
+      await gameService.updateInactivePlayers(gameCode, updatedInactivePlayers);
+      
+      showError(
+        isCurrentlyInactive 
+          ? 'Player marked as active'
+          : 'Player marked as inactive',
+        'success'
+      );
+    } catch (error) {
+      console.error('Error toggling player status:', error);
+      showError('Failed to update player status');
+    } finally {
+      setLoading(false);
+    }
   };
 
-  // Add this function to get role color
   const getRoleColor = (role) => {
     const normalizedRole = role?.toLowerCase();
     switch(normalizedRole) {
@@ -333,7 +367,7 @@ const GameControlScreen = ({ route, navigation }) => {
     }
   };
 
-  // Add this function to sort players by role
+  // Modified to sort players by active/inactive status
   const getSortedPlayers = () => {
     const roleOrder = {
       'mafia': 1,
@@ -343,6 +377,14 @@ const GameControlScreen = ({ route, navigation }) => {
     };
 
     return [...players].sort((a, b) => {
+      // First sort by active/inactive status
+      const isAInactive = inactivePlayers.includes(a.id);
+      const isBInactive = inactivePlayers.includes(b.id);
+      
+      if (isAInactive && !isBInactive) return 1; // A is inactive, B is active
+      if (!isAInactive && isBInactive) return -1; // A is active, B is inactive
+      
+      // Then sort by role
       const roleA = a.role?.toLowerCase() || 'civilian';
       const roleB = b.role?.toLowerCase() || 'civilian';
       return (roleOrder[roleA] || 5) - (roleOrder[roleB] || 5);
@@ -431,9 +473,9 @@ const GameControlScreen = ({ route, navigation }) => {
                 ) : (
                   <View style={styles.timerControls}>
                     <CustomButton
-                      title="PAUSE"
-                      onPress={() => setTimerActive(false)}
-                      leftIcon={<Icon name="pause" size={20} color="#fff" />}
+                      title={timerActive ? "PAUSE" : "RESUME"}
+                      onPress={() => setTimerActive(!timerActive)}
+                      leftIcon={<Icon name={timerActive ? "pause" : "play-arrow"} size={20} color="#fff" />}
                       style={{ flex: 1, marginRight: 8 }}
                     />
                     <CustomButton
@@ -532,7 +574,8 @@ const GameControlScreen = ({ route, navigation }) => {
                   end={{ x: 1, y: 1 }}
                   style={[
                     styles.playerItem,
-                    eliminatedPlayers.includes(player.id) && styles.eliminatedPlayer
+                    eliminatedPlayers.includes(player.id) && styles.eliminatedPlayer,
+                    inactivePlayers.includes(player.id) && styles.inactivePlayer
                   ]}
                 >
                   <View style={styles.playerInfo}>
@@ -555,16 +598,36 @@ const GameControlScreen = ({ route, navigation }) => {
                     </View>
                   </View>
                   
-                  {/* Status indication */}
-                  <View style={[
-                    styles.playerStatus,
-                    eliminatedPlayers.includes(player.id) 
-                      ? styles.playerEliminated 
-                      : styles.playerActive
-                  ]}>
-                    <Text style={styles.playerStatusText}>
-                      {eliminatedPlayers.includes(player.id) ? 'Eliminated' : 'Active'}
-                    </Text>
+                  <View style={styles.playerActions}>
+                    {/* Status indication */}
+                    <View style={[
+                      styles.playerStatus,
+                      eliminatedPlayers.includes(player.id) 
+                        ? styles.playerEliminated 
+                        : inactivePlayers.includes(player.id)
+                          ? styles.playerInactive
+                          : styles.playerActive
+                    ]}>
+                      <Text style={styles.playerStatusText}>
+                        {eliminatedPlayers.includes(player.id) 
+                          ? 'Eliminated' 
+                          : inactivePlayers.includes(player.id)
+                            ? 'Inactive'
+                            : 'Active'}
+                      </Text>
+                    </View>
+
+                    {/* Toggle active/inactive button */}
+                    <TouchableOpacity
+                      style={styles.toggleActiveButton}
+                      onPress={() => togglePlayerActive(player.id)}
+                    >
+                      <Icon 
+                        name={inactivePlayers.includes(player.id) ? "check-circle" : "cancel"} 
+                        size={24} 
+                        color={inactivePlayers.includes(player.id) ? theme.colors.success : theme.colors.error} 
+                      />
+                    </TouchableOpacity>
                   </View>
                 </LinearGradient>
               ))}
@@ -588,15 +651,9 @@ const GameControlScreen = ({ route, navigation }) => {
             <Text style={styles.sectionTitle}>Game Navigation</Text>
             <View style={styles.buttonGroup}>
               <CustomButton
-                title="VIEW ALL ROLES"
-                onPress={handleViewPlayerRole}
-                leftIcon={<Icon name="person" size={20} color={theme.colors.text.primary} />}
-                style={styles.navigationButton}
-              />
-              <CustomButton
-                title="RETURN TO LOBBY"
-                onPress={handleReturnToLobby}
-                leftIcon={<Icon name="meeting-room" size={20} color={theme.colors.text.primary} />}
+                title="RETURN TO HOME"
+                onPress={handleReturnToHome}
+                leftIcon={<Icon name="home" size={20} color={theme.colors.text.primary} />}
                 style={styles.navigationButton}
               />
             </View>
@@ -884,6 +941,26 @@ const styles = StyleSheet.create({
   confirmButtonText: {
     color: theme.colors?.text?.primary || '#FFFFFF',
     fontWeight: 'bold',
+  },
+  playerActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  toggleActiveButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginLeft: theme.spacing.sm,
+  },
+  inactivePlayer: {
+    opacity: 0.6,
+    borderColor: theme.colors.error + '40',
+    borderWidth: 1,
+  },
+  playerInactive: {
+    backgroundColor: 'rgba(255, 50, 50, 0.3)',
   },
 });
 

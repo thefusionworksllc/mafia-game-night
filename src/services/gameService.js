@@ -974,6 +974,26 @@ export const gameService = {
       return null;
     }
   },
+
+  /**
+   * Updates the list of inactive players in a game
+   * @param {string} gameCode - The game code
+   * @param {Array<string>} inactivePlayers - Array of player IDs who are inactive
+   * @returns {Promise<void>}
+   */
+  updateInactivePlayers: async (gameCode, inactivePlayers) => {
+    try {
+      const db = getDbInstance();
+      const gameRef = ref(db, `games/${gameCode}`);
+      await update(gameRef, {
+        inactivePlayers: inactivePlayers || []
+      });
+      return true;
+    } catch (error) {
+      console.error('Error updating inactive players:', error);
+      throw error;
+    }
+  },
 };
 
 // Helper function to assign roles

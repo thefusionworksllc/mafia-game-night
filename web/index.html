@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta httpEquiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no" />
+  <!-- Full-screen mode for iOS devices -->
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Mafia Game Night" />
+  
+  <!-- Full-screen mode for Android devices -->
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="theme-color" content="#000000" />
+  
+  <!-- PWA manifest -->
+  <link rel="manifest" href="manifest.json" />
+  
+  <!-- iOS icons -->
+  <link rel="apple-touch-icon" href="assets/icon.png" />
+  <link rel="apple-touch-icon" sizes="152x152" href="assets/icon-152x152.png" />
+  <link rel="apple-touch-icon" sizes="180x180" href="assets/icon-180x180.png" />
+  <link rel="apple-touch-icon" sizes="167x167" href="assets/icon-167x167.png" />
+  
+  <!-- iOS startup images -->
+  <link rel="apple-touch-startup-image" href="assets/splash-icon.png" />
+  
+  <title>Mafia Game Night</title>
+  <style>
+    /* Ensure the app takes up the full screen */
+    html, body, #root {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      background-color: #000000;
+    }
+    
+    /* Add safe area insets for notched devices */
+    #root {
+      padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+    }
+
+    /* Display install prompt for iOS */
+    .ios-prompt {
+      display: none;
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      padding: 16px;
+      background-color: rgba(0, 0, 0, 0.85);
+      color: white;
+      text-align: center;
+      z-index: 9999;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    .ios-prompt p {
+      margin: 0 0 8px 0;
+    }
+
+    .close-prompt {
+      border: none;
+      background: none;
+      color: #ffffff;
+      font-size: 24px;
+      position: absolute;
+      top: 5px;
+      right: 10px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+  
+  <!-- iOS install prompt -->
+  <div id="ios-install-prompt">
+    <p>Install this app on your device: tap <strong>Share</strong> and then <strong>Add to Home Screen</strong></p>
+    <button id="close-prompt">Got it</button>
+  </div>
+
+  <script>
+    // Check if the app is in standalone mode (PWA installed)
+    if (('standalone' in window.navigator) && !window.navigator.standalone) {
+      // Not in standalone mode, might be iOS
+      if (/iphone|ipad|ipod/.test(navigator.userAgent.toLowerCase())) {
+        // Show the iOS install prompt if not already dismissed
+        if (!localStorage.getItem('iosInstallPromptDismissed')) {
+          document.getElementById('ios-install-prompt').style.display = 'block';
+        }
+        
+        // Handle dismissal
+        document.getElementById('close-prompt').addEventListener('click', function() {
+          document.getElementById('ios-install-prompt').style.display = 'none';
+          localStorage.setItem('iosInstallPromptDismissed', 'true');
+        });
+      }
+    }
+
+    // Prevent page scrolling and bouncing on iOS
+    document.addEventListener('touchmove', function(e) {
+      if (e.target.tagName !== 'INPUT' && e.target.tagName !== 'TEXTAREA') {
+        e.preventDefault();
+      }
+    }, { passive: false });
+    
+    // Prevent pull-to-refresh
+    document.body.addEventListener('touchstart', function(e) {
+      if (e.touches.length === 1) {
+        window.touchStartY = e.touches[0].clientY;
+      }
+    }, { passive: true });
+    
+    document.body.addEventListener('touchmove', function(e) {
+      if (e.touches.length === 1 && window.touchStartY && e.touches[0].clientY > window.touchStartY) {
+        e.preventDefault();
+      }
+    }, { passive: false });
+    
+    // Register service worker for PWA
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', function() {
+        navigator.serviceWorker.register('service-worker.js').then(function(registration) {
+          console.log('ServiceWorker registration successful with scope: ', registration.scope);
+        }, function(err) {
+          console.log('ServiceWorker registration failed: ', err);
+        });
+      });
+    }
+  </script>
+</body>
+</html> 

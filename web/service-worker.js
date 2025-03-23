@@ -43,6 +43,27 @@ self.addEventListener('activate', event => {
 
 // Intercept fetch requests and serve from cache if available
 self.addEventListener('fetch', event => {
+  // Skip cross-origin requests
+  if (!event.request.url.startsWith(self.location.origin)) {
+    return;
+  }
+
+  // Handle API requests differently (don't cache them)
+  if (event.request.url.includes('/api/')) {
+    return;
+  }
+
+  // For navigation requests (HTML), always go to index.html for SPA routing
+  if (event.request.mode === 'navigate') {
+    event.respondWith(
+      fetch(event.request).catch(() => {
+        return caches.match('/index.html');
+      })
+    );
+    return;
+  }
+
+  // For all other requests, try cache first, then network
   event.respondWith(
     caches.match(event.request)
       .then(response => {

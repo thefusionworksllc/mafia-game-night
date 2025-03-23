@@ -49,6 +49,19 @@ This project has been configured to work as a Progressive Web App (PWA), which a
    - Run the predeploy script that creates necessary files like `_redirects` and `.nojekyll`
    - Deploy to GitHub Pages
 
+2. To deploy to Netlify:
+   ```
+   npm run deploy:netlify
+   ```
+
+   This will:
+   - Build the web version with PWA support
+   - Run the predeploy script that creates Netlify-specific files
+   - Deploy directly to Netlify (requires Netlify CLI to be installed)
+
+   Alternatively, you can connect your GitHub repository to Netlify and it will automatically deploy
+   when you push changes to your repository.
+
 ## How to Use the PWA on Mobile Devices
 
 ### iOS (Safari)

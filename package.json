@@ -10,8 +10,7 @@
     "build": "npx expo export",
     "build:web": "npx expo export -p web --output-dir web-build && npx copy-files-from-to --config web-build-config.json",
     "predeploy": "node fix-deploy.js",
-    "deploy": "npm run build:web && npm run predeploy",
-    "deploy:netlify": "npm run build:web && npm run predeploy && netlify deploy --prod"
+    "deploy": "npm run build:web && npm run predeploy"
   },
   "dependencies": {
     "@expo/metro-runtime": "~4.0.1",
@@ -38,8 +37,7 @@
   "devDependencies": {
     "@babel/core": "^7.20.0",
     "copy-files-from-to": "^3.9.1",
-    "gh-pages": "^6.3.0",
-    "netlify-cli": "^19.0.3"
+    "gh-pages": "^6.3.0"
   },
   "private": true
 }

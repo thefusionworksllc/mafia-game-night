@@ -8,9 +8,9 @@
     "ios": "expo start --ios",
     "web": "expo start --web",
     "build": "npx expo export",
-    "build:web": "npx expo export -p web --output-dir web-build && npx copy-files-from-to --config web-build-config.json",
+    "build:web": "npx expo export -p web",
     "predeploy": "node fix-deploy.js",
-    "deploy": "npm run build:web && npm run predeploy"
+    "deploy": "npm run build && npm run predeploy"
   },
   "dependencies": {
     "@expo/metro-runtime": "~4.0.1",
@@ -35,9 +35,7 @@
     "react-native-web": "^0.19.13"
   },
   "devDependencies": {
-    "@babel/core": "^7.20.0",
-    "copy-files-from-to": "^3.9.1",
-    "gh-pages": "^6.3.0"
+    "@babel/core": "^7.20.0"
   },
   "private": true
 }

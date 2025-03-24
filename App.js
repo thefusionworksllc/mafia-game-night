@@ -54,11 +54,8 @@ const screenOptions = {
 };
 
 export default function App() {
-<<<<<<< HEAD
   // For web - Setup PWA related meta tags
   
-=======
->>>>>>> 89605d0b1582d81e3808f8fee2c87994499ccedd
   return (
     <AuthProvider>
       <ErrorProvider>

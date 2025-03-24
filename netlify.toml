@@ -1,29 +1,8 @@
 [build]
-  command = "npm install cross-env --legacy-peer-deps && npm install --legacy-peer-deps && (npx cross-env EXPO_NO_STATIC_RENDERING=1 expo export --no-static && node fix-deploy.js) || node netlify-deploy.js"
+  command = "npx expo export"
   publish = "dist"
 
 [[redirects]]
   from = "/*"
   to = "/index.html"
   status = 200 
-
-[[headers]]
-  for = "/manifest.json"
-  [headers.values]
-    Content-Type = "application/manifest+json"
-    Cache-Control = "public, max-age=0"
-
-[[headers]]
-  for = "/service-worker.js"
-  [headers.values]
-    Cache-Control = "public, max-age=0, must-revalidate"
-
-[[headers]]
-  for = "/pwa.js"
-  [headers.values]
-    Cache-Control = "public, max-age=0, must-revalidate"
-
-[[headers]]
-  for = "/icons/*"
-  [headers.values]
-    Cache-Control = "public, max-age=31536000" 

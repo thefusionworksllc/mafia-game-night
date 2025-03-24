@@ -21,7 +21,7 @@ import HostGameScreen from './src/screens/HostGameScreen';
 import PlayerRole from './src/screens/PlayerRoleScreen';  
 import { StatusBar } from 'expo-status-bar';
 import { AuthProvider } from './src/context/AuthContext';
-import { ImageBackground, SafeAreaView, Platform } from 'react-native';
+import { ImageBackground, SafeAreaView, } from 'react-native';
 import theme from './src/theme'; // Import the theme
 import { ErrorProvider } from './src/context/ErrorContext'; 
 import GamePlayScreen from './src/screens/GamePlayScreen';
@@ -55,37 +55,7 @@ const screenOptions = {
 
 export default function App() {
   // For web - Setup PWA related meta tags
-  useEffect(() => {
-    if (Platform.OS === 'web') {
-      // Add meta tags for PWA
-      const setMetaTag = (name, content) => {
-        let meta = document.querySelector(`meta[name="${name}"]`);
-        if (!meta) {
-          meta = document.createElement('meta');
-          meta.setAttribute('name', name);
-          document.head.appendChild(meta);
-        }
-        meta.setAttribute('content', content);
-      };
-
-      // Set viewport for mobile
-      setMetaTag('viewport', 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover');
-      
-      // Set theme color
-      setMetaTag('theme-color', theme.colors.background);
-      
-      // Set apple-mobile-web-app properties for iOS
-      setMetaTag('apple-mobile-web-app-capable', 'yes');
-      setMetaTag('apple-mobile-web-app-status-bar-style', 'black-translucent');
-      
-      // Load PWA registration script
-      const script = document.createElement('script');
-      script.src = '/pwa.js';
-      script.async = true;
-      document.body.appendChild(script);
-    }
-  }, []);
-
+  
   return (
     <AuthProvider>
       <ErrorProvider>

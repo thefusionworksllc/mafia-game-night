@@ -143,6 +143,45 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 - All contributors who have helped shape this project
 - The React Native and Expo community for their excellent documentation and support
 
+## PWA Support
+
+Mafia Game Night can be deployed as a Progressive Web App (PWA), providing the following benefits:
+
+- Full-screen experience on mobile devices (no browser chrome)
+- Home screen installation
+- Offline capabilities
+- App-like experience on all devices
+
+### Deploying to Netlify
+
+The app is configured to be deployed to Netlify with PWA capabilities. To deploy:
+
+1. Push your changes to GitHub
+2. Connect your repository to Netlify
+3. Use the following build settings:
+   - Build command: `npm install cross-env && npx cross-env EXPO_NO_STATIC_RENDERING=1 expo export --no-static && node fix-deploy.js`
+   - Publish directory: `dist`
+
+Alternatively, you can deploy manually:
+
+```bash
+# Build for web with PWA assets
+npm run build:web
+
+# Deploy to Netlify
+npm run deploy
+```
+
+### Installing the PWA
+
+On mobile devices, users can install the PWA by:
+
+1. Opening the website in their browser
+2. On iOS: Tapping the Share button, then "Add to Home Screen"
+3. On Android: Tapping the menu, then "Add to Home Screen" or "Install App"
+
+When launched from the home screen, the app will run in full-screen mode, providing a native-like experience.
+
 ---
 
 Built with ❤️ by [TheFusionWorksLLC and Team]

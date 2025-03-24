@@ -7,8 +7,8 @@
     "android": "expo start --android",
     "ios": "expo start --ios",
     "web": "expo start --web",
-    "build": "npx expo export",
-    "build:web": "npx expo export -p web && node scripts/copy-pwa-assets.js",
+    "build": "cross-env EXPO_NO_STATIC_RENDERING=1 npx expo export --no-static",
+    "build:web": "cross-env EXPO_NO_STATIC_RENDERING=1 npx expo export -p web --no-static && node scripts/copy-pwa-assets.js",
     "predeploy": "node fix-deploy.js",
     "deploy": "npm run build:web && npm run predeploy",
     "copy-pwa": "node scripts/copy-pwa-assets.js"
@@ -37,7 +37,9 @@
     "react-native-web": "^0.19.13"
   },
   "devDependencies": {
-    "@babel/core": "^7.20.0"
+    "@babel/core": "^7.20.0",
+    "@expo/webpack-config": "^19.0.0",
+    "cross-env": "^7.0.3"
   },
   "private": true
 }

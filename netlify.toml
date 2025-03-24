@@ -1,5 +1,5 @@
 [build]
-  command = "npx expo export"
+  command = "npm install cross-env && npx cross-env EXPO_NO_STATIC_RENDERING=1 expo export --no-static && node fix-deploy.js"
   publish = "dist"
 
 [[redirects]]

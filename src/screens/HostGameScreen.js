@@ -299,7 +299,7 @@ const HostGameScreen = ({ navigation }) => {
             contentContainerStyle={theme.commonStyles.scrollContentContainer}
             showsVerticalScrollIndicator={false}
           >
-            <Text style={theme.commonStyles.title}>Host Game</Text>
+            <Text style={styles.title}>Host Game</Text>
             
             {/* Game Settings Section */}
             <View style={styles.section}>
@@ -508,6 +508,13 @@ const HostGameScreen = ({ navigation }) => {
 const styles = StyleSheet.create({
   keyboardAvoidingView: {
     flex: 1,
+  },
+  title: {
+    fontSize: theme.typography.sizes.xxxl,
+    fontWeight: theme.typography.weights.bold,
+    color: theme.colors.text.accent,
+    textAlign: 'center',
+    marginBottom: theme.spacing.lg,
   },
   section: {
     marginBottom: theme.spacing.lg,

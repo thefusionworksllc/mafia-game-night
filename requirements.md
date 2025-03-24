@@ -3,6 +3,25 @@
 ## Project Overview
 Mafia Game Night is a feature-rich mobile application designed for playing the classic social deduction game, Mafia (or Werewolf). The application enables users to host or join games, participate in gameplay with different roles, and enjoy a fully guided gaming experience through an intuitive interface. Built with React Native and Expo, the app leverages Firebase for authentication and real-time database management, making it a modern multiplayer game platform.
 
+## Current Project Status
+The application is in active development with a functional codebase. Recent npm installation highlighted several package deprecation warnings that need to be addressed:
+
+- Several deprecated Babel plugins need to be replaced with their newer equivalents:
+  - @babel/plugin-proposal-class-properties → @babel/plugin-transform-class-properties
+  - @babel/plugin-proposal-nullish-coalescing-operator → @babel/plugin-transform-nullish-coalescing-operator
+  - @babel/plugin-proposal-optional-chaining → @babel/plugin-transform-optional-chaining
+
+- Other deprecated packages that need updates:
+  - inflight@1.0.6 (memory leak issue) → Consider using lru-cache
+  - lodash.isequal@4.5.0 → Use Node's built-in util.isDeepStrictEqual
+  - rimraf (versions prior to v4) → Update to rimraf v4+
+  - glob (versions prior to v9) → Update to glob v9+
+  - sudo-prompt → Needs alternative solution
+  - @xmldom/xmldom → Update to at least 0.8.* version
+  - @react-native-community/masked-view → Migrate to @react-native-masked-view/masked-view
+
+These updates should be prioritized before further development to ensure stability and security.
+
 ## Key Features
 
 ### User Authentication & Profile Management
@@ -47,12 +66,12 @@ Mafia Game Night is a feature-rich mobile application designed for playing the c
 - **Active Game Tracking**: Players can see and rejoin their active games from the home screen
 - **Role Visibility**: Host can view all assigned roles, while players see only their own
 
-## Technical Requirements
+## Technical Implementation
 
 ### Frontend
 - **React Native**: Core framework for cross-platform mobile development
-- **Expo**: Development and deployment platform
-- **Navigation**: React Navigation for screen management
+- **Expo**: Development and deployment platform (currently using Expo version ~52.0.35)
+- **Navigation**: React Navigation (v7.x) for screen management
 - **UI Components**: Custom components and React Native Elements
 - **Styling**: Custom theming system with consistent visual language
 - **Animation**: React Native Animated API for smooth transitions
@@ -60,7 +79,7 @@ Mafia Game Night is a feature-rich mobile application designed for playing the c
 ### Backend
 - **Firebase Authentication**: User management and security
 - **Firebase Realtime Database**: Game state management and player data
-- **Cloud Functions**: (Optional) Server-side logic for advanced features
+- **Firebase Configuration**: Fully set up with appropriate security rules
 
 ### Cross-Platform Support
 - **iOS & Android**: Full feature parity across mobile platforms
@@ -109,6 +128,12 @@ Mafia Game Night is a feature-rich mobile application designed for playing the c
 - **Accessibility**: Clear text and intuitive controls
 - **Security**: Protected user data and game integrity
 
+## Technical Debt & Immediate Concerns
+1. Update deprecated packages identified during npm installation
+2. Address any memory leak concerns related to the inflight package
+3. Ensure compatibility with the latest Expo SDK version
+4. Update Babel plugins to their transform equivalents
+
 ## Future Enhancements
 - **Custom Roles**: Allow hosts to create custom roles with unique abilities
 - **In-Game Chat**: Text communication between players
@@ -126,4 +151,4 @@ Mafia Game Night is a feature-rich mobile application designed for playing the c
 5. As a user, I want to leave the game lobby if I change my mind about playing.
 
 ## Conclusion
-Mafia Game Night aims to provide an engaging and interactive experience for users who enjoy social deduction games. By leveraging modern technologies and a user-friendly design, the application seeks to create a fun environment for friends and family to connect and play together.
+Mafia Game Night aims to provide an engaging and interactive experience for users who enjoy social deduction games. By leveraging modern technologies and a user-friendly design, the application seeks to create a fun environment for friends and family to connect and play together. The immediate focus should be on addressing deprecated packages to ensure the application remains stable and secure.

@@ -23,7 +23,25 @@
       "package": "com.thefusionworksllc.mafiagamenight"
     },
     "web": {
-      "favicon": "./assets/favicon.png"
+      "favicon": "./assets/favicon.png",
+      "bundler": "metro",
+      "output": "static",
+      "themeColor": "#000000",
+      "backgroundColor": "#000000",
+      "name": "Mafia Game Night",
+      "shortName": "Mafia Game",
+      "description": "A modern cross-platform application for playing the classic social deduction game Mafia with friends.",
+      "startUrl": "/",
+      "display": "standalone",
+      "orientation": "portrait",
+      "lang": "en",
+      "scope": "/",
+      "includeAssetsFileTypes": ["png", "svg", "jpg", "jpeg", "gif", "json", "js", "woff", "woff2", "ttf", "otf", "mp3"],
+      "splash": {
+        "image": "./assets/splash-icon.png",
+        "resizeMode": "contain",
+        "backgroundColor": "#000000"
+      }
     },
     "extra": {
       "eas": {

@@ -8,9 +8,10 @@
     "ios": "expo start --ios",
     "web": "expo start --web",
     "build": "npx expo export",
-    "build:web": "npx expo export -p web",
+    "build:web": "npx expo export -p web && node scripts/copy-pwa-assets.js",
     "predeploy": "node fix-deploy.js",
-    "deploy": "npm run build && npm run predeploy"
+    "deploy": "npm run build:web && npm run predeploy",
+    "copy-pwa": "node scripts/copy-pwa-assets.js"
   },
   "dependencies": {
     "@expo/metro-runtime": "~4.0.1",

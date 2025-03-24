@@ -34,24 +34,21 @@
   <title>Mafia Game Night</title>
   <style>
     /* Ensure the app takes up the full screen */
-    html, body {
+    html, body, #root {
       height: 100%;
       width: 100%;
       margin: 0;
       padding: 0;
+      overflow: hidden;
+      position: fixed;
       background-color: #000000;
-      overscroll-behavior: none; /* Prevent pull-to-refresh */
     }
     
+    /* Add safe area insets for notched devices */
     #root {
-      height: 100%;
-      width: 100%;
       padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
       display: flex;
       flex: 1;
-      overflow-y: auto; /* Allow scrolling within the app */
-      -webkit-overflow-scrolling: touch; /* Enable momentum scrolling on iOS */
-      position: relative;
     }
 
     /* iOS install prompt */
@@ -128,16 +125,22 @@
       }
     }
 
-    // Only prevent browser bouncing at edges, but allow normal scrolling
+    // Prevent page scrolling and bouncing on iOS
     document.addEventListener('touchmove', function(e) {
-      // Only prevent if we're at the edge (top bounce effect)
-      if (document.scrollingElement.scrollTop === 0 && e.touches[0].clientY > 0) {
-        // We're at the top and trying to scroll further up (pull-to-refresh)
+      if (e.target.tagName !== 'INPUT' && e.target.tagName !== 'TEXTAREA') {
         e.preventDefault();
       }
-      // Prevent overscroll at bottom too
-      else if (document.scrollingElement.scrollHeight - document.scrollingElement.scrollTop <= document.scrollingElement.clientHeight + 10 &&
-                e.touches[0].clientY < 0) {
+    }, { passive: false });
+    
+    // Prevent pull-to-refresh
+    document.body.addEventListener('touchstart', function(e) {
+      if (e.touches.length === 1) {
+        window.touchStartY = e.touches[0].clientY;
+      }
+    }, { passive: true });
+    
+    document.body.addEventListener('touchmove', function(e) {
+      if (e.touches.length === 1 && window.touchStartY && e.touches[0].clientY > window.touchStartY) {
         e.preventDefault();
       }
     }, { passive: false });

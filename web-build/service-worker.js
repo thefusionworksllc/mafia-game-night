@@ -3,15 +3,15 @@ const CACHE_NAME = 'mafia-game-night-v1';
 
 // Files to cache
 const urlsToCache = [
-  './',
-  './index.html',
-  './manifest.json',
-  './assets/icon.png',
-  './assets/icon-512x512.png',
-  './assets/icon-180x180.png',
-  './assets/icon-167x167.png',
-  './assets/icon-152x152.png',
-  './assets/splash-icon.png'
+  '/',
+  '/index.html',
+  '/manifest.json',
+  '/assets/icon.png',
+  '/assets/icon-512x512.png',
+  '/assets/icon-180x180.png',
+  '/assets/icon-167x167.png',
+  '/assets/icon-152x152.png',
+  '/assets/splash-icon.png'
 ];
 
 // Install the service worker and cache assets
@@ -39,8 +39,6 @@ self.addEventListener('activate', event => {
       );
     })
   );
-  // Immediately claim clients so the PWA is usable right away
-  return self.clients.claim();
 });
 
 // Intercept fetch requests and serve from cache if available
@@ -59,7 +57,7 @@ self.addEventListener('fetch', event => {
   if (event.request.mode === 'navigate') {
     event.respondWith(
       fetch(event.request).catch(() => {
-        return caches.match('./index.html');
+        return caches.match('/index.html');
       })
     );
     return;

@@ -482,7 +482,7 @@ const styles = StyleSheet.create({
     marginHorizontal: theme.spacing.xs,
     borderRadius: theme.borderRadius.large,
     overflow: 'hidden',
-    ...theme.shadows.medium,
+    ...theme.shadows.large,
   },
   actionGradient: {
     flexDirection: 'row',
@@ -519,7 +519,7 @@ const styles = StyleSheet.create({
     marginBottom: theme.spacing.md,
     borderRadius: theme.borderRadius.large,
     overflow: 'hidden',
-    ...theme.shadows.medium,
+    ...theme.shadows.large,
   },
   cardGradient: {
     flexDirection: 'row',
@@ -577,8 +577,8 @@ const styles = StyleSheet.create({
     marginBottom: theme.spacing.xl,
     borderRadius: theme.borderRadius.large,
     overflow: 'hidden',
-    ...theme.shadows.medium,
-  },
+    ...theme.shadows.large ,
+  },    
   activeGameGradient: {
     padding: theme.spacing.lg,
     borderRadius: theme.borderRadius.large,

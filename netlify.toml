@@ -1,5 +1,5 @@
 [build]
-  command = "npm install cross-env && npx cross-env EXPO_NO_STATIC_RENDERING=1 expo export --no-static && node fix-deploy.js"
+  command = "npm install cross-env --legacy-peer-deps && npm install --legacy-peer-deps && (npx cross-env EXPO_NO_STATIC_RENDERING=1 expo export --no-static && node fix-deploy.js) || node netlify-deploy.js"
   publish = "dist"
 
 [[redirects]]

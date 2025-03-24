@@ -38,7 +38,7 @@
   },
   "devDependencies": {
     "@babel/core": "^7.20.0",
-    "@expo/webpack-config": "^19.0.0",
+    "@expo/webpack-config": "^20.0.0",
     "cross-env": "^7.0.3"
   },
   "private": true

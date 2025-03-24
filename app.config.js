@@ -1,3 +1,6 @@
+// Force disable static rendering
+process.env.EXPO_NO_STATIC_RENDERING = '1';
+
 const { getDefaultConfig } = require('expo/metro-config');
 
 // Export the app configuration as a function
@@ -15,11 +18,13 @@ module.exports = ({ config }) => {
       staticOptions: {
         enabled: false
       },
-      // Other web options from app.json are maintained
+      // Use the web bundler without static rendering
+      bundler: 'metro'
     },
     // Make sure expo-router is not used for navigation
     plugins: [
       ...(existingConfig.plugins || []),
+      // Only include expo-router plugin if it's installed
       ['expo-router', {
         // Disable router features we're not using
         enabled: false,

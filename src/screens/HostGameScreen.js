@@ -387,7 +387,7 @@ const HostGameScreen = ({ navigation }) => {
                       <View style={[styles.roleIconContainer, { backgroundColor: `${theme.colors.mafia}30` }]}>
                         <Icon name="security" size={24} color={theme.colors.mafia} />
                       </View>
-                      <Text style={styles.roleName}>Mafia</Text>
+                      <Text style={[styles.roleName, { color: theme.colors.mafia }]}>Mafia</Text>
                       <View style={styles.roleCountContainer}>
                         <Text style={[styles.roleCount, { color: theme.colors.mafia }]}>{mafiaCount}</Text>
                       </View>
@@ -402,7 +402,7 @@ const HostGameScreen = ({ navigation }) => {
                       <View style={[styles.roleIconContainer, { backgroundColor: `${theme.colors.detective}30` }]}>
                         <Icon name="visibility" size={24} color={theme.colors.detective} />
                       </View>
-                      <Text style={styles.roleName}>Detective</Text>
+                      <Text style={[styles.roleName, { color: theme.colors.detective }]}>Detective</Text>
                       <View style={styles.roleCountContainer}>
                         <Text style={[styles.roleCount, { color: theme.colors.detective }]}>{detectiveCount}</Text>
                         {detectiveCount === 2 && (
@@ -420,7 +420,7 @@ const HostGameScreen = ({ navigation }) => {
                       <View style={[styles.roleIconContainer, { backgroundColor: `${theme.colors.doctor}30` }]}>
                         <Icon name="healing" size={24} color={theme.colors.doctor} />
                       </View>
-                      <Text style={styles.roleName}>Doctor</Text>
+                      <Text style={[styles.roleName, { color: theme.colors.doctor }]}>Doctor</Text>
                       <View style={styles.roleCountContainer}>
                         <Text style={[styles.roleCount, { color: theme.colors.doctor }]}>{doctorCount}</Text>
                         {doctorCount === 2 && (
@@ -438,7 +438,7 @@ const HostGameScreen = ({ navigation }) => {
                       <View style={[styles.roleIconContainer, { backgroundColor: `${theme.colors.civilian}30` }]}>
                         <Icon name="people" size={24} color={theme.colors.civilian} />
                       </View>
-                      <Text style={styles.roleName}>Civilian</Text>
+                      <Text style={[styles.roleName, { color: theme.colors.civilian }]}>Civilian</Text>
                       <View style={styles.roleCountContainer}>
                         <Text style={[styles.roleCount, { color: theme.colors.civilian }]}>{civilianCount}</Text>
                       </View>

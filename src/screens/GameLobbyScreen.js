@@ -323,25 +323,25 @@ const GameLobbyScreen = ({ route, navigation }) => {
           <View style={styles.infoContainer}>
             <View style={styles.infoItem}>
               <Icon name="security" size={24} color={theme.colors.mafia} />
-              <Text style={styles.infoText}>
+              <Text style={[styles.infoText, { color : theme.colors.mafia }]}>
                 Mafia: {mafiaCount}
               </Text>
             </View>
             <View style={styles.infoItem}>
               <Icon name="visibility" size={24} color={theme.colors.detective} />
-              <Text style={styles.infoText}>
+              <Text style={[styles.infoText, { color : theme.colors.detective }]}>
                 Detective: {detectiveCount}
               </Text>
             </View>
             <View style={styles.infoItem}>
               <Icon name="healing" size={24} color={theme.colors.doctor} />
-              <Text style={styles.infoText}>
+              <Text style={[styles.infoText, { color : theme.colors.doctor }]}>
                 Doctor: {doctorCount}
               </Text>
             </View>
             <View style={styles.infoItem}>
               <Icon name="person" size={24} color={theme.colors.civilian} />
-              <Text style={styles.infoText}>
+              <Text style={[styles.infoText, { color : theme.colors.civilian }]}>
                 Civilian: {civilianCount}
               </Text>
             </View>

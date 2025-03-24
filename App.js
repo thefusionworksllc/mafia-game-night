@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { NavigationContainer, DefaultTheme } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import RegisterScreen from './src/screens/auth/RegisterScreen';
@@ -54,8 +54,11 @@ const screenOptions = {
 };
 
 export default function App() {
+<<<<<<< HEAD
   // For web - Setup PWA related meta tags
   
+=======
+>>>>>>> 89605d0b1582d81e3808f8fee2c87994499ccedd
   return (
     <AuthProvider>
       <ErrorProvider>

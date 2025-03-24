@@ -143,7 +143,7 @@ const HomeScreen = ({ navigation, route }) => {
     {
       title: 'Roles & Abilities',
       description: 'Discover different roles and their special abilities',
-      icon: 'person',
+      icon: 'group',
       screen: 'RolesAndAbilities',
     },
     {
@@ -173,7 +173,7 @@ const HomeScreen = ({ navigation, route }) => {
         end={{ x: 1, y: 1 }}
       >
         <View style={styles.cardIconContainer}>
-          <Icon name={icon} size={28} color={theme.colors.primary} />
+          <Icon name={icon} size={28} color={theme.colors.warning} />     
         </View>
         <View style={styles.cardContent}>
           <Text style={styles.cardTitle}>{title}</Text>
@@ -339,7 +339,7 @@ const HomeScreen = ({ navigation, route }) => {
           </View>
 
           {/* Profile Section - Only shown when logged in */}
-          {isLoggedIn && (
+          {isLoggedIn && (  
             <View style={styles.profileSection}>
               <Text style={styles.sectionTitle}>Your Profile</Text>
               <TouchableOpacity 

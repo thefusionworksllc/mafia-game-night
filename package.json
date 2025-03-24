@@ -10,8 +10,7 @@
     "build": "cross-env EXPO_NO_STATIC_RENDERING=1 npx expo export --no-static",
     "build:web": "cross-env EXPO_NO_STATIC_RENDERING=1 npx expo export -p web --no-static && node scripts/copy-pwa-assets.js",
     "predeploy": "node fix-deploy.js",
-    "deploy": "npm run build:web && npm run predeploy",
-    "copy-pwa": "node scripts/copy-pwa-assets.js"
+    "deploy": "npm run build && npm run predeploy"
   },
   "dependencies": {
     "@expo/metro-runtime": "~4.0.1",

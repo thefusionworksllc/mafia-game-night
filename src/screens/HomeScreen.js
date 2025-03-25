@@ -243,7 +243,7 @@ const HomeScreen = ({ navigation, route }) => {
                   colors={theme.gradients.primary || theme.gradients.button}
                   style={styles.actionGradient}
                 >
-                  <Icon name="add" size={24} color="#FFFFFF" />
+                  <Icon name="add-circle" size={24} color="#FFFFFF" />
                   <Text style={styles.actionText}>HOST GAME</Text>
                 </LinearGradient>
               </TouchableOpacity>

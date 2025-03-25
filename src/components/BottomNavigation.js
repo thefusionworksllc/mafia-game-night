@@ -232,7 +232,7 @@ const BottomNavigation = ({ navigation, activeScreen }) => {
           />
           <BottomNavButton
             title="Settings"
-            icon="more-horiz"
+            icon="settings"
             onPress={() => setMoreModalVisible(true)}
             isActive={activeScreen === 'Settings' || activeScreen === 'Login' || activeScreen === 'GameTutorial'}
           />

@@ -10,7 +10,9 @@
     "build": "npx expo export",
     "build:web": "npx expo export -p web",
     "predeploy": "node fix-deploy.js",
-    "deploy": "npm run build && npm run predeploy"
+    "build:pwa": "node build-pwa.js",
+    "serve:pwa": "npx serve dist",
+    "deploy": "npm run build:pwa"
   },
   "dependencies": {
     "@expo/metro-runtime": "~4.0.1",
@@ -35,7 +37,9 @@
     "react-native-web": "^0.19.13"
   },
   "devDependencies": {
-    "@babel/core": "^7.20.0"
+    "@babel/core": "^7.20.0",
+    "copy-webpack-plugin": "^11.0.0",
+    "serve": "^14.2.1"
   },
   "private": true
 }

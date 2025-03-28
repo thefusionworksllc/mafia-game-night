@@ -21,7 +21,7 @@ import HostGameScreen from './src/screens/HostGameScreen';
 import PlayerRole from './src/screens/PlayerRoleScreen';  
 import { StatusBar } from 'expo-status-bar';
 import { AuthProvider } from './src/context/AuthContext';
-import { ImageBackground, SafeAreaView, } from 'react-native';
+import { ImageBackground, SafeAreaView, Platform } from 'react-native';
 import theme from './src/theme'; // Import the theme
 import { ErrorProvider } from './src/context/ErrorContext'; 
 import GamePlayScreen from './src/screens/GamePlayScreen';
@@ -54,8 +54,17 @@ const screenOptions = {
 };
 
 export default function App() {
-  // For web - Setup PWA related meta tags
-  
+  // Add web-specific code here for PWA handling
+  React.useEffect(() => {
+    if (typeof window !== 'undefined') {
+      // Define theme color dynamically if needed
+      const metaThemeColor = document.querySelector("meta[name='theme-color']");
+      if (metaThemeColor) {
+        metaThemeColor.setAttribute('content', theme.colors.primary);
+      }
+    }
+  }, []);
+
   return (
     <AuthProvider>
       <ErrorProvider>

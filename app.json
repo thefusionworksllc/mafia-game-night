@@ -23,7 +23,13 @@
       "package": "com.thefusionworksllc.mafiagamenight"
     },
     "web": {
-      "favicon": "./assets/favicon.png"      
+      "favicon": "./assets/favicon.png",
+      "name": "Mafia Game Night",
+      "shortName": "Mafia Night",
+      "description": "Play the classic Mafia party game with friends",
+      "themeColor": "#1ABC9C",
+      "backgroundColor": "#0A1929",
+      "display": "standalone"
     },
     "extra": {
       "eas": {

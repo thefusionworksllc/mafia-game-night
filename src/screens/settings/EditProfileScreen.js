@@ -52,7 +52,7 @@ const EditProfileScreen = ({ navigation }) => {
 
     setLoading(true);
     try {
-      await userService.updateUserProfile(displayName);
+      await userService.updateProfile({ displayName });
       showError('Profile updated successfully!', 'success');
       navigation.goBack();
     } catch (error) {
@@ -81,8 +81,8 @@ const EditProfileScreen = ({ navigation }) => {
   };
 
   const handleUpdatePassword = async () => {
-    if (newPassword.trim() === '') {
-      showError('New password cannot be empty');
+    if (currentPassword.trim() === '' || newPassword.trim() === '') {
+      showError('Current and new passwords cannot be empty');
       return;
     }
 
@@ -91,17 +91,18 @@ const EditProfileScreen = ({ navigation }) => {
       return;
     }
 
-    setLoading(true);
+    setPasswordLoading(true);
     try {
-      await userService.updateUserPassword(newPassword);
+      await userService.updatePassword(currentPassword, newPassword);
       showError('Password updated successfully!', 'success');
+      setCurrentPassword('');
       setNewPassword('');
       setConfirmPassword('');
       navigation.goBack();
     } catch (error) {
       showError(error.message || 'Failed to update password');
     } finally {
-      setLoading(false);
+      setPasswordLoading(false);
     }
   };
 
@@ -181,7 +182,7 @@ const EditProfileScreen = ({ navigation }) => {
               <CustomButton
                 title="CHANGE PASSWORD"
                 onPress={handleUpdatePassword}
-                loading={loading}
+                loading={passwordLoading}
                 variant="secondary"
                 leftIcon={<Icon name="security" size={20} color={theme.colors.text.primary} />}
                 style={styles.passwordButton}

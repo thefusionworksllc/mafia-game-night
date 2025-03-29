@@ -56,7 +56,7 @@ const screenOptions = {
 export default function App() {
   // Add web-specific code here for PWA handling
   React.useEffect(() => {
-    if (typeof window !== 'undefined') {
+    if (typeof window !== 'undefined' && Platform.OS=='web') {
       // Define theme color dynamically if needed
       const metaThemeColor = document.querySelector("meta[name='theme-color']");
       if (metaThemeColor) {

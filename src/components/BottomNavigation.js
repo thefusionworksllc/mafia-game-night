@@ -300,7 +300,7 @@ const styles = StyleSheet.create({
     borderColor: 'rgba(108, 99, 255, 0.3)',
   },
   navButtonText: {
-    color: theme.colors.text.secondary,
+    color: theme.colors.text.primary,
     fontSize: theme.typography.sizes.sm,
     marginTop: 2,
     textAlign: 'center',

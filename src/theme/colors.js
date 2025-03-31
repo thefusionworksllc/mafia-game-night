@@ -40,9 +40,9 @@ export const gradients = {
     'rgba(30, 41, 59, 0.97)',
   ],
   backgroundAnimated: [
-    'rgba(15, 23, 42, 0.9)',
-    'rgba(30, 41, 59, 0.95)',
-    'rgba(51, 65, 85, 0.98)',
+    'rgba(6, 16, 39, 0.9)',
+    'rgba(37, 4, 80, 0.95)',
+    'rgba(47, 4, 51, 0.98)',
   ],
   backgroundOverlay: [
     'rgba(15, 23, 42, 0.4)',
